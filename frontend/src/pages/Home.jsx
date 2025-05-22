@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import TypeWriterEffect from 'react-typewriter-effect';
 import JobTable from '../components/JobTable';
 import { FloatButton } from 'antd';
-import { MessageFilled, PlusOutlined, FormOutlined, UsergroupAddOutlined, CloseOutlined, SendOutlined, BarChartOutlined, CoffeeOutlined } from '@ant-design/icons';
+import { MessageFilled, PlusOutlined, FormOutlined, UsergroupAddOutlined, CloseOutlined, SendOutlined, BarChartOutlined, CoffeeOutlined, RocketOutlined, TrophyOutlined, StarOutlined, ThunderboltOutlined, FireOutlined, CrownOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'flowbite-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import CreatePollModal from '../components/CreatePollModal';
@@ -33,6 +33,23 @@ export default function Home() {
   };
 
   useEffect(scrollToBottom, [messages]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showModal || showPollModal) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '0px'; // Prevent scrollbar shift
+    } else {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    }
+    
+    // Cleanup function to reset on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    };
+  }, [showModal, showPollModal]);
 
   // Check premium status
   useEffect(() => {
@@ -144,174 +161,384 @@ ${question}`;
     await AIanswer(inputMessage);
   };
 
+  const handleModalOpen = (modalType) => {
+    // Prevent any scrolling or jumping
+    if (modalType === 'chat') {
+      setShowModal(true);
+    } else if (modalType === 'poll') {
+      setShowPollModal(true);
+    }
+  };
+
+  const handleModalClose = (modalType) => {
+    if (modalType === 'chat') {
+      setShowModal(false);
+    } else if (modalType === 'poll') {
+      setShowPollModal(false);
+    }
+  };
+
 
   return (
-    <div className={`bg-gray-50 min-h-screen ${showModal || showPollModal ? 'overflow-hidden' : ''}`}>
-
-      {/* Buy Me a Coffee Button */}
-      <div className="flex justify-start mb-4 mt-4">
-        <Tooltip content="Buy me a Coffee" placement="right">
-          <a
-            href="/BuyMeACoffee"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative inline-block hover:scale-105 transition-all duration-300"
-          >
-            {/* Animated Gradient Background */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 via-red-500 to-purple-600 rounded-r-full opacity-75 group-hover:opacity-100 transition-all duration-500 animate-gradient-x"></div>
-            
-            <div className="relative pl-4 pr-6 py-3 bg-white rounded-r-full border-2 border-transparent group-hover:border-purple-500 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-2xl">
-              {/* Icon with Fixed Gradient and Increased Size */}
-              <CoffeeOutlined 
-                className="text-gray-800 text-2xl group-hover:text-gray-800 group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-pink-600 group-hover:to-purple-800 transition-all duration-300 animate-bounce" 
-              />
-            </div>
-          </a>
-        </Tooltip>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
+      
+      {/* Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-32 w-96 h-96 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-32 w-96 h-96 bg-gradient-to-tr from-teal-500/30 to-blue-500/30 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
       </div>
 
-
-      <FloatButton.Group icon={<PlusOutlined />} trigger='click' type='primary' tooltip='Explore some unique features!'>
-        <FloatButton icon={<UsergroupAddOutlined />} tooltip='Public Polls' onClick={() => navigate('/publicpolls')} />
-        <FloatButton icon={<BarChartOutlined />} tooltip='My Polls' onClick={() => navigate('/mypolls')} />
-        <FloatButton icon={<FormOutlined />} tooltip='Create a Poll!' onClick={() => setShowPollModal(true)} />
-        <FloatButton icon={<MessageFilled />} tooltip='Ask anything...' onClick={() => setShowModal(true)} />
-      </FloatButton.Group>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8 md:py-12 lg:py-16">
-          <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-6">
-            <img
-              src="/assets/gif2.gif"
-              className="h-40 w-40 md:h-52 md:w-52"
-              alt="Welcome"
-            />
-            <div className="flex flex-col items-center md:items-start text-center md:text-left">
-              <span className="text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-teal-400 via-blue-500 to-purple-500 bg-clip-text text-transparent mb-4 block">
+      <div className="relative z-10">
+        
+        {/* Hero Section - Centered */}
+        <section className="py-12 sm:py-20 md:py-32">
+          <div className="container mx-auto px-4 sm:px-6 text-center">
+            
+            {/* Premium Badge */}
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm border border-yellow-500/30 rounded-full px-4 sm:px-6 py-2 mb-6 sm:mb-8">
+              <CrownOutlined className="text-yellow-400 text-sm sm:text-base" />
+              <span className="text-yellow-300 font-semibold text-xs sm:text-sm tracking-wide">PREMIUM EXPERIENCE</span>
+            </div>
+            
+            {/* Main Title - Centered */}
+            <div className="relative max-w-6xl mx-auto">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/30 via-purple-600/30 to-teal-500/30 blur-3xl scale-110"></div>
+              <h1 className="relative text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-6 sm:mb-8 leading-tight">
                 <TypeWriterEffect
                   textStyle={{
-                    fontFamily: 'Red Hat Display',
-                    fontWeight: 'bold',
-                    background: 'linear-gradient(to right, #00bcd4, #2196f3, #9c27b0)',
+                    fontFamily: 'Inter, system-ui',
+                    fontWeight: '900',
+                    background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%)',
                     WebkitBackgroundClip: 'text',
                     color: 'transparent',
                     fontSize: 'inherit',
-                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.4)',
+                    textAlign: 'center',
+                    display: 'block'
                   }}
                   startDelay={100}
-                  cursorColor="black"
-                  text="Welcome to TrendingJobs4All!"
-                  typeSpeed={100}
+                  cursorColor="#60a5fa"
+                  text="TrendingJobs4All"
+                  typeSpeed={80}
                 />
-              </span>
-              <span className="text-lg md:text-2xl font-medium bg-gradient-to-r from-gray-600 to-gray-400 bg-clip-text text-transparent">
-                Explore Opportunities that Align with Your Passion and Skillset!
-              </span>
+              </h1>
+            </div>
+            
+            {/* Premium Subtitle */}
+            <p className="text-lg sm:text-xl md:text-3xl text-white/80 mb-3 sm:mb-4 font-light leading-relaxed max-w-4xl mx-auto">
+              Where Career Dreams Meet
+              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent font-semibold"> Premium Opportunities</span>
+            </p>
+            
+            <p className="text-base sm:text-lg md:text-xl text-white/60 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed">
+              Experience the future of job discovery with AI-powered matching, exclusive opportunities, and a community of ambitious professionals
+            </p>
+            
+            {/* Premium CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12 sm:mb-16 px-4">
+              <button
+                onClick={() => handleModalOpen('chat')}
+                className="group relative inline-flex items-center justify-center gap-3 sm:gap-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 hover:from-blue-500 hover:via-purple-500 hover:to-blue-500 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg font-bold transition-all duration-500 hover:scale-105 shadow-2xl hover:shadow-blue-500/25 border border-white/10 w-full sm:w-auto max-w-xs sm:max-w-none"
+              >
+                <MessageFilled className="text-xl sm:text-2xl flex-shrink-0" />
+                <span className="whitespace-nowrap">Launch AI Assistant</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
+              </button>
+              
+              <button
+                onClick={() => navigate('/publicpolls')}
+                className="group inline-flex items-center justify-center gap-3 sm:gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-xl text-white px-6 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg font-bold transition-all duration-500 hover:scale-105 shadow-2xl border border-white/20 hover:border-white/30 w-full sm:w-auto max-w-xs sm:max-w-none"
+              >
+                <BarChartOutlined className="text-xl sm:text-2xl flex-shrink-0" />
+                <span className="whitespace-nowrap">Explore Community</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              </button>
+            </div>
+            
+            {/* Premium Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-4xl mx-auto mb-16 sm:mb-20">
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">1K+</div>
+                <div className="text-white/60 font-medium text-sm sm:text-base">Premium Jobs</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">200+</div>
+                <div className="text-white/60 font-medium text-sm sm:text-base">Active Users</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">95%</div>
+                <div className="text-white/60 font-medium text-sm sm:text-base">Success Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">24/7</div>
+                <div className="text-white/60 font-medium text-sm sm:text-base">AI Support</div>
+              </div>
+            </div>
+            
+          </div>
+        </section>
+
+        {/* Premium Action Cards Section - New Addition */}
+        <section className="py-8 sm:py-12">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4">Take Action Today</h2>
+              <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto">
+                Unlock premium features and accelerate your career journey
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
+              {/* AI Assistant Card */}
+              <div 
+                onClick={() => handleModalOpen('chat')}
+                className="group cursor-pointer bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/20"
+              >
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 mx-auto group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                  <MessageFilled className="text-white text-xl sm:text-2xl" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 text-center">AI Assistant</h3>
+                <p className="text-white/70 text-center leading-relaxed text-sm sm:text-base">
+                  Get personalized career advice and job recommendations
+                </p>
+              </div>
+
+              {/* Create Poll Card */}
+              <div 
+                onClick={() => handleModalOpen('poll')}
+                className="group cursor-pointer bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/20"
+              >
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 mx-auto group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                  <FormOutlined className="text-white text-xl sm:text-2xl" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 text-center">Create Poll</h3>
+                <p className="text-white/70 text-center leading-relaxed text-sm sm:text-base">
+                  Share insights and gather community feedback
+                </p>
+              </div>
+
+              {/* Analytics Card */}
+              <div 
+                onClick={() => navigate('/mypolls')}
+                className="group cursor-pointer bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-teal-500/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-teal-500/20"
+              >
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 mx-auto group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                  <BarChartOutlined className="text-white text-xl sm:text-2xl" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 text-center">My Analytics</h3>
+                <p className="text-white/70 text-center leading-relaxed text-sm sm:text-base">
+                  Track your polls and engagement metrics
+                </p>
+              </div>
+
+              {/* Community Card */}
+              <div 
+                onClick={() => navigate('/publicpolls')}
+                className="group cursor-pointer bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-green-500/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-500/20"
+              >
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 mx-auto group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                  <UsergroupAddOutlined className="text-white text-xl sm:text-2xl" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3 text-center">Public Polls</h3>
+                <p className="text-white/70 text-center leading-relaxed text-sm sm:text-base">
+                  Engage with public polls and discussions
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <NewsletterBanner />
+        {/* Premium Feature Cards */}
+        <section id="features" className="py-12 sm:py-20">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 sm:mb-6">Premium Features</h2>
+              <p className="text-lg sm:text-xl text-white/70 max-w-3xl mx-auto">
+                Experience next-generation job discovery with cutting-edge technology and premium services
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
+              <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-white/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 mx-auto group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                    <RocketOutlined className="text-white text-xl sm:text-2xl" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 text-center">Personalized Job Alerts</h3>
+                  <p className="text-white/70 text-center leading-relaxed text-sm sm:text-base">
+                    Get job opportunities tailored to your role and experience level delivered straight to your inbox — never miss the perfect opportunity.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-white/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 mx-auto group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                    <UsergroupAddOutlined className="text-white text-xl sm:text-2xl" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 text-center">Elite Community</h3>
+                  <p className="text-white/70 text-center leading-relaxed text-sm sm:text-base">
+                    Connect with industry leaders, participate in exclusive polls, and build meaningful professional relationships
+                  </p>
+                </div>
+              </div>
+              
+              <div className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-white/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-teal-500/20">
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-500/20 to-green-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 mx-auto group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                    <TrophyOutlined className="text-white text-xl sm:text-2xl" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 text-center">Exclusive Opportunities</h3>
+                  <p className="text-white/70 text-center leading-relaxed text-sm sm:text-base">
+                    Access premium job listings, executive positions, and career opportunities not available anywhere else
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <JobTable />
+        {/* Newsletter Section */}
+        <section className="py-12 sm:py-16">
+          <div className="container mx-auto px-4 sm:px-6">
+            <NewsletterBanner />
+          </div>
+        </section>
 
-        <TestimonialSection />  
+        {/* Job Table Section */}
+        <section id="jobs" className="py-12 sm:py-20">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 sm:mb-6">Premium Opportunities</h2>
+              <p className="text-lg sm:text-xl text-white/70 max-w-3xl mx-auto">
+                Discover hand-curated, high-paying positions from top companies worldwide
+              </p>
+            </div>
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden">
+              <JobTable />
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section id="testimonials" className="py-12 sm:py-20">
+          <div className="container mx-auto px-4 sm:px-6">
+            <TestimonialSection />
+          </div>
+        </section>
 
       </div>
 
+      {/* Premium Chat Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
-        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-fadeInScale">
-          {/* Header */}
-          <div className="p-4 sm:p-6 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-xl sm:text-2xl font-semibold text-center flex-grow bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Chat with AI Assistant
-            </h3>
-            <button 
-              onClick={() => setShowModal(false)} 
-              className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
-            >
-              <CloseOutlined style={{ fontSize: '20px' }} />
-            </button>
-          </div>
-
-          {/* Messages Container */}
-          <div className="flex-grow overflow-y-auto p-4 sm:p-6 space-y-4">
-            {messages.map((message, index) => (
-              <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeInSlide`}>
-                <div 
-                  className={`max-w-[85%] p-3 sm:p-4 rounded-lg shadow-md ${
-                    message.type === 'user' 
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' 
-                      : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                  }`}
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md sm:max-w-4xl h-full sm:max-h-[90vh] flex flex-col overflow-hidden border border-white/10">
+            {/* Premium Header */}
+            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 p-4 sm:p-8 text-white relative overflow-hidden flex-shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>
+              <div className="relative z-10 flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl sm:text-3xl font-black mb-1 sm:mb-2">AI Career Assistant</h3>
+                  <p className="text-blue-100 text-sm sm:text-lg">Your premium AI-powered career advisor</p>
+                </div>
+                <button 
+                  onClick={() => handleModalClose('chat')} 
+                  className="text-white/80 hover:text-white transition-colors duration-300 p-2 sm:p-3 hover:bg-white/10 rounded-xl sm:rounded-2xl flex-shrink-0"
                 >
-                  {message.type === 'ai' ? (
-                    <div 
-                      className="text-sm sm:text-base"
-                      dangerouslySetInnerHTML={{ __html: message.content.replace(/\n/g, '<br>') }} 
-                    />
-                  ) : (
-                    <div className="text-sm sm:text-base">{message.content}</div>
-                  )}
-                </div>
+                  <CloseOutlined style={{ fontSize: window.innerWidth < 640 ? '20px' : '24px' }} />
+                </button>
               </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start animate-pulse">
-                <div className="bg-gray-300 rounded-lg p-3 max-w-[85%] text-sm sm:text-base">
-                  Thinking...
-                </div>
-              </div>
-            )}
-            <div ref={chatEndRef} />
-          </div>
+            </div>
 
-          {/* Input Area */}
-          <div className="p-3 sm:p-6 border-t border-gray-200 bg-white rounded-b-lg">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Type your message here..."
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={isLoading}
-                className="min-w-[80px] bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold py-2 px-4 sm:px-6 rounded-r-full transition-all duration-300 ease-in-out flex items-center justify-center h-[38px] sm:h-[42px]"
-              >
-                <SendOutlined className="mr-1 sm:mr-2" />
-                <span className="text-sm sm:text-base">Send</span>
-              </button>
+            {/* Messages Container */}
+            <div className="flex-grow overflow-y-auto p-3 sm:p-8 space-y-4 sm:space-y-6 bg-gradient-to-br from-slate-900/50 to-slate-800/50">
+              {messages.length === 0 && (
+                <div className="text-center py-8 sm:py-12">
+                  <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl">
+                    <MessageFilled className="text-white text-xl sm:text-3xl" />
+                  </div>
+                  <h4 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Welcome to Premium AI</h4>
+                  <p className="text-white/70 text-base sm:text-lg max-w-md mx-auto leading-relaxed">
+                    Ask me anything about careers, job opportunities, salary negotiations, or professional growth!
+                  </p>
+                </div>
+              )}
+              
+              {messages.map((message, index) => (
+                <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeInSlide`}>
+                  <div 
+                    className={`max-w-[90%] sm:max-w-[85%] p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl backdrop-blur-xl ${
+                      message.type === 'user' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white border border-white/20' 
+                        : 'bg-white/10 text-white border border-white/20'
+                    }`}
+                  >
+                    {message.type === 'ai' ? (
+                      <div 
+                        className="leading-relaxed text-sm sm:text-base"
+                        dangerouslySetInnerHTML={{ __html: message.content.replace(/\n/g, '<br>') }} 
+                      />
+                    ) : (
+                      <div className="text-sm sm:text-base">{message.content}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl border border-white/20 flex items-center gap-4">
+                    <div className="flex space-x-2">
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-teal-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                    <span className="text-white/80 ml-2 text-sm sm:text-base">AI is analyzing...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Premium Input Area */}
+            <div className="p-3 sm:p-8 bg-gradient-to-r from-slate-800/50 to-slate-900/50 backdrop-blur-xl border-t border-white/10 flex-shrink-0">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <input
+                  type="text"
+                  placeholder="Ask about careers, salaries, job markets..."
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-white/60 transition-all duration-300 text-sm sm:text-base"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !inputMessage.trim()}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 sm:py-4 sm:px-8 rounded-xl sm:rounded-2xl transition-all duration-300 flex items-center gap-2 sm:gap-3 shadow-xl hover:shadow-2xl hover:scale-105 flex-shrink-0"
+                >
+                  <SendOutlined className="text-base sm:text-xl" />
+                  <span className="hidden sm:inline">Send</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* Poll Modal */}
       {showPollModal && (
-        <CreatePollModal onClose={() => setShowPollModal(false)} />
+        <CreatePollModal onClose={() => handleModalClose('poll')} />
       )}
 
-      <style jsx>{`
-        @keyframes fadeInScale {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
+<style jsx>{`
         @keyframes fadeInSlide {
           from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(30px);
           }
           to {
             opacity: 1;
@@ -319,23 +546,134 @@ ${question}`;
           }
         }
 
-        .animate-fadeInScale {
-          animation: fadeInScale 0.3s ease-out;
-        }
-
         .animate-fadeInSlide {
-          animation: fadeInSlide 0.3s ease-out;
+          animation: fadeInSlide 0.6s ease-out;
         }
 
-        /* Responsive design */
-        @media (max-width: 640px) {
-          .max-w-2xl {
-            max-width: 100%;
+        /* Premium Scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(45deg, #667eea, #764ba2);
+          border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(45deg, #5a67d8, #6b46c1);
+        }
+
+        /* Enhanced bounce animation */
+        @keyframes bounce {
+          0%, 20%, 53%, 80%, 100% {
+            transform: translate3d(0,0,0);
           }
-          
-          input, button {
-            height: 42px;
+          40%, 43% {
+            transform: translate3d(0, -12px, 0);
           }
+          70% {
+            transform: translate3d(0, -6px, 0);
+          }
+          90% {
+            transform: translate3d(0, -3px, 0);
+          }
+        }
+
+        .animate-bounce {
+          animation: bounce 1.6s infinite;
+        }
+
+        /* Pulse effect for background elements */
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.4;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.05);
+          }
+        }
+
+        .animate-pulse {
+          animation: pulse 4s ease-in-out infinite;
+        }
+
+        /* Glass morphism effects */
+        .glass {
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Premium gradient text */
+        .premium-text {
+          background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        /* Hover glow effects */
+        .glow-on-hover:hover {
+          box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Smooth transitions for all interactive elements */
+        * {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom gradient borders */
+        .gradient-border {
+          position: relative;
+          background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+          background-size: 400% 400%;
+          animation: gradient-shift 6s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        /* Premium card hover effects */
+        .premium-card {
+          transform-style: preserve-3d;
+          transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .premium-card:hover {
+          transform: rotateY(5deg) rotateX(5deg) translateZ(50px);
+        }
+
+        /* Text shadow for better readability */
+        .text-shadow {
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Loading animation improvements */
+        .loading-dots {
+          display: inline-block;
+        }
+
+        .loading-dots::after {
+          content: '';
+          animation: loading-dots 1.5s infinite;
+        }
+
+        @keyframes loading-dots {
+          0%, 20% { content: ''; }
+          40% { content: '.'; }
+          60% { content: '..'; }
+          80%, 100% { content: '...'; }
         }
       `}</style>
     </div>
