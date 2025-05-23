@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { BookmarkIcon, Share2, MapPin, Briefcase, Clock, BarChart3 } from "lucide-react";
+import { BookmarkIcon, Share2, MapPin, Briefcase, Clock, BarChart3, ExternalLink, Sparkles } from "lucide-react";
 import Modal from "react-modal";
 import { ShareSocial } from "react-share-social";
 import CommentSection from "../components/CommentSection";
@@ -90,134 +90,219 @@ export default function FullJd() {
 
   if (!currentUser) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-100 to-purple-300">
-        <h2 className="text-4xl font-extrabold text-indigo-900 mb-6">
-          Please Sign In to View Job Details
-        </h2>
-        <p className="text-lg text-gray-800 mb-6">
-          Access job details, save your favorite jobs, and share them with others!
-        </p>
-        <button
-          onClick={() => navigate("/sign-in")}
-          className="bg-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-700 hover:scale-105 transition-transform duration-300 shadow-lg"
-        >
-          Sign In
-        </button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-12 text-center max-w-md mx-auto shadow-2xl">
+          <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-8">
+            <Sparkles className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Access Required
+          </h2>
+          <p className="text-white/80 mb-8 leading-relaxed">
+            Sign in to unlock premium job details, save opportunities, and connect with your dream career.
+          </p>
+          <button
+            onClick={() => navigate("/sign-in")}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+          >
+            Sign In Now
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-12 mb-20 px-4 lg:px-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4 lg:px-8 mt-16">
       {job ? (
-        <div className="bg-gradient-to-br from-blue-100 via-purple-300 to-indigo-400 p-10 rounded-xl shadow-xl transform transition-all duration-700 hover:scale-105 hover:shadow-2xl animate-slideIn">
-          <div className="flex justify-between items-start">
-            <h2 className="text-4xl font-extrabold text-indigo-900 mb-4 animate-fadeInUp tracking-wide">
-              {job.title}
-            </h2>
+        <div className="max-w-5xl mx-auto">
+          {/* Header Card */}
+          <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl p-8 lg:p-12 shadow-2xl mb-8 hover:shadow-3xl transition-all duration-500">
+            {/* Top Section */}
+            <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-8">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-emerald-600 uppercase tracking-wider">
+                    Active Position
+                  </span>
+                </div>
+                <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-slate-900 via-purple-800 to-slate-900 bg-clip-text text-transparent mb-3 leading-tight">
+                  {job.title}
+                </h1>
+                <p className="text-xl text-slate-600 font-medium">{job.company}</p>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSaveJob}
+                  className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 ${
+                    isSaved 
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 border-amber-300 shadow-lg shadow-amber-500/25" 
+                      : "bg-white/60 border-slate-200 hover:border-amber-300 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50"
+                  }`}
+                  title={isSaved ? "Remove from saved" : "Save this job"}
+                >
+                  <BookmarkIcon 
+                    size={24} 
+                    className={`transition-all duration-300 ${
+                      isSaved ? "text-white fill-current" : "text-slate-600 group-hover:text-amber-600"
+                    }`}
+                  />
+                  {isSaved && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                  )}
+                </button>
 
-            <div className="flex items-center space-x-4 lg:space-x-6">
-              <button
-                onClick={handleSaveJob}
-                className={`p-2 rounded-full shadow-lg ${
-                  isSaved ? "bg-yellow-400" : "bg-gray-300"
-                } hover:bg-yellow-500 transition-colors duration-300 ease-out transform hover:scale-110`}
-                title={isSaved ? "Unsave Job" : "Save Job"}
+                <button
+                  onClick={toggleShareModal}
+                  className="group p-4 rounded-2xl border-2 border-slate-200 bg-white/60 hover:border-blue-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300"
+                  title="Share this opportunity"
+                >
+                  <Share2 size={24} className="text-slate-600 group-hover:text-blue-600 transition-colors duration-300" />
+                </button>
+              </div>
+            </div>
+
+            {/* Job Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl border border-purple-200/50">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-purple-500 rounded-xl">
+                    <Briefcase className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-purple-700 uppercase tracking-wide">Company</span>
+                </div>
+                <p className="text-slate-800 font-semibold text-lg">{job.company}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-2xl border border-emerald-200/50">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-emerald-500 rounded-xl">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-emerald-700 uppercase tracking-wide">Location</span>
+                </div>
+                <p className="text-slate-800 font-semibold text-lg">{job.location.join(", ")}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200/50">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-blue-500 rounded-xl">
+                    <BarChart3 className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-blue-700 uppercase tracking-wide">Experience</span>
+                </div>
+                <p className="text-slate-800 font-semibold text-lg">{job.min_exp} years</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl border border-orange-200/50">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-orange-500 rounded-xl">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-orange-700 uppercase tracking-wide">Posted</span>
+                </div>
+                <p className="text-slate-800 font-semibold text-lg">{formatDate(job.time)}</p>
+              </div>
+            </div>
+
+            {/* Apply Button */}
+            <div className="flex justify-center">
+              <a
+                href={job.apply_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white px-12 py-5 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-purple-800 hover:to-indigo-800 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl shadow-purple-500/25"
               >
-                <BookmarkIcon size={26} color={isSaved ? "white" : "black"} />
-              </button>
-
-              <button
-                onClick={toggleShareModal}
-                className="p-2 rounded-full shadow-lg bg-blue-500 hover:bg-blue-600 transition-transform duration-300 ease-out transform hover:scale-110 flex items-center justify-center"
-                title="Share this job"
-              >
-                <Share2 size={26} color="white" />
-              </button>
+                <span>Apply Now</span>
+                <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+              </a>
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 text-lg text-gray-800 font-medium">
-            <div className="flex items-center space-x-2">
-              <Briefcase className="text-purple-700" />
-              <p>
-                <span className="text-purple-700 font-bold">Company:</span> {job.company}
-              </p>
+          {/* Job Description Card */}
+          <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl p-8 lg:p-12 shadow-2xl mb-8">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center">
+                <Briefcase className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-slate-900">Job Description</h2>
+                <p className="text-slate-600 mt-1">Everything you need to know about this role</p>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <MapPin className="text-purple-700" />
-              <p>
-                <span className="text-purple-700 font-bold">Location:</span>{" "}
-                {job.location.join(", ")}
-              </p>
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">!</span>
+                </div>
+                <p className="text-amber-800 font-medium">
+                  <strong>Note:</strong> If the apply link doesn't work, please check the company's career page directly.
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="text-purple-700" />
-              <p>
-                <span className="text-purple-700 font-bold">Experience:</span>{" "}
-                {job.min_exp} years
-              </p>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Clock className="text-purple-700" />
-              <p>
-                <span className="text-purple-700 font-bold">Posted on:</span>{" "}
-                {formatDate(job.time)}
-              </p>
+            <div className="prose prose-lg max-w-none">
+              <div className="text-slate-700 leading-relaxed space-y-4 text-lg">
+                {formatJobDescription(job.full_jd)}
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 text-lg text-gray-800 font-medium">
-            <span className="text-purple-700 font-bold">Job Description : </span>
-            <span> *NOTE :- If apply link is not working , request you to search on career page!*</span>
-            <div className="ml-10 mt-4 space-y-2 leading-relaxed">
-              {formatJobDescription(job.full_jd)}
+          {/* Comments Section */}
+          <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl p-8 lg:p-12 shadow-2xl">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center">
+                <span className="text-white font-bold">💬</span>
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-slate-900">Discussion</h2>
+                <p className="text-slate-600 mt-1">Share your thoughts and connect with others</p>
+              </div>
             </div>
+            <CommentSection jobId={job._id} />
           </div>
 
-          <a
-            href={job.apply_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mt-8 bg-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-700 hover:scale-110 transition-transform duration-300 shadow-lg hover:shadow-2xl"
-          >
-            Apply Here
-          </a>
-
+          {/* Share Modal */}
           <Modal
             isOpen={isModalOpen}
             onRequestClose={toggleShareModal}
-            className="bg-gradient-to-tr from-purple-500 via-pink-500 to-red-400 p-8 rounded-lg shadow-2xl animate-fadeInUp scale-105 w-full max-w-lg mx-auto"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center"
+            className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl w-full max-w-md mx-auto"
+            overlayClassName="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4"
           >
-            <h2 className="text-2xl font-semibold text-white mb-6 text-center">
-              Share This Amazing Job!
-            </h2>
-            <ShareSocial
-              url={window.location.href}
-              socialTypes={["facebook", "twitter", "linkedin", "reddit", "whatsapp"]}
-              onSocialButtonClicked={(data) => console.log("Shared on:", data)}
-            />
-            <button
-              className="mt-6 bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-indigo-700 transition-all duration-300 w-full"
-              onClick={toggleShareModal}
-            >
-              Close
-            </button>
-          </Modal>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Share2 className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Share This Job</h2>
+              <p className="text-slate-600 mb-8">Help others discover this amazing opportunity</p>
+              
+              <div className="mb-8">
+                <ShareSocial
+                  url={window.location.href}
+                  socialTypes={["facebook", "twitter", "linkedin", "reddit", "whatsapp"]}
+                  onSocialButtonClicked={(data) => console.log("Shared on:", data)}
+                />
+              </div>
 
-          <div className="flex flex-col mt-20">
-            <h1 className="text-blue-900 font-bold text-3xl mb-6">Comment Section</h1>
-            <CommentSection jobId={job._id} />
-          </div>
+              <button
+                className="w-full bg-gradient-to-r from-slate-600 to-slate-700 text-white px-6 py-4 rounded-2xl font-semibold hover:from-slate-700 hover:to-slate-800 transition-all duration-300"
+                onClick={toggleShareModal}
+              >
+                Close
+              </button>
+            </div>
+          </Modal>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center mt-20">
-          <PuffLoader size={60} color="#4A90E2" />
-          <span>Loading Job Details</span>
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-3xl p-12 text-center shadow-2xl">
+            <PuffLoader size={80} color="#8B5CF6" />
+            <p className="text-slate-600 font-medium text-xl mt-6">Loading premium job details...</p>
+          </div>
         </div>
       )}
     </div>

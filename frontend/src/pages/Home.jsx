@@ -4,6 +4,7 @@ import JobTable from '../components/JobTable';
 import { FloatButton } from 'antd';
 import { MessageFilled, PlusOutlined, FormOutlined, UsergroupAddOutlined, CloseOutlined, SendOutlined, BarChartOutlined, CoffeeOutlined, RocketOutlined, TrophyOutlined, StarOutlined, ThunderboltOutlined, FireOutlined, CrownOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'flowbite-react';
+import FadedJobTablePreview from '../components/FadedJobTablePreview';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import CreatePollModal from '../components/CreatePollModal';
 import { useNavigate } from 'react-router-dom';
@@ -257,7 +258,7 @@ ${question}`;
             </div>
             
             {/* Premium Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-4xl mx-auto mb-16 sm:mb-20">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-4xl mx-auto mb-8 sm:mb-12">
               <div className="text-center">
                 <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">1K+</div>
                 <div className="text-white/60 font-medium text-sm sm:text-base">Premium Jobs</div>
@@ -278,6 +279,8 @@ ${question}`;
             
           </div>
         </section>
+
+        <FadedJobTablePreview />
 
         {/* Premium Action Cards Section - New Addition */}
         <section className="py-8 sm:py-12">
@@ -409,20 +412,6 @@ ${question}`;
           </div>
         </section>
 
-        {/* Job Table Section */}
-        <section id="jobs" className="py-12 sm:py-20">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 sm:mb-6">Premium Opportunities</h2>
-              <p className="text-lg sm:text-xl text-white/70 max-w-3xl mx-auto">
-                Discover hand-curated, high-paying positions from top companies worldwide
-              </p>
-            </div>
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden">
-              <JobTable />
-            </div>
-          </div>
-        </section>
 
         {/* Testimonials */}
         <section id="testimonials" className="py-12 sm:py-20">

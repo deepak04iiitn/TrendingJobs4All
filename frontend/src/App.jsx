@@ -23,6 +23,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './pages/Dashboard';
 import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import Jobs from './pages/Jobs';
 
 
 export default function App() {
@@ -54,6 +55,7 @@ export default function App() {
             <Route path='/BuyMeACoffee' element={<PremiumSubscription />} />
             <Route path='/contactUs' element={<ContactUs />} />
             <Route path='/privacyPolicy' element={<PrivacyPolicy />} />
+            <Route path='/jobs' element={<Jobs />} />
         </Routes>
 
     <Footer />
