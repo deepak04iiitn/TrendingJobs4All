@@ -1,57 +1,104 @@
 import React from 'react';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Sparkles, TrendingUp } from 'lucide-react';
 
 const InterviewHeader = ({ onFilterClick, onApplyFilters, onShareClick }) => {
   return (
-    <div className="w-full max-w-7xl mx-auto mb-12">
-      {/* Gradient Background */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 p-1">
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-3xl"></div>
+    <div className="w-full max-w-7xl mx-auto mb-8 mt-10">
+      {/* Main Header Container */}
+      <div className="relative">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-200/30 to-purple-300/30 rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-pink-200/30 to-indigo-300/30 rounded-full blur-3xl translate-y-24 -translate-x-24"></div>
         
-        {/* Content Container */}
-        <div className="relative bg-white/95 rounded-[1.4rem] px-8 py-6">
-          {/* Title */}
+        {/* Content */}
+        <div className="relative bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl shadow-indigo-100/50 p-8">
+          {/* Header Section */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 inline-block text-transparent bg-clip-text">
-              Interview Experiences
-            </h1>
-            <p className="text-gray-600 mt-2">
-            "Discover and share interview experiences on TrendingJobs4All, where job seekers explore real stories, tips, and trends. 
-            Sort experiences by company, position, or years of expertise to gain tailored insights. Join a community sharing knowledge 
-            for career growth!"
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-pink-400 to-orange-400 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-2.5 h-2.5 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Interview Experiences
+                </h1>
+              </div>
+            </div>
+            
+            <p className="text-gray-600 max-w-4xl mx-auto leading-relaxed text-lg">
+              Discover and share interview experiences on <span className="font-semibold text-indigo-600">TrendingJobs4All</span>, 
+              where job seekers explore real stories, tips, and trends. Sort experiences by company, position, or years of 
+              expertise to gain tailored insights.
             </p>
+            
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <div className="flex -space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full border-2 border-white"></div>
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full border-2 border-white"></div>
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full border-2 border-white"></div>
+                <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full border-2 border-white"></div>
+              </div>
+              <span className="text-sm text-gray-500 ml-2">Join thousands of professionals sharing insights</span>
+            </div>
           </div>
 
-          {/* Buttons Container */}
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             {/* Filter Button */}
             <button
               onClick={onFilterClick}
-              className="group relative w-full sm:w-auto px-6 py-3 bg-white rounded-xl border-2 border-indigo-100 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2"
+              className="group relative w-full sm:w-auto overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <Filter className="w-5 h-5 text-indigo-600" />
-              <span className="relative text-indigo-600 font-medium">Filters</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+              <div className="relative px-8 py-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Filter className="w-5 h-5 text-gray-600" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-gray-800">Refine Search</div>
+                  <div className="text-sm text-gray-500">Filter & sort results</div>
+                </div>
+              </div>
             </button>
 
             {/* Apply Filters Button */}
             <button
               onClick={onApplyFilters}
-              className="group relative w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+              className="group relative w-full sm:w-auto overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <Search className="w-5 h-5 text-white mr-2" />
-              <span className="relative text-white font-medium">Apply Filters</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+              <div className="relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Search className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-white">Apply Filters</div>
+                  <div className="text-sm text-white/80">Find experiences</div>
+                </div>
+              </div>
             </button>
 
             {/* Share Experience Button */}
             <button
               onClick={onShareClick}
-              className="group relative w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+              className="group relative w-full sm:w-auto overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <Plus className="w-5 h-5 text-white" />
-              <span className="relative text-white font-medium">Share Experience</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+              <div className="relative px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Plus className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold text-white">Share Story</div>
+                  <div className="text-sm text-white/80">Help others succeed</div>
+                </div>
+              </div>
             </button>
           </div>
         </div>

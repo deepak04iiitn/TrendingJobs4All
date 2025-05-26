@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import InterviewForm from '../components/InterviewForm';
 import InterviewEmptyState from '../components/InterviewEmptyState';
 import InterviewHeader from '../components/InterviewHeader';
 import InterviewFilterModal from '../components/InterviewFilterModal';
 import InterviewSidebar from '../components/InterviewSidebar';
-import InterviewDetailPanel from '../components/InterviewDetailPanel';
 import { useSelector } from 'react-redux';
+import { Menu, X } from 'lucide-react';
 
 export default function InterviewExp() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [experiences, setExperiences] = useState([]);
-  const [selectedExperience, setSelectedExperience] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   
   const [isPremiumUser, setIsPremiumUser] = useState(false);
@@ -21,8 +21,6 @@ export default function InterviewExp() {
   const {currentUser} = useSelector((state) => state.user);
   
   const navigate = useNavigate();
-  const params = useParams();
-  const location = useLocation();
   
   const [filters, setFilters] = useState({
     companySearch: '',
@@ -41,38 +39,7 @@ export default function InterviewExp() {
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
   const toggleFilterModal = () => setIsFilterModalOpen(!isFilterModalOpen);
-
-  // Generate URL-friendly slug from company and position
-  const generateSlug = (company, position, id) => {
-    const baseText = `${company}-${position}`;
-    const baseSlug = baseText
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-    
-    // Only generate hash if id is provided
-    if (id) {
-      // Simple hash function for the ID
-      const hash = id.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a; // Convert to 32-bit integer
-      }, 0);
-      
-      return `${baseSlug}-${Math.abs(hash).toString(36)}`;
-    }
-    
-    return baseSlug;
-  };
-
-  // Find experience by slug
-  const findExperienceBySlug = (slug, experiences) => {
-    return experiences.find(exp => {
-      const expSlug = generateSlug(exp.company || 'unknown', exp.position || 'unknown', exp._id);
-      return expSlug === slug;
-    });
-  };
+  const toggleMobileSidebar = () => setIsMobileSidebarOpen(!isMobileSidebarOpen);
 
   // Check premium status
   useEffect(() => {
@@ -120,33 +87,6 @@ export default function InterviewExp() {
     }
   };
 
-  // Handle URL routing when experiences are loaded
-  useEffect(() => {
-    if (experiences.length > 0 && !isLoading) {
-      const { slug } = params;
-      
-      if (slug) {
-        // Try to find experience by slug from URL
-        const experience = findExperienceBySlug(slug, experiences);
-        if (experience) {
-          setSelectedExperience(experience);
-        } else {
-          // If slug doesn't match any experience, redirect to first experience
-          const firstExp = experiences[0];
-          const firstSlug = generateSlug(firstExp.company || 'unknown', firstExp.position || 'unknown', firstExp._id);
-          navigate(`/interview-experiences/${firstSlug}`, { replace: true });
-          setSelectedExperience(firstExp);
-        }
-      } else {
-        // No slug in URL, set first experience and update URL
-        const firstExp = experiences[0];
-        const firstSlug = generateSlug(firstExp.company || 'unknown', firstExp.position || 'unknown', firstExp._id);
-        navigate(`/interview-experiences/${firstSlug}`, { replace: true });
-        setSelectedExperience(firstExp);
-      }
-    }
-  }, [experiences, params, navigate, isLoading]);
-
   const handleSaveFilters = (newFilters) => {
     setFilters(newFilters);
   };
@@ -161,9 +101,8 @@ export default function InterviewExp() {
   };
 
   const handleExperienceSelect = (experience) => {
-    const slug = generateSlug(experience.company || 'unknown', experience.position || 'unknown', experience._id);
-    navigate(`/interview-experiences/${slug}`);
-    setSelectedExperience(experience);
+    // Use the MongoDB _id directly in the URL
+    window.open(`/interview-experience/${experience._id}`, '_blank');
   };
 
   const filteredExperiences = experiences
@@ -189,34 +128,17 @@ export default function InterviewExp() {
       return 0;
     });
 
-  // Update selected experience when filtered experiences change
-  useEffect(() => {
-    if (filteredExperiences.length > 0 && selectedExperience) {
-      const currentExpInFiltered = filteredExperiences.find(exp => exp._id === selectedExperience._id);
-      if (!currentExpInFiltered) {
-        // Current selection not in filtered results, select first filtered result
-        const newExp = filteredExperiences[0];
-        const newSlug = generateSlug(newExp.company || 'unknown', newExp.position || 'unknown', newExp._id);
-        navigate(`/interview-experiences/${newSlug}`, { replace: true });
-        setSelectedExperience(newExp);
-      }
-    }
-  }, [filteredExperiences, selectedExperience, navigate]);
-
   // Handle successful form submission
   const handleFormSubmitSuccess = async () => {
     await fetchExperiences();
-    // After fetching new data, maintain current selection if possible
   };
 
   if (isLoading) {
     return (
-      <div className="py-8">
-        <div className="min-h-screen bg-gray-50">
-          <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            </div>
+      <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
         </div>
       </div>
@@ -224,83 +146,149 @@ export default function InterviewExp() {
   }
 
   return (
-    <div className="py-8">
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
-          {/* Header Section */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <InterviewHeader
-              onFilterClick={toggleFilterModal}
-              onApplyFilters={handleApplyFilters}
-              onShareClick={toggleModal}
-            />
-          </motion.div>
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-6 lg:mb-8"
+        >
+          <InterviewHeader
+            onFilterClick={toggleFilterModal}
+            onApplyFilters={handleApplyFilters}
+            onShareClick={toggleModal}
+          />
+        </motion.div>
 
-          {/* Main Content Area */}
-          {filteredExperiences.length > 0 ? (
-            <motion.div 
-              className="flex gap-6 mt-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+        {/* Mobile Sidebar Toggle */}
+        {filteredExperiences.length > 0 && (
+          <div className="lg:hidden mb-4">
+            <button
+              onClick={toggleMobileSidebar}
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              {/* Sidebar */}
-              <div className="w-1/3">
-                <InterviewSidebar
-                  experiences={filteredExperiences}
-                  selectedExperience={selectedExperience}
-                  onExperienceSelect={handleExperienceSelect}
-                />
-              </div>
+              <Menu size={20} />
+              <span className="font-medium">Browse Experiences</span>
+              <span className="text-sm text-gray-500">({filteredExperiences.length})</span>
+            </button>
+          </div>
+        )}
 
-              {/* Detail Panel */}
-              <div className="flex-1">
-                <InterviewDetailPanel
-                  experience={selectedExperience}
-                />
-              </div>
-            </motion.div>
-          ) : (
+        {/* Main Content Area - Full Width Sidebar */}
+        {filteredExperiences.length > 0 ? (
+          <motion.div 
+            className="w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            {/* Desktop Sidebar - Full Width */}
+            <div className="hidden lg:block w-full">
+              <InterviewSidebar
+                experiences={filteredExperiences}
+                selectedExperience={null}
+                onExperienceSelect={handleExperienceSelect}
+                isFullWidth={true}
+              />
+            </div>
+
+            {/* Mobile Sidebar Overlay */}
+            <AnimatePresence>
+              {isMobileSidebarOpen && (
+                <motion.div
+                  className="fixed inset-0 z-50 lg:hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {/* Backdrop */}
+                  <div 
+                    className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+                    onClick={toggleMobileSidebar}
+                  />
+                  
+                  {/* Sidebar */}
+                  <motion.div
+                    className="absolute left-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl"
+                    initial={{ x: '-100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '-100%' }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  >
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                      <h2 className="text-lg font-semibold text-gray-900">Interview Experiences</h2>
+                      <button
+                        onClick={toggleMobileSidebar}
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                    <div className="h-full overflow-hidden">
+                      <InterviewSidebar
+                        experiences={filteredExperiences}
+                        selectedExperience={null}
+                        onExperienceSelect={(exp) => {
+                          handleExperienceSelect(exp);
+                          setIsMobileSidebarOpen(false);
+                        }}
+                        isMobile={true}
+                      />
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Mobile List - Show on mobile when sidebar is not open */}
+            <div className="lg:hidden">
+              <InterviewSidebar
+                experiences={filteredExperiences}
+                selectedExperience={null}
+                onExperienceSelect={handleExperienceSelect}
+                isMobile={true}
+                isFullWidth={true}
+              />
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <InterviewEmptyState />
+          </motion.div>
+        )}
+
+        {/* Modals */}
+        <AnimatePresence>
+          {isModalOpen && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+              onClick={toggleModal}
             >
-              <InterviewEmptyState />
+              <InterviewForm toggleModal={toggleModal} onSubmitSuccess={handleFormSubmitSuccess} />
             </motion.div>
           )}
+        </AnimatePresence>
 
-          {/* Modals */}
-          <AnimatePresence>
-            {isModalOpen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-                onClick={toggleModal}
-              >
-                <InterviewForm toggleModal={toggleModal} onSubmitSuccess={handleFormSubmitSuccess} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <AnimatePresence>
-            {isFilterModalOpen && (
-              <InterviewFilterModal
-                isOpen={isFilterModalOpen}
-                onClose={toggleFilterModal}
-                filters={filters}
-                onSave={handleSaveFilters}
-                onClear={handleClearFilters}
-              />
-            )}
-          </AnimatePresence>
-        </div>
+        <AnimatePresence>
+          {isFilterModalOpen && (
+            <InterviewFilterModal
+              isOpen={isFilterModalOpen}
+              onClose={toggleFilterModal}
+              filters={filters}
+              onSave={handleSaveFilters}
+              onClear={handleClearFilters}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

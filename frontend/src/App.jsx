@@ -24,6 +24,7 @@ import Dashboard from './pages/Dashboard';
 import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Jobs from './pages/Jobs';
+import InterviewDetailPage from './pages/InterviewDetailPage';
 
 
 
@@ -46,7 +47,7 @@ export default function App() {
             <Route path="/mypolls" element={<MyPolls />} />
             <Route path="/interviewExp" element={<InterviewExp />} />
             <Route path="/interview-experiences" element={<InterviewExp />} />
-            <Route path="/interview-experiences/:slug" element={<InterviewExp />} />
+            <Route path="/interview-experience/:id" element={<InterviewDetailPage />} />
             <Route path="/salaryStructures" element={<SalaryStructures />} />
             <Route path="/referrals" element={<Referrals />} />
             {/* <Route path="/resumeReviews" element={<ResumeReviews />} /> */}
