@@ -493,7 +493,7 @@ export default function JobTable() {
                 {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2">
                         <button
-                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
                             className="p-2 rounded-xl border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                         >
@@ -510,7 +510,7 @@ export default function JobTable() {
                             return (
                                 <button
                                     key={pageNum}
-                                    onClick={() => setCurrentPage(pageNum)}
+                                    onClick={() => handlePageChange(pageNum)}
                                     className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
                                         currentPage === pageNum
                                             ? 'bg-indigo-600 text-white shadow-lg'
@@ -523,7 +523,7 @@ export default function JobTable() {
                         })}
                         
                         <button
-                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
                             className="p-2 rounded-xl border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                         >
