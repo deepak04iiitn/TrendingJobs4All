@@ -126,4 +126,18 @@ export const deleteExp = async(req, res, next) => {
     }
 }
 
+export const getExperienceById = async (req, res, next) => {
+    try {
+        const experience = await InterviewExperience.findById(req.params.expId);
+        
+        if (!experience) {
+            return next(errorHandler(404, 'Experience not found!'));
+        }
+
+        res.status(200).json(experience);
+    } catch (error) {
+        next(error);
+    }
+}
+
   

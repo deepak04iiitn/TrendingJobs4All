@@ -26,6 +26,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Jobs from './pages/Jobs';
 
 
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -44,6 +45,8 @@ export default function App() {
             <Route path='/publicpolls' element={<PublicPolls />} />
             <Route path="/mypolls" element={<MyPolls />} />
             <Route path="/interviewExp" element={<InterviewExp />} />
+            <Route path="/interview-experiences" element={<InterviewExp />} />
+            <Route path="/interview-experiences/:slug" element={<InterviewExp />} />
             <Route path="/salaryStructures" element={<SalaryStructures />} />
             <Route path="/referrals" element={<Referrals />} />
             {/* <Route path="/resumeReviews" element={<ResumeReviews />} /> */}
