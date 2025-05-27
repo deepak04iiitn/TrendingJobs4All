@@ -135,8 +135,8 @@ export default function InterviewExp() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 py-4 sm:py-8 overflow-x-hidden">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
@@ -146,14 +146,14 @@ export default function InterviewExp() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8 overflow-x-hidden">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-6 lg:mb-8"
+          className="mb-6 lg:mb-8 w-full"
         >
           <InterviewHeader
             onFilterClick={toggleFilterModal}
@@ -164,14 +164,14 @@ export default function InterviewExp() {
 
         {/* Mobile Sidebar Toggle */}
         {filteredExperiences.length > 0 && (
-          <div className="lg:hidden mb-4">
+          <div className="lg:hidden mb-4 w-full">
             <button
               onClick={toggleMobileSidebar}
-              className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors w-full max-w-sm"
             >
-              <Menu size={20} />
-              <span className="font-medium">Browse Experiences</span>
-              <span className="text-sm text-gray-500">({filteredExperiences.length})</span>
+              <Menu size={20} className="flex-shrink-0" />
+              <span className="font-medium truncate">Browse Experiences</span>
+              <span className="text-sm text-gray-500 flex-shrink-0">({filteredExperiences.length})</span>
             </button>
           </div>
         )}
@@ -179,7 +179,7 @@ export default function InterviewExp() {
         {/* Main Content Area - Full Width Sidebar */}
         {filteredExperiences.length > 0 ? (
           <motion.div 
-            className="w-full"
+            className="w-full overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
@@ -211,17 +211,17 @@ export default function InterviewExp() {
                   
                   {/* Sidebar */}
                   <motion.div
-                    className="absolute left-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl"
+                    className="absolute left-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl overflow-hidden"
                     initial={{ x: '-100%' }}
                     animate={{ x: 0 }}
                     exit={{ x: '-100%' }}
                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                   >
                     <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                      <h2 className="text-lg font-semibold text-gray-900">Interview Experiences</h2>
+                      <h2 className="text-lg font-semibold text-gray-900 truncate">Interview Experiences</h2>
                       <button
                         onClick={toggleMobileSidebar}
-                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
                       >
                         <X size={20} />
                       </button>
@@ -243,7 +243,7 @@ export default function InterviewExp() {
             </AnimatePresence>
 
             {/* Mobile List - Show on mobile when sidebar is not open */}
-            <div className="lg:hidden">
+            <div className="lg:hidden w-full overflow-hidden">
               <InterviewSidebar
                 experiences={filteredExperiences}
                 selectedExperience={null}
@@ -258,6 +258,7 @@ export default function InterviewExp() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
+            className="w-full overflow-hidden"
           >
             <InterviewEmptyState />
           </motion.div>
@@ -270,7 +271,7 @@ export default function InterviewExp() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+              className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto"
               onClick={toggleModal}
             >
               <InterviewForm toggleModal={toggleModal} onSubmitSuccess={handleFormSubmitSuccess} />
