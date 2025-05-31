@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Search, Filter, Sparkles, TrendingUp } from 'lucide-react';
 
-const InterviewHeader = ({ onFilterClick, onApplyFilters, onShareClick }) => {
+const InterviewHeader = ({ onFilterClick, onShareClick }) => {
   return (
     <div className="w-full max-w-7xl mx-auto mb-8 mt-10">
       {/* Main Header Container */}
@@ -55,31 +55,14 @@ const InterviewHeader = ({ onFilterClick, onApplyFilters, onShareClick }) => {
               onClick={onFilterClick}
               className="group relative w-full sm:w-auto overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-              <div className="relative px-8 py-4 bg-white rounded-2xl border-2 border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Filter className="w-5 h-5 text-gray-600" />
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold text-gray-800">Refine Search</div>
-                  <div className="text-sm text-gray-500">Filter & sort results</div>
-                </div>
-              </div>
-            </button>
-
-            {/* Apply Filters Button */}
-            <button
-              onClick={onApplyFilters}
-              className="group relative w-full sm:w-auto overflow-hidden"
-            >
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
               <div className="relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Search className="w-5 h-5 text-white" />
+                  <Filter className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <div className="font-semibold text-white">Apply Filters</div>
-                  <div className="text-sm text-white/80">Find experiences</div>
+                  <div className="font-semibold text-white">Filter & Sort</div>
+                  <div className="text-sm text-white/80">Refine your search</div>
                 </div>
               </div>
             </button>

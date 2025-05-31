@@ -22,14 +22,8 @@ export default function InterviewExp() {
   
   const navigate = useNavigate();
   
+  // Single filters state that gets applied immediately
   const [filters, setFilters] = useState({
-    companySearch: '',
-    positionSearch: '',
-    yoeSearch: '',
-    verdictFilter: '',
-    sortConfig: 'rating-desc'
-  });
-  const [appliedFilters, setAppliedFilters] = useState({
     companySearch: '',
     positionSearch: '',
     yoeSearch: '',
@@ -87,17 +81,14 @@ export default function InterviewExp() {
     }
   };
 
-  const handleSaveFilters = (newFilters) => {
+  // Handle saving filters and applying them immediately
+  const handleSaveAndApplyFilters = (newFilters) => {
     setFilters(newFilters);
   };
 
+  // Handle clearing filters
   const handleClearFilters = (clearedFilters) => {
     setFilters(clearedFilters);
-    setAppliedFilters(clearedFilters);
-  };
-
-  const handleApplyFilters = () => {
-    setAppliedFilters(filters);
   };
 
   const handleExperienceSelect = (experience) => {
@@ -105,19 +96,20 @@ export default function InterviewExp() {
     window.open(`/interview-experience/${experience._id}`, '_blank');
   };
 
+  // Filter and sort experiences using the current filters state
   const filteredExperiences = experiences
     .filter(exp => {
-      const companyMatch = (exp.company || '').toLowerCase().includes(appliedFilters.companySearch.toLowerCase());
-      const positionMatch = (exp.position || '').toLowerCase().includes(appliedFilters.positionSearch.toLowerCase());
-      const yoeMatch = appliedFilters.yoeSearch === '' || 
-        (exp.yoe !== undefined && exp.yoe.toString() === appliedFilters.yoeSearch);
-      const verdictMatch = appliedFilters.verdictFilter === '' || 
-        (exp.verdict && exp.verdict.toLowerCase() === appliedFilters.verdictFilter.toLowerCase());
+      const companyMatch = (exp.company || '').toLowerCase().includes(filters.companySearch.toLowerCase());
+      const positionMatch = (exp.position || '').toLowerCase().includes(filters.positionSearch.toLowerCase());
+      const yoeMatch = filters.yoeSearch === '' || 
+        (exp.yoe !== undefined && exp.yoe.toString() === filters.yoeSearch);
+      const verdictMatch = filters.verdictFilter === '' || 
+        (exp.verdict && exp.verdict.toLowerCase() === filters.verdictFilter.toLowerCase());
       
       return companyMatch && positionMatch && yoeMatch && verdictMatch;
     })
     .sort((a, b) => {
-      const [field, order] = appliedFilters.sortConfig.split('-');
+      const [field, order] = filters.sortConfig.split('-');
       const sortValue = order === 'asc' ? 1 : -1;
       
       if (field === 'rating') {
@@ -157,7 +149,6 @@ export default function InterviewExp() {
         >
           <InterviewHeader
             onFilterClick={toggleFilterModal}
-            onApplyFilters={handleApplyFilters}
             onShareClick={toggleModal}
           />
         </motion.div>
@@ -285,7 +276,7 @@ export default function InterviewExp() {
               isOpen={isFilterModalOpen}
               onClose={toggleFilterModal}
               filters={filters}
-              onSave={handleSaveFilters}
+              onSaveAndApply={handleSaveAndApplyFilters}
               onClear={handleClearFilters}
             />
           )}

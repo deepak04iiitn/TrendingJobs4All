@@ -185,3 +185,18 @@ export const deleteSal = async(req, res, next) => {
         next(error);
     }
   }
+
+
+  export const getSalaryById = async (req, res, next) => {
+    try {
+        const salary = await Salary.findById(req.params.salId);
+        
+        if (!salary) {
+            return next(errorHandler(404, 'Salary not found!'));
+        }
+
+        res.status(200).json(salary);
+    } catch (error) {
+        next(error);
+    }
+}

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { X, SlidersHorizontal, RotateCcw, Check, Search, Building, User, Award, ArrowUpDown, Sparkles } from 'lucide-react';
+import { X, SlidersHorizontal, RotateCcw, Check, Search, Building, User, MapPin, Award, ArrowUpDown, DollarSign } from 'lucide-react';
 
-const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClear }) => {
+const SalaryFilterModal = ({ isOpen, onClose, filters, onSave, onClear }) => {
   const [localFilters, setLocalFilters] = useState(filters);
   const [activeTab, setActiveTab] = useState('search');
 
-  const handleSaveAndApply = () => {
-    onSaveAndApply(localFilters);
+  const handleSave = () => {
+    onSave(localFilters);
     onClose();
   };
 
@@ -14,12 +14,13 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
     const clearedFilters = {
       companySearch: '',
       positionSearch: '',
-      yoeSearch: '',
-      verdictFilter: '',
-      sortConfig: 'rating-desc'
+      locationSearch: '',
+      experienceFilter: '',
+      sortConfig: 'ctc-desc'
     };
     setLocalFilters(clearedFilters);
     onClear(clearedFilters);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -28,7 +29,7 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
     <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 z-50">
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-2xl shadow-2xl border border-white/50 overflow-hidden">
         {/* Header */}
-        <div className="relative px-8 py-6 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
+        <div className="relative px-8 py-6 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
@@ -41,8 +42,8 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
                 <SlidersHorizontal className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Refine Your Search</h2>
-                <p className="text-white/80 text-sm">Find the perfect interview experiences</p>
+                <h2 className="text-2xl font-bold text-white">Filter & Sort</h2>
+                <p className="text-white/80 text-sm">Refine your salary search</p>
               </div>
             </div>
             <button
@@ -60,7 +61,7 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
             onClick={() => setActiveTab('search')}
             className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-300 relative ${
               activeTab === 'search'
-                ? 'text-indigo-600 bg-white shadow-sm'
+                ? 'text-emerald-600 bg-white shadow-sm'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
             }`}
           >
@@ -69,14 +70,14 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
               Search & Filter
             </div>
             {activeTab === 'search' && (
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"></div>
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full"></div>
             )}
           </button>
           <button
             onClick={() => setActiveTab('sort')}
             className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-300 relative ${
               activeTab === 'sort'
-                ? 'text-indigo-600 bg-white shadow-sm'
+                ? 'text-emerald-600 bg-white shadow-sm'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
             }`}
           >
@@ -85,7 +86,7 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
               Sort Options
             </div>
             {activeTab === 'sort' && (
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"></div>
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full"></div>
             )}
           </button>
         </div>
@@ -97,7 +98,7 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
               {/* Company Search */}
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <Building className="w-4 h-4 text-indigo-600" />
+                  <Building className="w-4 h-4 text-emerald-600" />
                   Company Name
                 </label>
                 <div className="relative group">
@@ -105,10 +106,10 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
                     type="text"
                     value={localFilters.companySearch}
                     onChange={(e) => setLocalFilters({ ...localFilters, companySearch: e.target.value })}
-                    className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
+                    className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
                     placeholder="e.g., Google, Microsoft, Amazon..."
                   />
-                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-500 transition-colors">
                     <Search className="w-4 h-4" />
                   </div>
                 </div>
@@ -117,63 +118,46 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
               {/* Position Search */}
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <User className="w-4 h-4 text-purple-600" />
+                  <User className="w-4 h-4 text-teal-600" />
                   Position Title
                 </label>
                 <input
                   type="text"
                   value={localFilters.positionSearch}
                   onChange={(e) => setLocalFilters({ ...localFilters, positionSearch: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
+                  className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
                   placeholder="e.g., Software Engineer, Product Manager..."
                 />
               </div>
 
-              {/* YOE */}
+              {/* Location Search */}
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <Award className="w-4 h-4 text-emerald-600" />
+                  <MapPin className="w-4 h-4 text-cyan-600" />
+                  Location
+                </label>
+                <input
+                  type="text"
+                  value={localFilters.locationSearch}
+                  onChange={(e) => setLocalFilters({ ...localFilters, locationSearch: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
+                  placeholder="e.g., San Francisco, New York, Remote..."
+                />
+              </div>
+
+              {/* Experience Filter */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                  <Award className="w-4 h-4 text-amber-600" />
                   Years of Experience
                 </label>
                 <input
                   type="number"
-                  value={localFilters.yoeSearch}
-                  onChange={(e) => setLocalFilters({ ...localFilters, yoeSearch: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
+                  value={localFilters.experienceFilter}
+                  onChange={(e) => setLocalFilters({ ...localFilters, experienceFilter: e.target.value })}
+                  className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
                   placeholder="Enter years of experience..."
                 />
-              </div>
-
-              {/* Verdict Filter */}
-              <div className="space-y-4">
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <Sparkles className="w-4 h-4 text-pink-600" />
-                  Interview Outcome
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { value: '', label: 'All Results', color: 'gray' },
-                    { value: 'selected', label: 'Selected', color: 'emerald' },
-                    { value: 'rejected', label: 'Rejected', color: 'rose' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setLocalFilters({ ...localFilters, verdictFilter: option.value })}
-                      className={`relative px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 border-2 ${
-                        localFilters.verdictFilter === option.value
-                          ? `bg-${option.color}-500 text-white border-${option.color}-500 shadow-lg shadow-${option.color}-500/30`
-                          : `bg-${option.color}-50 text-${option.color}-700 border-${option.color}-100 hover:bg-${option.color}-100 hover:border-${option.color}-200`
-                      }`}
-                    >
-                      {option.label}
-                      {localFilters.verdictFilter === option.value && (
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                          <Check className="w-3 h-3 text-gray-600" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
           ) : (
@@ -185,15 +169,17 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
               
               <div className="space-y-3">
                 {[
-                  { value: 'rating-desc', label: 'Highest Rating First', icon: '⭐', desc: 'Best experiences first' },
-                  { value: 'rating-asc', label: 'Lowest Rating First', icon: '📈', desc: 'Learning opportunities' },
+                  { value: 'ctc-desc', label: 'Highest CTC First', icon: '💰', desc: 'Top salaries first' },
+                  { value: 'ctc-asc', label: 'Lowest CTC First', icon: '📈', desc: 'Entry-level friendly' },
+                  { value: 'likes-desc', label: 'Most Liked First', icon: '👍', desc: 'Popular posts first' },
+                  { value: 'likes-asc', label: 'Least Liked First', icon: '🔍', desc: 'Hidden gems' }
                 ].map((option) => (
                   <button
                     key={option.value}
                     onClick={() => setLocalFilters({ ...localFilters, sortConfig: option.value })}
                     className={`w-full p-5 rounded-2xl text-left transition-all duration-300 border-2 group ${
                       localFilters.sortConfig === option.value
-                        ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/30'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-emerald-500 shadow-lg shadow-emerald-500/30'
                         : 'bg-gray-50/80 text-gray-700 border-gray-100 hover:bg-gray-100 hover:border-gray-200'
                     }`}
                   >
@@ -240,8 +226,8 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
               Cancel
             </button>
             <button
-              onClick={handleSaveAndApply}
-              className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
+              onClick={handleSave}
+              className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
             >
               Apply Filters
             </button>
@@ -252,4 +238,4 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
   );
 };
 
-export default InterviewFilterModal;
+export default SalaryFilterModal;

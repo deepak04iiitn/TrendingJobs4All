@@ -25,6 +25,7 @@ import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Jobs from './pages/Jobs';
 import InterviewDetailPage from './pages/InterviewDetailPage';
+import SalaryDetailPage from './pages/SalaryDetailPage';
 
 
 
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/interview-experiences" element={<InterviewExp />} />
             <Route path="/interview-experience/:id" element={<InterviewDetailPage />} />
             <Route path="/salaryStructures" element={<SalaryStructures />} />
+            <Route path="/salary/:id" element={<SalaryDetailPage />} />
             <Route path="/referrals" element={<Referrals />} />
             {/* <Route path="/resumeReviews" element={<ResumeReviews />} /> */}
             <Route path='/resumeTemplates' element={<ResumeTemplates />} />

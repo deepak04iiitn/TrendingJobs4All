@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { ChevronDown, X, Building, MapPin, Briefcase, Banknote, ThumbsUp, ThumbsDown, MessageCircle, Linkedin } from 'lucide-react';
+import { ChevronRight, X, Building, MapPin, Briefcase, Banknote, ThumbsUp, ThumbsDown, MessageCircle, Linkedin, Award, Calendar, DollarSign, TrendingUp, Users, Target, Eye, Star, Sparkles, Trophy, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import SalaryCommentSection from './SalaryCommentSection';
 
-export default function SalaryCard({ salary }) {
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function SalaryComponent({ salary }) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [likes, setLikes] = useState(salary?.numberOfLikes || 0);
   const [dislikes, setDislikes] = useState(salary?.numberOfDislikes || 0);
@@ -16,7 +15,6 @@ export default function SalaryCard({ salary }) {
 
   const handleLinkedInClick = (linkedinUrl) => {
     if (linkedinUrl && linkedinUrl !== 'Not Provided') {
-      // Add https:// if not present
       const url = linkedinUrl.startsWith('http') ? linkedinUrl : `https://${linkedinUrl}`;
       window.open(url, '_blank');
     }
@@ -52,346 +50,308 @@ export default function SalaryCard({ salary }) {
     }
   };
 
-  const InteractionRow = ({ isModal = false }) => (
+  const handleCardClick = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = `/salary/${salary._id}`;
+    }
+  };
+
+  // Premium Modern Salary Card with InterviewSidebar Design
+  const PremiumSalaryCard = () => (
     <motion.div
-      className={`p-4 flex justify-between items-center border-t border-indigo-200 ${
-        isModal ? 'bg-gray-100' : ''
-      }`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.5 }}
+      className="relative mb-3 cursor-pointer transition-all duration-500 group overflow-hidden w-full"
+      onClick={handleCardClick}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ 
+        duration: 0.4,
+        type: "spring",
+        stiffness: 100
+      }}
+      whileHover={{ 
+        y: -2,
+        scale: 1.01,
+        transition: { duration: 0.2 }
+      }}
     >
-      <div className="flex items-center space-x-4">
-        <motion.button
-          className="flex items-center text-sm text-indigo-600 hover:text-indigo-800"
-          onClick={handleLike}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+      {/* Card container with glassmorphism effect */}
+      <div className="relative backdrop-blur-sm rounded-2xl p-6 sm:p-7 lg:p-8 border transition-all duration-500 w-full bg-white/80 border-slate-200/50 shadow-lg shadow-slate-900/5 hover:bg-white/95 hover:border-violet-200/40 hover:shadow-xl hover:shadow-violet-500/5">
+        
+        {/* Animated background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 via-white/30 to-indigo-50/30 pointer-events-none rounded-2xl"></div>
+        
+        {/* Floating particles for hover effect */}
+        <div className="opacity-0 group-hover:opacity-100 transition-all duration-500">
+          <div className="absolute top-4 right-4 w-1 h-1 bg-violet-400 rounded-full animate-ping"></div>
+          <div className="absolute top-8 right-8 w-1 h-1 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+        </div>
+
+        {/* Header Section */}
+        <div className="relative z-10 mb-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="relative flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/25">
+                  <Briefcase size={24} className="text-white" />
+                </div>
+                <div className="absolute -inset-1 bg-gradient-to-br from-violet-500/30 to-purple-600/30 rounded-2xl blur-lg"></div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent line-clamp-1">
+                  {salary.position}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-2 h-2 bg-gradient-to-r from-violet-500 to-purple-500 rounded-full animate-pulse flex-shrink-0"></div>
+                  <p className="text-slate-600 font-medium line-clamp-1">
+                    {salary.yearsOfExperience} years experience
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Action Icons */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {salary.linkedin && salary.linkedin !== 'Not Provided' && (
+                <motion.button
+                  className="w-10 h-10 bg-gradient-to-br from-slate-100/80 to-slate-200/60 rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-200 border border-slate-200/50 backdrop-blur-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLinkedInClick(salary.linkedin);
+                  }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Linkedin size={18} className="text-indigo-600" />
+                </motion.button>
+              )}
+              <motion.div 
+                className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex-shrink-0"
+                whileHover={{ scale: 1.1, rotate: 15 }}
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-xl flex items-center justify-center">
+                  <ExternalLink size={18} className="text-violet-600" />
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        {/* Company and Location Section */}
+        <div className="relative z-10 mb-6">
+          <div className="flex items-center gap-6 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <Building size={18} className="text-slate-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Company</p>
+                <p className="font-bold text-slate-800 text-lg">{salary.company}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="relative flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <MapPin size={18} className="text-slate-600" />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500 font-medium">Location</p>
+                <p className="font-bold text-slate-800">{salary.location}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Metadata Badges */}
+        <div className="relative z-10 mb-6">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* CTC Badge - Premium Style */}
+            <div className="flex items-center gap-2 bg-gradient-to-r from-emerald-50/80 to-green-50/60 px-4 py-2.5 rounded-xl border border-emerald-200/40 shadow-sm backdrop-blur-sm">
+              <div className="relative">
+                <DollarSign size={16} className="text-emerald-600" />
+                <div className="absolute -inset-1 bg-emerald-500/20 rounded-full blur-sm"></div>
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-emerald-700">₹{salary.ctc}</span>
+                <span className="text-sm text-emerald-600 font-semibold ml-1">LPA</span>
+              </div>
+            </div>
+
+            {/* Experience Badge */}
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 bg-gradient-to-r from-slate-100/80 to-slate-200/60 px-4 py-2.5 rounded-xl border border-slate-200/50 shadow-sm backdrop-blur-sm">
+              <Trophy size={14} className="text-slate-500" />
+              <span>{salary.yearsOfExperience} YOE</span>
+            </div>
+
+            {/* Education Badge */}
+            <div className="flex items-center gap-2 text-sm font-semibold text-amber-700 bg-gradient-to-r from-amber-50/80 to-yellow-50/60 px-4 py-2.5 rounded-xl border border-amber-200/40 shadow-sm backdrop-blur-sm">
+              <Award size={14} className="text-amber-600" />
+              <span>{salary.education}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider with gradient */}
+        <div className="relative z-10 mb-6">
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+        </div>
+
+        {/* Engagement Actions */}
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* Like Button - Premium Style */}
+            <motion.button
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-100/80 to-slate-200/60 hover:from-indigo-50/80 hover:to-indigo-100/60 text-slate-600 hover:text-indigo-600 rounded-xl transition-all duration-200 border border-slate-200/50 hover:border-indigo-200/50 shadow-sm backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLike();
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ThumbsUp size={16} />
+              <span className="font-semibold">{likes}</span>
+            </motion.button>
+            
+            {/* Dislike Button - Premium Style */}
+            <motion.button
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-100/80 to-slate-200/60 hover:from-rose-50/80 hover:to-rose-100/60 text-slate-600 hover:text-rose-500 rounded-xl transition-all duration-200 border border-slate-200/50 hover:border-rose-200/50 shadow-sm backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDislike();
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ThumbsDown size={16} />
+              <span className="font-semibold">{dislikes}</span>
+            </motion.button>
+          </div>
+          
+          {/* Discuss Button - Premium Style */}
+          <motion.button
+            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-xl shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all duration-200 backdrop-blur-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsCommentModalOpen(true);
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <MessageCircle size={16} />
+            <span className="font-semibold">Discuss</span>
+          </motion.button>
+        </div>
+
+        {/* Premium hover hint */}
+        <motion.div 
+          className="mt-6 opacity-0 group-hover:opacity-100 transition-all duration-300 w-full"
+          initial={{ y: 10 }}
+          animate={{ y: 0 }}
         >
-          <ThumbsUp className="mr-1" size={18} />
-          {likes}
-        </motion.button>
-        <motion.button
-          className="flex items-center text-sm text-indigo-600 hover:text-indigo-800"
-          onClick={handleDislike}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <ThumbsDown className="mr-1" size={18} />
-          {dislikes}
-        </motion.button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-violet-600 font-semibold bg-gradient-to-r from-violet-50/80 to-purple-50/60 px-3 py-2 rounded-lg border border-violet-200/40">
+              <Sparkles size={12} />
+              <span>Click to explore detailed insights</span>
+              <ExternalLink size={12} />
+            </div>
+            <div className="text-xs bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200/50 text-slate-600 font-medium">
+              ID: {salary._id.slice(-6)}
+            </div>
+          </div>
+        </motion.div>
       </div>
-      <motion.button
-        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full transition-colors"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsCommentModalOpen(true)}
-      >
-        <MessageCircle size={18} />
-        <span>Comments</span>
-      </motion.button>
     </motion.div>
   );
 
   return (
     <>
-      <motion.div 
-        className="w-full sm:w-[340px] md:w-[384px] lg:w-96 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-lg shadow-lg overflow-hidden flex flex-col h-[280px]"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        whileHover={{ scale: 1.02 }}
-      >
-        <div className="p-4 sm:p-6 flex-grow">
+      <PremiumSalaryCard />
 
-          <div className="flex justify-between items-center mb-2">
-            <motion.h3 
-              className="text-lg sm:text-xl font-bold text-indigo-800 mb-2 line-clamp-1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              {salary.position}
-            </motion.h3>
-
-            {salary.linkedin !== 'Not Provided' && (
-              <motion.div
-                className="relative group"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <motion.button
-                  className="p-2 rounded-full hover:bg-indigo-100 transition-colors relative"
-                  onClick={() => handleLinkedInClick(salary.linkedin)}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Linkedin size={20} className="text-indigo-600" />
-                  <span className="absolute -bottom-8 right-0 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity">
-                    Connect with provider
-                  </span>
-                </motion.button>
-              </motion.div>
-            )}
-          </div>
-          
-          <motion.div 
-            className="flex flex-col gap-2 text-sm text-gray-600 mb-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <span className="bg-indigo-100 px-2 py-1 rounded-full flex items-center w-full overflow-hidden">
-              <Building size={14} className="mr-1 flex-shrink-0" />
-              <span className="truncate">{salary.company}</span>
-            </span>
-            <span className="bg-purple-100 px-2 py-1 rounded-full flex items-center w-full overflow-hidden">
-              <MapPin size={14} className="mr-1 flex-shrink-0" />
-              <span className="truncate">{salary.location}</span>
-            </span>
-          </motion.div>
-          <motion.div 
-            className="text-sm text-gray-600"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <span className="bg-indigo-100 px-2 py-1 rounded-full flex items-center w-full overflow-hidden">
-              <Banknote size={14} className="mr-1 flex-shrink-0 text-indigo-500" />
-              <span className="truncate">CTC: {salary.ctc} LPA</span>
-            </span>
-          </motion.div>
-        </div>
-
-        <div className="px-4 sm:px-6 pb-4 mt-auto border-t border-indigo-200 pt-4 bg-white bg-opacity-50">
-          <div className="grid grid-cols-3 items-center">
-            <div className="flex items-center space-x-2">
-              <motion.button
-                className="flex items-center text-sm text-indigo-600 hover:text-indigo-800"
-                onClick={handleLike}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ThumbsUp className="mr-1" size={18} />
-                {likes}
-              </motion.button>
-              <motion.button
-                className="flex items-center text-sm text-indigo-600 hover:text-indigo-800"
-                onClick={handleDislike}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ThumbsDown className="mr-1" size={18} />
-                {dislikes}
-              </motion.button>
-            </div>
-            <div className="flex justify-center">
-              <motion.button 
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full text-sm transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsCommentModalOpen(true)}
-              >
-                <MessageCircle size={16} />
-                <span className="hidden sm:inline">Comments</span>
-              </motion.button>
-            </div>
-            <div className="flex justify-end">
-              <motion.button
-                className="text-indigo-600 hover:text-indigo-800 flex items-center text-sm"
-                onClick={() => setIsModalOpen(true)}
-                whileHover={{ scale: 1.05 }}
-              >
-                Details <ChevronDown className="ml-1" size={16} />
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-md p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsModalOpen(false)}
-          >
-            <motion.div
-              className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden"
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-4 sm:p-6 bg-gradient-to-r from-indigo-600 to-purple-600 relative">
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                  {salary.position} at {salary.company}
-                </h3>
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <span className="bg-white bg-opacity-20 text-white px-2 py-1 rounded-full flex items-center">
-                    <MapPin size={14} className="mr-1" /> {salary.location}
-                  </span>
-                  <span className="bg-white bg-opacity-20 text-white px-2 py-1 rounded-full flex items-center">
-                    <Briefcase size={14} className="mr-1" /> {salary.yearsOfExperience} years experience
-                  </span>
-                </div>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="absolute top-4 right-4 text-white hover:text-gray-200"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              
-              <div className="p-4 sm:p-6 max-h-[60vh] overflow-y-auto">
-                <table className="w-full border-collapse">
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Education</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.education}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Years of Experience</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.yearsOfExperience} years</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Prior Experience</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.priorExperience}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Company</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.company}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Title/Level</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.position}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Location</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.location}</td>
-                    </tr>
-                    <tr className="border-b bg-indigo-50">
-                      <td className="py-3 px-2 sm:px-4 font-semibold">CTC (Cost to Company)</td>
-                      <td className="py-3 px-2 sm:px-4 font-semibold text-indigo-600">{salary.ctc} LPA</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Base Salary</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.salary}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Relocation/Signing Bonus</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.relocationSigningBonus || 'N/A'}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Stock Bonus</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.stockBonus || 'N/A'}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Annual Bonus</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.bonus || 'N/A'}</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Benefits</td>
-                      <td className="py-3 px-2 sm:px-4">{salary.benefits}</td>
-                    </tr>
-                    {salary.otherDetails && (
-                      <tr>
-                        <td className="py-3 px-2 sm:px-4 font-semibold bg-gray-50">Other Details</td>
-                        <td className="py-3 px-2 sm:px-4">{salary.otherDetails}</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-
-                <div className="mt-6 flex justify-center">
-                    <button 
-                      className="inline-flex items-center justify-center gap-3 px-8 py-3 text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg group"
-                      onClick={() => handleLinkedInClick(experience.linkedin)}
-                    >
-                      <Linkedin 
-                        size={20} 
-                        className="transition-transform duration-300 group-hover:scale-110" 
-                      />
-                      <span className="font-semibold">Connect on LinkedIn</span>
-                    </button>
-                </div>
-
-              </div>
-
-              <InteractionRow isModal={true} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+      {/* Comment Modal - Enhanced with Premium Design */}
       <AnimatePresence>
         {isCommentModalOpen && (
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-md p-4 md:p-0"
+            className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-50 p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsCommentModalOpen(false)}
           >
             <motion.div
-              className="bg-white rounded-2xl shadow-xl w-full max-w-2xl h-[90vh] flex flex-col"
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden border border-white/20"
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-4 md:p-6 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-t-2xl relative flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg md:text-xl font-bold text-white">Discussion</h3>
-                  <p className="text-indigo-200 text-sm mt-1">Share your thoughts about this salary</p>
+              {/* Modal Header - Premium Style */}
+              <div className="relative p-8 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 text-white rounded-t-3xl overflow-hidden">
+                {/* Header background effects */}
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 via-purple-600/20 to-indigo-600/20"></div>
+                <div className="absolute top-0 left-1/4 w-32 h-32 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 right-1/4 w-28 h-28 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl"></div>
+                
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                        <Sparkles size={24} className="text-white" />
+                      </div>
+                      <h3 className="text-3xl font-bold">Discussion Forum</h3>
+                    </div>
+                    <p className="text-violet-100 text-lg font-medium">
+                      Share insights about {salary.position} at {salary.company}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-violet-200 font-medium">
+                      <span className="flex items-center gap-1">
+                        <DollarSign size={14} />
+                        ₹{salary.ctc} LPA
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Trophy size={14} />
+                        {salary.yearsOfExperience} years exp
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <MapPin size={14} />
+                        {salary.location}
+                      </span>
+                    </div>
+                  </div>
+                  <motion.button
+                    onClick={() => setIsCommentModalOpen(false)}
+                    className="p-3 hover:bg-white/10 rounded-xl transition-colors duration-200 backdrop-blur-sm"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <X size={24} />
+                  </motion.button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsCommentModalOpen(false)}
-                  className="text-white hover:text-indigo-200 transition-colors p-2 rounded-full hover:bg-white/10"
-                >
-                  <X size={20} />
-                </button>
               </div>
               
-              <div className="flex-1 overflow-hidden flex flex-col">
-                <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 custom-scrollbar">
-                  <SalaryCommentSection salId={salary._id} />
-                </div>
+              {/* Modal Content */}
+              <div className="flex-1 overflow-y-auto p-8 bg-gradient-to-br from-slate-50/80 to-white/90 backdrop-blur-sm">
+                <SalaryCommentSection salId={salary._id} />
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Custom scrollbar styles */}
       <style jsx>{`
-        .custom-scrollbar {
-          scrollbar-width: thin;
-          scrollbar-color: #818cf8 #e0e7ff;
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
-        
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #e0e7ff;
-          border-radius: 4px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: #818cf8;
-          border-radius: 4px;
-          border: 2px solid #e0e7ff;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background-color: #6366f1;
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
     </>
