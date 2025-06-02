@@ -8,7 +8,6 @@ import { Menu, X } from 'lucide-react';
 import SalaryHeader from '../components/SalaryHeader';
 import SalaryFilterModal from '../components/SalaryFilterModal';
 import SalaryForm from '../components/SalaryForm';
-import SalaryCard from '../components/SalaryCard';
 import SalaryEmptyState from '../components/SalaryEmptyState';
 import SalarySidebar from '../components/SalarySidebar'; // You'll need to create this component
 

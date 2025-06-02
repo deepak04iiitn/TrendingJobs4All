@@ -135,3 +135,18 @@ export const deleteRef = async(req, res, next) => {
         next(error);
     }
   }
+
+
+export const getReferralById = async (req, res, next) => {
+    try {
+        const referral = await Referral.findById(req.params.refId);
+        
+        if (!referral) {
+            return next(errorHandler(404, 'Referral not found!'));
+        }
+
+        res.status(200).json(referral);
+    } catch (error) {
+        next(error);
+    }
+}
