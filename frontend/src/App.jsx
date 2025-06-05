@@ -27,6 +27,7 @@ import Jobs from './pages/Jobs';
 import InterviewDetailPage from './pages/InterviewDetailPage';
 import SalaryDetailPage from './pages/SalaryDetailPage';
 import ReferralDetailPage from './pages/ReferralDetailPage';
+import ResumeBuilder from './pages/ResumeBuilder';
 
 
 
@@ -64,6 +65,7 @@ export default function App() {
             <Route path='/contactUs' element={<ContactUs />} />
             <Route path='/privacyPolicy' element={<PrivacyPolicy />} />
             <Route path='/jobs' element={<Jobs />} />
+            <Route path='/resume-builder' element={<ResumeBuilder />} />
         </Routes>
 
     <Footer />

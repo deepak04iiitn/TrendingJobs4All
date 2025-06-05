@@ -14,6 +14,7 @@ import MyInterviews from '../components/MyInterviews';
 import MyReferrals from '../components/MyReferrals';
 import MySalary from '../components/MySalary';
 import MyResumeTemplates from '../components/MyResumeTemplates';
+import ResumeBuilder from './ResumeBuilder';
 
 export default function MyCorner() {
   const { currentUser } = useSelector((state) => state.user);
@@ -38,6 +39,7 @@ export default function MyCorner() {
     { id: 'referral', icon: Users, label: 'Referrals' },
     { id: 'salary', icon: DollarSign, label: 'Salary Structures' },
     { id: 'resume', icon: FileEdit, label: 'Resume Templates' },
+    { id: 'resumeBuilder', icon: FileEdit, label: 'Resume Builder' },
   ];
 
   const handleMenuItemClick = (itemId) => {
@@ -57,6 +59,8 @@ export default function MyCorner() {
         return <MySalary />;
       case 'resume':
         return <MyResumeTemplates />;
+      case 'resumeBuilder':
+        return <ResumeBuilder />;
       default:
         return <div className="p-8">Select a menu item</div>;
     }

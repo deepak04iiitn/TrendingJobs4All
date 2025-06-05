@@ -18,7 +18,8 @@ import {
   MessageCircle,
   Bell,
   Search,
-  Star
+  Star,
+  FileEdit
 } from 'lucide-react';
 import { signoutSuccess } from '../redux/user/userSlice';
 
@@ -242,7 +243,8 @@ export default function Header() {
       { path: '/interviewExp', icon: User, label: 'Interview Experiences', desc: 'Real experiences shared' },
       { path: '/referrals', icon: BriefcaseIcon, label: 'Referrals', desc: 'Get referred by peers' },
       { path: '/salaryStructures', icon: TrendingUp, label: 'Salary Insights', desc: 'Compensation data' },
-      { path: '/resumeTemplates', icon: BookOpen, label: 'Resume Builder', desc: 'Professional templates' }
+      { path: '/resumeTemplates', icon: BookOpen, label: 'Resume Templates', desc: 'Professional templates' },
+      { path: '/resume-builder', icon: FileEdit, label: 'Resume Builder', desc: 'Create your resume' }
     ];
 
     return (
@@ -391,7 +393,8 @@ export default function Header() {
                     { path: '/interviewExp', icon: User, label: 'Interview Experiences' },
                     { path: '/referrals', icon: BriefcaseIcon, label: 'Referrals' },
                     { path: '/salaryStructures', icon: TrendingUp, label: 'Salary Insights' },
-                    { path: '/resumeTemplates', icon: BookOpen, label: 'Resume Builder' }
+                    { path: '/resumeTemplates', icon: BookOpen, label: 'Resume Templates' },
+                    { path: '/resume-builder', icon: FileEdit, label: 'Resume Builder' }
                   ].map(({ path, icon: Icon, label }) => (
                     <motion.div
                       key={path}

@@ -20,6 +20,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import cron from 'node-cron';
+import resumeRoutes from './routes/resumeRoutes.js';
 
 dotenv.config();
 
@@ -35,7 +36,14 @@ mongoose
 const __dirname = path.resolve();
 const app = express();
 
-app.use(cors());
+// Configure CORS with specific options
+app.use(cors({
+    origin: 'http://localhost:5173', // Frontend URL
+    credentials: true, // Allow credentials (cookies, authorization headers, etc)
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -43,10 +51,12 @@ app.use(cookieParser());
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Internal Server Error!';
+    console.error('Error:', err);  // Add logging
     res.status(statusCode).json({
         success: false,
         statusCode,
         message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 });
 
@@ -80,7 +90,7 @@ const PremiumSchema = new mongoose.Schema({
 
 const Premium = mongoose.model('Premium', PremiumSchema, 'premium');
 
-// Routes
+
 app.use('/backend/user', userRoutes);
 app.use('/backend/auth', authRoutes);
 app.use('/backend/comment', commentRoutes);
@@ -96,8 +106,9 @@ app.use('/backend/salaryComments', salaryCommentRoutes);
 app.use('/backend/resumeComments', resumeCommentRoutes);
 app.use('/backend/testimonials', testimonialRoutes);
 app.use('/backend/admin', adminRoutes);
+app.use('/backend/resume', resumeRoutes);
 
-// API Endpoints
+// Routes
 app.get('/backend/naukri', async (req, res) => {
     try {
         const data = await Naukri.find().lean().sort({ date: -1 }); // Sort by latest date

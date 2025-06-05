@@ -1,15 +1,16 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  server : {
-    proxy : {
-        '/backend' : {
-        target : 'http://localhost:3000',
-        secure : false,
-      },
-    }
-},
   plugins: [react()],
+  server: {
+    proxy: {
+      '/backend': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  }
 })
