@@ -244,7 +244,8 @@ export default function Header() {
       { path: '/referrals', icon: BriefcaseIcon, label: 'Referrals', desc: 'Get referred by peers' },
       { path: '/salaryStructures', icon: TrendingUp, label: 'Salary Insights', desc: 'Compensation data' },
       { path: '/resumeTemplates', icon: BookOpen, label: 'Resume Templates', desc: 'Professional templates' },
-      { path: '/resume-builder', icon: FileEdit, label: 'Resume Builder', desc: 'Create your resume' }
+      { path: '/resume-builder', icon: FileEdit, label: 'Resume Builder', desc: 'Create your resume' },
+      { path: '/interview-questions', icon: Puzzle, label: 'Interview Questions', desc: 'Practice questions' }
     ];
 
     return (
@@ -254,14 +255,10 @@ export default function Header() {
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="absolute left-0 mt-3 w-72 rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden z-50"
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute right-0 mt-3 w-80 rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden z-50"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
-              <h3 className="font-bold text-lg text-slate-800">Explore Features</h3>
-              <p className="text-sm text-slate-600">Discover what we offer</p>
-            </div>
-            
             <div className="p-3">
               {features.map(({ path, icon: Icon, label, desc }) => (
                 <motion.div

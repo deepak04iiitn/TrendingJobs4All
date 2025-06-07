@@ -16,6 +16,8 @@ import salaryCommentRoutes from './routes/salaryComment.route.js';
 import resumeCommentRoutes from './routes/resumeComment.route.js';
 import testimonialRoutes from './routes/testimonial.route.js';
 import adminRoutes from './routes/admin.route.js';
+import interviewQuestionRoutes from './routes/interviewQuestion.route.js';
+import interviewQuestionCommentRoutes from './routes/interviewQuestionComment.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
@@ -107,6 +109,8 @@ app.use('/backend/resumeComments', resumeCommentRoutes);
 app.use('/backend/testimonials', testimonialRoutes);
 app.use('/backend/admin', adminRoutes);
 app.use('/backend/resume', resumeRoutes);
+app.use('/backend/interview-questions', interviewQuestionRoutes);
+app.use('/backend/interview-question-comments', interviewQuestionCommentRoutes);
 
 // Routes
 app.get('/backend/naukri', async (req, res) => {

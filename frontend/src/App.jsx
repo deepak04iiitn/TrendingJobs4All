@@ -28,16 +28,16 @@ import InterviewDetailPage from './pages/InterviewDetailPage';
 import SalaryDetailPage from './pages/SalaryDetailPage';
 import ReferralDetailPage from './pages/ReferralDetailPage';
 import ResumeBuilder from './pages/ResumeBuilder';
-
-
+import InterviewQuestions from './pages/InterviewQuestions';
+import AdminInterviewQuestions from './pages/AdminInterviewQuestions';
 
 export default function App() {
   return (
     <BrowserRouter>
-
-    <Header />
-
-        <Routes>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <div className="flex-grow">
+          <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/about' element={<About />} />
             <Route path='/sign-in' element={<SignIn />} />
@@ -59,17 +59,20 @@ export default function App() {
             <Route path='/resumeTemplates' element={<ResumeTemplates />} />
             <Route path='/myCorner' element={<MyCorner />} />
             <Route element={<PrivateRoute />}>
-              <Route path='/dashboard' element={<Dashboard />}></Route>        {/* making dashboard private */}
+              <Route path='/dashboard' element={<Dashboard />} />
+              <Route path='/admin/interview-questions' element={<AdminInterviewQuestions />} />
             </Route>
             <Route path='/BuyMeACoffee' element={<PremiumSubscription />} />
             <Route path='/contactUs' element={<ContactUs />} />
             <Route path='/privacyPolicy' element={<PrivacyPolicy />} />
             <Route path='/jobs' element={<Jobs />} />
             <Route path='/resume-builder' element={<ResumeBuilder />} />
-        </Routes>
-
-    <Footer />
-    
+            <Route path='/interview-questions' element={<InterviewQuestions />} />
+            <Route path='/interview-questions/:topicSlug' element={<InterviewQuestions />} />
+          </Routes>
+        </div>
+        <Footer />
+      </div>
     </BrowserRouter>
-  )
+  );
 }
