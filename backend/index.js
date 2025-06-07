@@ -92,6 +92,33 @@ const PremiumSchema = new mongoose.Schema({
 
 const Premium = mongoose.model('Premium', PremiumSchema, 'premium');
 
+// In-memory cache configuration
+const cache = new Map();
+const CACHE_DURATION = 3600000; // 1 hour in milliseconds
+
+// Cache middleware
+const cacheMiddleware = (req, res, next) => {
+  const key = `jobs:${req.originalUrl}`;
+  const cachedData = cache.get(key);
+  
+  if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+    return res.json(cachedData.data);
+  }
+  next();
+};
+
+// Cache response middleware
+const cacheResponse = (key, data) => {
+  cache.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+};
+
+// Clear cache middleware
+const clearCache = () => {
+  cache.clear();
+};
 
 app.use('/backend/user', userRoutes);
 app.use('/backend/auth', authRoutes);
@@ -113,13 +140,19 @@ app.use('/backend/interview-questions', interviewQuestionRoutes);
 app.use('/backend/interview-question-comments', interviewQuestionCommentRoutes);
 
 // Routes
-app.get('/backend/naukri', async (req, res) => {
-    try {
-        const data = await Naukri.find().lean().sort({ date: -1 }); // Sort by latest date
-        res.json(data);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch data: ' + err.message });
-    }
+app.get('/backend/naukri', cacheMiddleware, async (req, res) => {
+  try {
+    const data = await Naukri.find()
+      .lean()
+      .sort({ date: -1 }); // Sort by latest date
+    
+    const key = `jobs:${req.originalUrl}`;
+    cacheResponse(key, data);
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 app.get('/backend/premium', async (req, res) => {
@@ -131,21 +164,34 @@ app.get('/backend/premium', async (req, res) => {
     }
 });
 
-app.get('/backend/naukri/:url/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const data = await Naukri.find().lean();
-        const job = data.find((d) => d._id.toString() === id);
+app.get('/backend/naukri/:url/:id', cacheMiddleware, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const data = await Naukri.find().lean();
+    const job = data.find((d) => d._id.toString() === id);
+    const key = `jobs:${req.originalUrl}`;
 
-        if (job) {
-            res.json(job);
-        } else {
-            res.status(404).json({ message: 'Job not found' });
-        }
-    } catch (error) {
-        console.error('Error fetching job data:', error);
-        res.status(500).json({ message: 'Internal server error' });
+    if (job) {
+      cacheResponse(key, job);
+      res.json(job);
+    } else {
+      res.status(404).json({ message: 'Job not found' });
     }
+  } catch (error) {
+    console.error('Error fetching job data:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Webhook endpoint for cache invalidation
+app.post('/backend/webhook/jobs-update', async (req, res) => {
+  try {
+    clearCache();
+    res.json({ message: 'Cache cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+    res.status(500).json({ message: 'Error clearing cache' });
+  }
 });
 
 // Serve frontend files

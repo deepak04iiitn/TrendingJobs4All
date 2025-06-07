@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOrUpdateResume, getResume, deleteResume } from '../controllers/resumeController.js';
+import { createResume, getResumes, getResume, updateResume, deleteResume } from '../controllers/resumeController.js';
 import { verifyToken } from '../utils/verifyUser.js';
 
 const router = express.Router();
@@ -7,13 +7,19 @@ const router = express.Router();
 // All routes are protected and require authentication
 router.use(verifyToken);
 
-// Create or update resume
-router.post('/', createOrUpdateResume);
+// Create new resume
+router.post('/', createResume);
 
-// Get user's resume
-router.get('/', getResume);
+// Get all user's resumes
+router.get('/', getResumes);
+
+// Get specific resume
+router.get('/:id', getResume);
+
+// Update resume
+router.put('/:id', updateResume);
 
 // Delete resume
-router.delete('/', deleteResume);
+router.delete('/:id', deleteResume);
 
 export default router; 

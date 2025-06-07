@@ -1,11 +1,12 @@
 import React, { useRef } from 'react';
 import { FaDownload } from 'react-icons/fa';
 import { jsPDF } from "jspdf";
+import html2canvas from 'html2canvas';
 
 const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
     const resumeRef = useRef(null);
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         const element = resumeRef.current;
 
         if (!element) {
@@ -13,27 +14,58 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
             return;
         }
 
-        // Configure jsPDF
-        const pdf = new jsPDF({
-            unit: 'in',
-            format: 'letter',
-            orientation: 'portrait'
-        });
+        try {
+            // Create a clone of the element to avoid modifying the original
+            const clone = element.cloneNode(true);
+            document.body.appendChild(clone);
+            clone.style.position = 'absolute';
+            clone.style.left = '-9999px';
+            clone.style.top = '0';
+            clone.style.width = '8.5in'; // Letter width
+            clone.style.height = 'auto';
+            clone.style.padding = '0.5in';
+            clone.style.backgroundColor = 'white';
 
-        // Use jsPDF's html method to render the content
-        // This method aims to preserve text but its capabilities depend on the complexity of the HTML/CSS.
-        pdf.html(element, {
-            callback: function (doc) {
-                // Save the PDF with a specific filename
-                doc.save('resume.pdf');
-            },
-            x: 0.3, // Adjusting x and y for margin, similar to previous margin: 0.1 on all sides
-            y: 0.3,
-            // autoPaging: 'text',
-            // html2canvas: { // jsPDF html can still use html2canvas, need to check if it can be avoided for text
-            //     scale: 0.8 // Adjust scale if needed to fit content
-            // }
-        });
+            // Use html2canvas with better settings
+            const canvas = await html2canvas(clone, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                letterRendering: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            });
+
+            // Remove the clone
+            document.body.removeChild(clone);
+
+            // Calculate dimensions
+            const imgWidth = 8.5; // Letter width in inches
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            const margin = 0.5; // 0.5 inch margins
+
+            // Create PDF
+            const pdf = new jsPDF({
+                unit: 'in',
+                format: 'letter',
+                orientation: imgHeight > 11 ? 'portrait' : 'portrait'
+            });
+
+            // Add the image to the PDF
+            pdf.addImage(
+                canvas.toDataURL('image/jpeg', 1.0),
+                'JPEG',
+                margin,
+                margin,
+                imgWidth - (2 * margin),
+                imgHeight - (2 * margin)
+            );
+
+            // Save the PDF
+            pdf.save('resume.pdf');
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+        }
     };
 
     // Separate header from other fields
