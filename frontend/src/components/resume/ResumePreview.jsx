@@ -167,13 +167,31 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 );
 
             case 'Technical Skills':
-                if (Array.isArray(value) && value.length === 0) return null;
+                if (!Array.isArray(value)) return null;
+                
+                // Check if skills are categorized
+                if (value.length > 0 && typeof value[0] === 'object' && 'category' in value[0]) {
+                    return (
+                        <div className="mb-2">
+                            <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Technical Skills</h2>
+                            <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                                {value.map((category, index) => (
+                                    <li key={index}>
+                                        <span className="font-semibold">{category.category}:</span> {category.skills.join(', ')}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    );
+                }
+                
+                // Fallback for uncategorized skills
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Technical Skills</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
-                            {(value || []).map((item, index) => (
-                                item && <li key={index}>{item}</li>
+                        <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                            {value.map((skill, index) => (
+                                <li key={index}>{typeof skill === 'string' ? skill : ''}</li>
                             ))}
                         </ul>
                     </div>

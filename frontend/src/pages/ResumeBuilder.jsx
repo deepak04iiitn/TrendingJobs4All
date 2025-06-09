@@ -316,7 +316,7 @@ const ResumeBuilder = () => {
                                                         <Briefcase className="w-6 h-6 text-white" />
                                                     </div>
                                                 </div>
-                                                Your Portfolio
+                                                Your Resumes
                                             </h2>
                                             <div className="text-purple-300 font-medium">
                                                 {savedResumes.length} Resume{savedResumes.length !== 1 ? 's' : ''}

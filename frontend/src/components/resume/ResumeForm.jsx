@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Save, RefreshCw, Sparkles, Wand2 } from 'lucide-react';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { toast } from 'react-toastify';
 
 const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset }) => {
+    const [jobDescription, setJobDescription] = useState('');
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+
     const renderFieldInput = (field) => {
         const value = resumeData[field] || (Array.isArray(resumeData[field]) ? [] : '');
 
@@ -64,6 +69,7 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
         const inputClasses = "w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all duration-200";
         const buttonClasses = "w-full p-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white rounded-xl hover:from-purple-500/30 hover:to-blue-500/30 transition-all duration-200 flex items-center justify-center space-x-2";
         const removeButtonClasses = "p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-xl transition-all duration-200";
+        const selectClasses = "w-full p-3 bg-gray-700 border border-white/10 rounded-xl text-gray-900 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all duration-200 cursor-pointer";
 
         switch (field) {
             case 'Header':
@@ -496,6 +502,74 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                 );
 
             case 'Technical Skills':
+                return (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-6"
+                    >
+                        {(value || []).map((category, categoryIndex) => (
+                            <motion.div
+                                key={categoryIndex}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="bg-white/5 rounded-xl p-4 border border-white/10"
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    <input
+                                        type="text"
+                                        placeholder="Category Name"
+                                        value={category.category || ''}
+                                        onChange={(e) => {
+                                            const newCategories = [...value];
+                                            newCategories[categoryIndex].category = e.target.value;
+                                            onChange(field, newCategories);
+                                        }}
+                                        className={`${inputClasses} flex-grow mr-2`}
+                                    />
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                            const newCategories = value.filter((_, i) => i !== categoryIndex);
+                                            onChange(field, newCategories);
+                                        }}
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/20 p-2 rounded-lg transition-all duration-200"
+                                    >
+                                        Remove Category
+                                    </motion.button>
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder={`Enter ${category.category} skills, comma-separated`}
+                                    value={category.skills.join(', ')}
+                                    onChange={(e) => {
+                                        const newSkills = e.target.value.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                                        const newCategories = [...value];
+                                        newCategories[categoryIndex].skills = newSkills;
+                                        onChange(field, newCategories);
+                                    }}
+                                    className={inputClasses}
+                                />
+                            </motion.div>
+                        ))}
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                                const newCategory = {
+                                    category: "New Category",
+                                    skills: []
+                                };
+                                onChange(field, [...value, newCategory]);
+                            }}
+                            className={buttonClasses}
+                        >
+                            Add New Category
+                        </motion.button>
+                    </motion.div>
+                );
+
             case 'Achievements':
             case 'Hobbies':
                 return (
@@ -513,7 +587,7 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                             >
                                 <input
                                     type="text"
-                                    placeholder={field === 'Technical Skills' ? 'Skill' : field === 'Achievements' ? 'Achievement' : 'Hobby'}
+                                    placeholder={field === 'Achievements' ? 'Achievement' : 'Hobby'}
                                     value={item || ''}
                                     onChange={(e) => handleSkillItemChange(field, index, e.target.value)}
                                     className={inputClasses}
@@ -534,7 +608,7 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                             onClick={() => addSkillItem(field)}
                             className={buttonClasses}
                         >
-                            Add {field === 'Technical Skills' ? 'Skill' : field === 'Achievements' ? 'Achievement' : 'Hobby'}
+                            Add {field === 'Achievements' ? 'Achievement' : 'Hobby'}
                         </motion.button>
                     </motion.div>
                 );
@@ -571,14 +645,14 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                                         newItems[index] = { ...newItems[index], proficiency: e.target.value };
                                         onChange(field, newItems);
                                     }}
-                                    className={inputClasses}
+                                    className={selectClasses}
                                 >
-                                    <option value="">Select Proficiency</option>
-                                    <option value="Native">Native</option>
-                                    <option value="Fluent">Fluent</option>
-                                    <option value="Advanced">Advanced</option>
-                                    <option value="Intermediate">Intermediate</option>
-                                    <option value="Basic">Basic</option>
+                                    <option value="" className="bg-white text-black">Select Proficiency</option>
+                                    <option value="Native" className="bg-white text-black">Native</option>
+                                    <option value="Fluent" className="bg-white text-black">Fluent</option>
+                                    <option value="Advanced" className="bg-white text-black">Advanced</option>
+                                    <option value="Intermediate" className="bg-white text-black">Intermediate</option>
+                                    <option value="Basic" className="bg-white text-black">Basic</option>
                                 </select>
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
@@ -603,6 +677,111 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
 
             default:
                 return null;
+        }
+    };
+
+    const analyzeJobDescription = async () => {
+        if (!jobDescription.trim()) {
+            toast.error('Please paste a job description first');
+            return;
+        }
+
+        if (!selectedFields.includes('Technical Skills')) {
+            toast.error('Please add Technical Skills section to your resume first');
+            return;
+        }
+
+        setIsAnalyzing(true);
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = `Analyze the following job description and extract technical skills, programming languages, tools, frameworks, and technologies. 
+        Group them into the following categories:
+        - Programming Languages (e.g., Python, Java, JavaScript)
+        - Frameworks & Libraries (e.g., React, Django, Spring)
+        - Databases (e.g., MySQL, MongoDB, PostgreSQL)
+        - Tools & Platforms (e.g., Git, Docker, AWS)
+        - Cloud Services (e.g., AWS, Azure, GCP)
+        - Other Technical Skills (e.g., Agile, CI/CD, REST APIs)
+
+        Return ONLY a valid JSON object in this exact format, with no markdown formatting or additional text:
+        {
+            "Programming Languages": ["skill1", "skill2"],
+            "Frameworks & Libraries": ["skill1", "skill2"],
+            "Databases": ["skill1", "skill2"],
+            "Tools & Platforms": ["skill1", "skill2"],
+            "Cloud Services": ["skill1", "skill2"],
+            "Other Technical Skills": ["skill1", "skill2"]
+        }
+
+        Only include categories that have skills. If a category has no skills, omit it from the JSON.
+        Focus on technical and professional skills that would be relevant for a resume.
+        
+        Job Description:
+        ${jobDescription}`;
+
+        try {
+            const result = await model.generateContent(prompt);
+            let responseText = result.response.text();
+            
+            // Clean up the response text to ensure it's valid JSON
+            responseText = responseText.replace(/```json\n?|\n?```/g, '').trim();
+            
+            // Try to parse the JSON
+            let response;
+            try {
+                response = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Failed to parse AI response:', responseText);
+                throw new Error('Invalid response format from AI');
+            }
+            
+            // Convert the categorized skills into a format suitable for the resume
+            const categorizedSkills = Object.entries(response).map(([category, skills]) => ({
+                category,
+                skills: Array.isArray(skills) ? skills.map(skill => skill.trim()).filter(skill => skill.length > 0) : []
+            })).filter(cat => cat.skills.length > 0);
+
+            // Get current skills and convert to categorized format if they exist
+            const currentSkills = resumeData['Technical Skills'] || [];
+            let existingCategorizedSkills = [];
+            
+            if (currentSkills.length > 0 && typeof currentSkills[0] === 'object' && 'category' in currentSkills[0]) {
+                existingCategorizedSkills = currentSkills;
+            } else if (Array.isArray(currentSkills)) {
+                // If current skills are not categorized, put them in "Other Technical Skills"
+                existingCategorizedSkills = [{
+                    category: "Other Technical Skills",
+                    skills: currentSkills.filter(skill => typeof skill === 'string')
+                }];
+            }
+
+            // Merge new skills with existing ones, maintaining categories
+            const mergedSkills = [...existingCategorizedSkills];
+            
+            categorizedSkills.forEach(newCat => {
+                const existingCatIndex = mergedSkills.findIndex(cat => cat.category === newCat.category);
+                
+                if (existingCatIndex >= 0) {
+                    // Merge skills for existing category
+                    const existingSkills = mergedSkills[existingCatIndex].skills;
+                    const uniqueSkills = [...new Set([...existingSkills, ...newCat.skills])];
+                    mergedSkills[existingCatIndex].skills = uniqueSkills;
+                } else {
+                    // Add new category
+                    mergedSkills.push(newCat);
+                }
+            });
+
+            onChange('Technical Skills', mergedSkills);
+            toast.success('Skills extracted and categorized successfully!');
+            setJobDescription(''); // Clear the input after successful extraction
+        } catch (error) {
+            console.error('Error analyzing job description:', error);
+            toast.error(error.message || 'Failed to analyze job description. Please try again.');
+        } finally {
+            setIsAnalyzing(false);
         }
     };
 
@@ -632,6 +811,55 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                     <span>Change Fields</span>
                 </motion.button>
             </div>
+
+            {/* AI Job Description Analyzer */}
+            {selectedFields.includes('Technical Skills') && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20"
+                >
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl blur opacity-75"></div>
+                            <div className="relative bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-xl">
+                                <Wand2 className="w-5 h-5 text-white" />
+                            </div>
+                        </div>
+                        <h3 className="text-xl font-semibold text-white">AI Skill Extractor</h3>
+                    </div>
+                    <p className="text-gray-300 mb-4">
+                        Paste a job description below and let AI extract relevant skills for your resume
+                    </p>
+                    <div className="space-y-4">
+                        <textarea
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
+                            placeholder="Paste job description here..."
+                            className="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all duration-200 min-h-[150px] resize-none"
+                        />
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={analyzeJobDescription}
+                            disabled={isAnalyzing || !jobDescription.trim()}
+                            className="w-full p-4 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+                        >
+                            {isAnalyzing ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    <span>Analyzing...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="w-5 h-5" />
+                                    <span>Extract Skills</span>
+                                </>
+                            )}
+                        </motion.button>
+                    </div>
+                </motion.div>
+            )}
 
             <div className="space-y-8">
                 {(selectedFields || []).map((field, index) => (
