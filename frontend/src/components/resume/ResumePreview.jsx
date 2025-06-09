@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { FaDownload } from 'react-icons/fa';
-import { jsPDF } from "jspdf";
-import html2canvas from 'html2canvas';
+import html2pdf from 'html2pdf.js';
 
 const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
     const resumeRef = useRef(null);
@@ -15,54 +14,67 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
         }
 
         try {
-            // Create a clone of the element to avoid modifying the original
+            // Create a clone of the element
             const clone = element.cloneNode(true);
-            document.body.appendChild(clone);
-            clone.style.position = 'absolute';
-            clone.style.left = '-9999px';
-            clone.style.top = '0';
-            clone.style.width = '8.5in'; // Letter width
-            clone.style.height = 'auto';
-            clone.style.padding = '0.5in';
-            clone.style.backgroundColor = 'white';
+            
+            // Create a container div for proper PDF generation
+            const container = document.createElement('div');
+            container.style.width = '8.5in';
+            container.style.backgroundColor = 'white';
+            container.appendChild(clone);
+            
+            // Temporarily add to document
+            document.body.appendChild(container);
+            
+            // Configure html2pdf options
+            const opt = {
+                margin: 0,
+                filename: 'resume.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: true, // Enable logging for debugging
+                    letterRendering: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    windowWidth: 816, // 8.5in * 96dpi
+                    windowHeight: 1056, // 11in * 96dpi
+                    onclone: (clonedDoc) => {
+                        // Ensure all styles are properly applied
+                        const styleSheets = document.styleSheets;
+                        for (let i = 0; i < styleSheets.length; i++) {
+                            try {
+                                const rules = styleSheets[i].cssRules;
+                                for (let j = 0; j < rules.length; j++) {
+                                    clonedDoc.styleSheets[i].insertRule(rules[j].cssText);
+                                }
+                            } catch (e) {
+                                console.warn('Could not copy stylesheet:', e);
+                            }
+                        }
+                    }
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'letter', 
+                    orientation: 'portrait',
+                    compress: true
+                }
+            };
 
-            // Use html2canvas with better settings
-            const canvas = await html2canvas(clone, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                letterRendering: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff'
-            });
+            // Generate PDF
+            await html2pdf()
+                .set(opt)
+                .from(container)
+                .save()
+                .catch(err => {
+                    console.error('PDF generation error:', err);
+                    throw err;
+                });
 
-            // Remove the clone
-            document.body.removeChild(clone);
-
-            // Calculate dimensions
-            const imgWidth = 8.5; // Letter width in inches
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            const margin = 0.5; // 0.5 inch margins
-
-            // Create PDF
-            const pdf = new jsPDF({
-                unit: 'in',
-                format: 'letter',
-                orientation: imgHeight > 11 ? 'portrait' : 'portrait'
-            });
-
-            // Add the image to the PDF
-            pdf.addImage(
-                canvas.toDataURL('image/jpeg', 1.0),
-                'JPEG',
-                margin,
-                margin,
-                imgWidth - (2 * margin),
-                imgHeight - (2 * margin)
-            );
-
-            // Save the PDF
-            pdf.save('resume.pdf');
+            // Clean up
+            document.body.removeChild(container);
         } catch (error) {
             console.error('Error generating PDF:', error);
         }
@@ -108,17 +120,17 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="text-center mb-2">
                         <h1 className="text-xl font-bold mb-0">{headerValue.name}</h1>
-                        <div className="text-gray-700 text-xs flex flex-wrap justify-center gap-x-2">
-                            {headerValue.portfolio && <span className="whitespace-nowrap">Portfolio: <a href={headerValue.portfolio} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
-                            {headerValue.email && <span className="whitespace-nowrap">• Email: {headerValue.email}</span>}
-                            {headerValue.phone && <span className="whitespace-nowrap">• Mobile: {headerValue.phone}</span>}
-                            {headerValue.location && <span className="whitespace-nowrap">• {headerValue.location}</span>}
-                            {headerValue.linkedin && <span className="whitespace-nowrap">• LinkedIn: <a href={headerValue.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
-                            {headerValue.github && <span className="whitespace-nowrap">• GitHub: <a href={headerValue.github} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
-                            {headerValue.geeksforgeeks && <span className="whitespace-nowrap">• GeeksForGeeks: <a href={headerValue.geeksforgeeks} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
-                            {headerValue.leetcode && <span className="whitespace-nowrap">• LeetCode: <a href={headerValue.leetcode} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
-                            {headerValue.codechef && <span className="whitespace-nowrap">• CodeChef: <a href={headerValue.codechef} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
-                            {headerValue.codeforces && <span className="whitespace-nowrap">• Codeforces: <a href={headerValue.codeforces} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
+                        <div className="text-gray-700 text-[0.65rem] flex flex-wrap gap-x-2 justify-center">
+                            {headerValue.portfolio && <span>Portfolio: <a href={headerValue.portfolio} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
+                            {headerValue.email && <span>• Email: {headerValue.email}</span>}
+                            {headerValue.phone && <span>• Mobile: {headerValue.phone}</span>}
+                            {headerValue.location && <span>• {headerValue.location}</span>}
+                            {headerValue.linkedin && <span>• LinkedIn: <a href={headerValue.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
+                            {headerValue.github && <span>• GitHub: <a href={headerValue.github} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
+                            {headerValue.geeksforgeeks && <span>• GeeksForGeeks: <a href={headerValue.geeksforgeeks} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
+                            {headerValue.leetcode && <span>• LeetCode: <a href={headerValue.leetcode} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
+                            {headerValue.codechef && <span>• CodeChef: <a href={headerValue.codechef} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
+                            {headerValue.codeforces && <span>• Codeforces: <a href={headerValue.codeforces} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Link</a></span>}
                         </div>
                     </div>
                 );
@@ -143,7 +155,7 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                                 </div>
                                 {edu.gpa && <p className="text-gray-700 text-xs">GPA: {edu.gpa}</p>}
                                 {(edu.description || []).length > 0 && (
-                                     <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc' }}>
+                                     <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                                         {(edu.description || []).map((desc, descIndex) => (
                                             desc && <li key={descIndex}>{desc}</li>
                                         ))}
@@ -159,7 +171,7 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Technical Skills</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc' }}>
+                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                             {(value || []).map((item, index) => (
                                 item && <li key={index}>{item}</li>
                             ))}
@@ -202,7 +214,7 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                                     <p className="text-gray-700 text-xs mt-0.5"><strong>Tech:</strong> {project.technologies.join(', ')}</p>
                                 )}
                                 {(project.description || []).length > 0 && (
-                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc' }}>
+                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                                         {(project.description || []).map((desc, descIndex) => (
                                             desc && <li key={descIndex}>{desc}</li>
                                         ))}
@@ -224,7 +236,7 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                                     <span className="text-gray-600">{exp.duration}</span>
                                 </div>
                                 {(exp.description || []).length > 0 && (
-                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc' }}>
+                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                                         {(exp.description || []).map((desc, descIndex) => (
                                             desc && <li key={descIndex}>{desc}</li>
                                         ))}
@@ -246,7 +258,7 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                                     <span className="text-gray-600">{pos.duration}</span>
                                 </div>
                                 {(pos.description || []).length > 0 && (
-                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc' }}>
+                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                                         {(pos.description || []).map((desc, descIndex) => (
                                             desc && <li key={descIndex}>{desc}</li>
                                         ))}
@@ -288,7 +300,7 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Achievements</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc' }}>
+                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                             {(value || []).map((item, index) => (
                                 item && <li key={index}>{item}</li>
                             ))}
@@ -332,7 +344,7 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Languages</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc' }}>
+                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                             {(value || []).map((item, index) => (
                                 (item.language || item.proficiency) && <li key={index}>{item.language}{item.language && item.proficiency && ' '}({item.proficiency})</li>
                             ))}
@@ -345,7 +357,7 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Hobbies</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc' }}>
+                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                             {(value || []).map((item, index) => (
                                 item && <li key={index}>{item}</li>
                             ))}
@@ -368,18 +380,30 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 <FaDownload size={20} />
             </button>
 
-            <div
-                ref={resumeRef}
-                className="bg-white p-2 shadow-lg max-w-[8.5in] mx-auto text-gray-900 leading-tight"
-                style={{ 
-                    fontFamily: 'Arial, sans-serif',
-                    fontSize: '0.7rem'
-                }}
-            >
-                {/* Render all selected fields in order */}
-                {selectedFields.map((field) => (
-                    <div key={field} className="mb-2">{renderField(field)}</div>
-                ))}
+            <div className="relative w-full overflow-x-auto">
+                <div
+                    ref={resumeRef}
+                    className="bg-white shadow-lg mx-auto text-gray-900 leading-tight"
+                    style={{ 
+                        fontFamily: 'Arial, sans-serif',
+                        fontSize: '0.7rem',
+                        width: '8.5in',
+                        minHeight: '11in',
+                        maxWidth: '100%',
+                        boxSizing: 'border-box',
+                        position: 'relative',
+                        backgroundColor: 'white',
+                        padding: '0.2in',
+                        overflowWrap: 'break-word',
+                        wordWrap: 'break-word',
+                        overflow: 'hidden'
+                    }}
+                >
+                    {/* Render all selected fields in order */}
+                    {selectedFields.map((field) => (
+                        <div key={field} className="mb-2">{renderField(field)}</div>
+                    ))}
+                </div>
             </div>
         </div>
     );
