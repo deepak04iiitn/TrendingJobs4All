@@ -32,7 +32,7 @@ const InterviewHeader = ({ onFilterClick, onShareClick }) => {
             </div>
             
             <p className="text-gray-600 max-w-4xl mx-auto leading-relaxed text-lg">
-              Discover and share interview experiences on <span className="font-semibold text-indigo-600">TrendingJobs4All</span>, 
+              Discover and share interview experiences on <span className="font-semibold text-indigo-600">Route2Hire</span>, 
               where job seekers explore real stories, tips, and trends. Sort experiences by company, position, or years of 
               expertise to gain tailored insights.
             </p>

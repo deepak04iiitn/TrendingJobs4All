@@ -49,7 +49,7 @@ export default function SignUp() {
           <div className="md:w-1/2 bg-gradient-to-br from-purple-600 to-pink-500 p-12 text-white flex flex-col justify-center">
             <Link to="/" className="flex justify-center">
               <img
-                src="/assets/TrendingJobs4All.png"
+                src="/assets/Route2Hire.png"
                 alt="CareerConnect Logo"
                 className="h-32 w-32 object-contain mb-8 hover:scale-105 transition-transform"
               />

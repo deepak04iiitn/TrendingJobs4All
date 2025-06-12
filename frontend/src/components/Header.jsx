@@ -359,11 +359,11 @@ export default function Header() {
               <div className="flex justify-between items-center">
                 <Link to="/" onClick={closeMobileMenu} className="flex items-center space-x-3">
                   <img
-                    src="/assets/TrendingJobs4All.png"
-                    alt="Career Connect"
+                    src="/assets/Route2Hire.png"
+                    alt="Route2Hire"
                     className="h-12 w-12 rounded-xl shadow-lg"
                   />
-                  <span className="text-slate-800 font-bold text-lg">TrendingJobs4All</span>
+                  <span className="text-slate-800 font-bold text-lg">Route2Hire</span>
                 </Link>
                 <button
                   onClick={closeMobileMenu}
@@ -452,12 +452,12 @@ export default function Header() {
 
           <Link to="/" className="flex items-center space-x-2">
             <img
-              src="/assets/TrendingJobs4All.png"
-              alt="Career Connect"
+              src="/assets/Route2Hire.png"
+              alt="Route2Hire"
               className="h-12 w-12 rounded-xl shadow-lg"
             />
             <span className="font-bold text-lg text-slate-800">
-              TrendingJobs4All
+              Route2Hire
             </span>
           </Link>
 
@@ -492,12 +492,12 @@ export default function Header() {
           <Link to="/" className="flex items-center space-x-3 group">
             <motion.img
               whileHover={{ rotate: 5 }}
-              src="/assets/TrendingJobs4All.png"
-              alt="TrendingJobs4All"
+              src="/assets/Route2Hire.png"
+              alt="Route2Hire"
               className="h-12 w-12 rounded-xl shadow-lg"
             />
             <span className="font-bold text-xl text-slate-800 transition-colors">
-              TrendingJobs4All
+              Route2Hire
             </span>
           </Link>
 

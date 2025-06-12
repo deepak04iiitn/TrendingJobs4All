@@ -44,15 +44,15 @@ export default function Footer() {
             <a href="/" className="inline-flex items-center space-x-3 group">
               <div className="relative">
                 <img
-                  src="/assets/TrendingJobs4All.png"
-                  alt="TrendingJobs4All Logo"
+                  src="/assets/Route2Hire.png"
+                  alt="Route2Hire Logo"
                   className="h-12 w-auto transition-transform duration-300 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
               </div>
               <div>
                 <span className="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                  TrendingJobs4All
+                  Route2Hire
                 </span>
                 <div className="text-xs text-cyan-400 font-medium tracking-wider uppercase">Premium Careers</div>
               </div>
@@ -126,7 +126,7 @@ export default function Footer() {
         <div className="mt-16 pt-8 border-t border-slate-800/50">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0">
             <div className="text-slate-500 text-sm">
-              © {new Date().getFullYear()} TrendingJobs4All. Crafted with 
+              © {new Date().getFullYear()} Route2Hire. Crafted with 
               <span className="text-red-400 mx-1">♥</span>
               for ambitious careers.
             </div>

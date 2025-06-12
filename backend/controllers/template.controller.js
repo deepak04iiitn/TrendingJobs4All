@@ -36,17 +36,32 @@ export const uploadResume = async(req, res, next) => {
 
 
 export const getResume = async(req, res, next) => {
-
     try {
+        const { sortConfig = 'createdAt-desc' } = req.query;
+        let sortOptions = {};
 
-        const resumeTemplates = await Template.find().sort({ createdAt : -1});
+        switch (sortConfig) {
+            case 'likes-desc':
+                sortOptions = { numberOfLikes: -1 };
+                break;
+            case 'likes-asc':
+                sortOptions = { numberOfLikes: 1 };
+                break;
+            case 'dislikes-desc':
+                sortOptions = { numberOfDislikes: -1 };
+                break;
+            case 'dislikes-asc':
+                sortOptions = { numberOfDislikes: 1 };
+                break;
+            default:
+                sortOptions = { createdAt: -1 };
+        }
 
+        const resumeTemplates = await Template.find().sort(sortOptions);
         res.status(200).json(resumeTemplates);
-
     } catch (error) {
         next(error);
     }
-
 }
 
 

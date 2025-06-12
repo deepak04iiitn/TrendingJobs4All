@@ -36,7 +36,33 @@ export const createExperience = async(req, res, next) => {
 
 export const getExperiences = async(req, res, next) => {
     try {
-        const experiences = await InterviewExperience.find().sort({ createdAt: -1 });
+        const { sortConfig = 'createdAt-desc' } = req.query;
+        let sortOptions = {};
+
+        switch (sortConfig) {
+            case 'rating-desc':
+                sortOptions = { rating: -1 };
+                break;
+            case 'rating-asc':
+                sortOptions = { rating: 1 };
+                break;
+            case 'likes-desc':
+                sortOptions = { numberOfLikes: -1 };
+                break;
+            case 'likes-asc':
+                sortOptions = { numberOfLikes: 1 };
+                break;
+            case 'dislikes-desc':
+                sortOptions = { numberOfDislikes: -1 };
+                break;
+            case 'dislikes-asc':
+                sortOptions = { numberOfDislikes: 1 };
+                break;
+            default:
+                sortOptions = { createdAt: -1 };
+        }
+
+        const experiences = await InterviewExperience.find().sort(sortOptions);
         res.status(200).json(experiences);
     } catch (error) {
         next(error);
@@ -51,7 +77,7 @@ export const likeExperience = async (req, res, next) => {
             return next(errorHandler(404, 'Experience not found'));
         }
 
-        const userId = req.user.id; 
+        const userId = req.user.id;
 
         if (!experience.likes.includes(userId)) {
             experience.likes.push(userId);
@@ -64,14 +90,19 @@ export const likeExperience = async (req, res, next) => {
             }
 
             await experience.save();
-            res.status(200).json({ message: 'Experience liked successfully', likes: experience.numberOfLikes, dislikes: experience.numberOfDislikes });
+            res.status(200).json({
+                message: 'Experience liked successfully',
+                likes: experience.numberOfLikes,
+                dislikes: experience.numberOfDislikes
+            });
         } else {
             res.status(400).json({ message: 'You have already liked this experience' });
         }
     } catch (error) {
-        next(error);
+        console.error('Error in likeExperience:', error);
+        next(errorHandler(500, 'Failed to like experience'));
     }
-}
+};
 
 export const dislikeExperience = async (req, res, next) => {
     try {
@@ -81,7 +112,7 @@ export const dislikeExperience = async (req, res, next) => {
             return next(errorHandler(404, 'Experience not found'));
         }
 
-        const userId = req.user.id; 
+        const userId = req.user.id;
 
         if (!experience.dislikes.includes(userId)) {
             experience.dislikes.push(userId);
@@ -94,15 +125,19 @@ export const dislikeExperience = async (req, res, next) => {
             }
 
             await experience.save();
-            res.status(200).json({ message: 'Experience disliked successfully', likes: experience.numberOfLikes, dislikes: experience.numberOfDislikes });
+            res.status(200).json({
+                message: 'Experience disliked successfully',
+                likes: experience.numberOfLikes,
+                dislikes: experience.numberOfDislikes
+            });
         } else {
             res.status(400).json({ message: 'You have already disliked this experience' });
         }
     } catch (error) {
-        next(error);
+        console.error('Error in dislikeExperience:', error);
+        next(errorHandler(500, 'Failed to dislike experience'));
     }
-}
-
+};
 
 export const deleteExp = async(req, res, next) => {
     try {

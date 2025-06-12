@@ -219,7 +219,7 @@ ${question}`;
                   }}
                   startDelay={100}
                   cursorColor="#60a5fa"
-                  text="TrendingJobs4All"
+                  text="Route2Hire"
                   typeSpeed={80}
                 />
               </h1>

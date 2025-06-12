@@ -153,7 +153,9 @@ const ReferralFilterModal = ({ isOpen, onClose, filters, onSave, onClear }) => {
               <div className="space-y-3">
                 {[
                   { value: 'likes-desc', label: 'Most Liked First', icon: '👍', desc: 'Popular referrals first' },
-                  { value: 'likes-asc', label: 'Least Liked First', icon: '📈', desc: 'Hidden opportunities' },
+                  { value: 'likes-asc', label: 'Least Liked First', icon: '📊', desc: 'Hidden opportunities' },
+                  { value: 'dislikes-desc', label: 'Most Disliked First', icon: '👎', desc: 'Controversial referrals' },
+                  { value: 'dislikes-asc', label: 'Least Disliked First', icon: '💫', desc: 'Well-received referrals' }
                 ].map((option) => (
                   <button
                     key={option.value}

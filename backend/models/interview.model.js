@@ -33,7 +33,7 @@ const interviewExperienceSchema = new mongoose.Schema(
   verdict: {
     type: String,
     required: true,
-    enum: ['selected', 'rejected'],
+    enum: ['selected', 'rejected', 'N/A'],
   },
 
   rating: {

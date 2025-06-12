@@ -19,10 +19,10 @@ export default function About() {
       title: "Who Are We?",
       gradient: "from-purple-600 to-pink-600",
       body: [
-        "Discover top career opportunities with TrendingJobs4All! Our dedicated team connects talented professionals with the perfect job opportunities to help them thrive in their careers.",
-        "Discover job roles and internships that perfectly match your skills, ambitions, and values on TrendingJobs4All, your ultimate platform for career opportunities.",
-        "At TrendingJobs4All, we empower individuals by connecting them with the right job opportunities, ensuring every career step is meaningful and fulfilling.",
-        "Experience innovation and seamless job searching with TrendingJobs4All—the ultimate platform for professionals and students to discover their next big career opportunity."
+        "Discover top career opportunities with Route2Hire! Our dedicated team connects talented professionals with the perfect job opportunities to help them thrive in their careers.",
+        "Discover job roles and internships that perfectly match your skills, ambitions, and values on Route2Hire, your ultimate platform for career opportunities.",
+        "At Route2Hire, we empower individuals by connecting them with the right job opportunities, ensuring every career step is meaningful and fulfilling.",
+        "Experience innovation and seamless job searching with Route2Hire—the ultimate platform for professionals and students to discover their next big career opportunity."
       ]
     },
     {
@@ -31,11 +31,11 @@ export default function About() {
       title: "What Makes Us Different from Others?",
       gradient: "from-blue-600 to-cyan-600",
       body: [
-        "Discover a revolutionary job search experience with TrendingJobs4All, where personalized career recommendations help you find opportunities tailored just for you.",
-        "At TrendingJobs4All, advanced algorithms match your unique skills, experiences, and aspirations with the best job and internship opportunities for your career growth.",
-        "Enhance your career with TrendingJobs4All, offering tailored resources to help you upskill, build your network, and stay ahead of industry trends.",
-        "At TrendingJobs4All, we prioritize community building, providing access to forums, mentorship, and expert career advice to support your professional growth.",
-        "At TrendingJobs4All, it's not just about finding a job—it's about discovering the right career path that aligns with your goals and aspirations."
+        "Discover a revolutionary job search experience with Route2Hire, where personalized career recommendations help you find opportunities tailored just for you.",
+        "At Route2Hire, advanced algorithms match your unique skills, experiences, and aspirations with the best job and internship opportunities for your career growth.",
+        "Enhance your career with Route2Hire, offering tailored resources to help you upskill, build your network, and stay ahead of industry trends.",
+        "At Route2Hire, we prioritize community building, providing access to forums, mentorship, and expert career advice to support your professional growth.",
+        "At Route2Hire, it's not just about finding a job—it's about discovering the right career path that aligns with your goals and aspirations."
       ]
     },
     {
@@ -44,9 +44,9 @@ export default function About() {
       title: "Why Choose Us?",
       gradient: "from-emerald-600 to-teal-600",
       body: [
-        "Choosing TrendingJobs4All means selecting a platform that truly understands your career goals. Enjoy a seamless, intuitive experience to explore and apply for job opportunities that align with your passion, skills, and aspirations.",
-        "With TrendingJobs4All, you're not just a job seeker; you're part of a supportive community dedicated to your continuous growth, success, and career advancement.",
-        "Our commitment to providing curated job opportunities, personalized insights, and professional development resources makes TrendingJobs4All the ultimate platform to advance your career. Join us today and take the first step toward a brighter, more fulfilling professional future!"
+        "Choosing Route2Hire means selecting a platform that truly understands your career goals. Enjoy a seamless, intuitive experience to explore and apply for job opportunities that align with your passion, skills, and aspirations.",
+        "With Route2Hire, you're not just a job seeker; you're part of a supportive community dedicated to your continuous growth, success, and career advancement.",
+        "Our commitment to providing curated job opportunities, personalized insights, and professional development resources makes Route2Hire the ultimate platform to advance your career. Join us today and take the first step toward a brighter, more fulfilling professional future!"
       ]
     }
   ];
@@ -118,7 +118,7 @@ export default function About() {
           <p className="text-2xl max-w-4xl mx-auto text-gray-300 leading-relaxed mb-12">
             Empowering careers, connecting dreams, and building futures together at{' '}
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">
-              TrendingJobs4All
+              Route2Hire
             </span>
           </p>
           

@@ -122,7 +122,13 @@ export default function Referrals() {
     .sort((a, b) => {
       const [field, order] = filters.sortConfig.split('-');
       const sortValue = order === 'asc' ? 1 : -1;
-      return ((a.numberOfLikes || 0) - (b.numberOfLikes || 0)) * sortValue;
+      
+      if (field === 'likes') {
+        return ((a.numberOfLikes || 0) - (b.numberOfLikes || 0)) * sortValue;
+      } else if (field === 'dislikes') {
+        return ((a.numberOfDislikes || 0) - (b.numberOfDislikes || 0)) * sortValue;
+      }
+      return 0;
     });
 
   // Handle successful form submission

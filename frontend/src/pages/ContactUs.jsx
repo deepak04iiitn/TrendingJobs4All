@@ -23,11 +23,11 @@ export default function ContactUs() {
       link: 'https://www.linkedin.com/in/deepak-kumar-yadav-a0653b248/', 
       color: 'text-blue-700 bg-blue-200'
     },
-    { name: 'QA Jobs', icon: <FaTelegram />, link: 'https://t.me/trendingjobs4all_qa', color: 'text-purple-500 bg-sky-100' },
-    { name: 'Developer Jobs', icon: <FaTelegram />, link: 'https://t.me/trendingjobs4all_Dev', color: 'text-purple-500 bg-indigo-100' },
-    { name: 'DevOps Jobs', icon: <FaTelegram />, link: 'https://t.me/trendingjobs4all_devops', color: 'text-purple-500 bg-purple-100' },
-    { name: 'Internships', icon: <FaTelegram />, link: 'https://t.me/trendingjobs4all_intern', color: 'text-purple-500 bg-teal-100' },
-    { name: 'Email', icon: <FaEnvelope />, link: 'mailto:support@trendingjobs4all.com', color: 'text-red-600 bg-red-100' },
+    { name: 'QA Jobs', icon: <FaTelegram />, link: 'https://t.me/route2hire_qa', color: 'text-purple-500 bg-sky-100' },
+    { name: 'Developer Jobs', icon: <FaTelegram />, link: 'https://t.me/route2hire_Dev', color: 'text-purple-500 bg-indigo-100' },
+    { name: 'DevOps Jobs', icon: <FaTelegram />, link: 'https://t.me/route2hire_devops', color: 'text-purple-500 bg-purple-100' },
+    { name: 'Internships', icon: <FaTelegram />, link: 'https://t.me/route2hire_intern', color: 'text-purple-500 bg-teal-100' },
+    { name: 'Email', icon: <FaEnvelope />, link: 'mailto:support@route2hire.com', color: 'text-red-600 bg-red-100' },
   ];
 
   return (

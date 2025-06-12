@@ -41,8 +41,27 @@ export const createReferral = async(req, res, next) => {
 
 export const getReferrals = async(req, res, next) => {
     try {
-        const referrals = await Referral.find()
-            .sort({ createdAt: -1 });
+        const { sortConfig = 'createdAt-desc' } = req.query;
+        let sortOptions = {};
+
+        switch (sortConfig) {
+            case 'likes-desc':
+                sortOptions = { numberOfLikes: -1 };
+                break;
+            case 'likes-asc':
+                sortOptions = { numberOfLikes: 1 };
+                break;
+            case 'dislikes-desc':
+                sortOptions = { numberOfDislikes: -1 };
+                break;
+            case 'dislikes-asc':
+                sortOptions = { numberOfDislikes: 1 };
+                break;
+            default:
+                sortOptions = { createdAt: -1 };
+        }
+
+        const referrals = await Referral.find().sort(sortOptions);
         res.status(200).json(referrals);
     } catch (error) {
         next(error);

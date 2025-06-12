@@ -12,14 +12,14 @@ export default function PrivacyPolicy() {
   const [activeSection, setActiveSection] = useState(null);
 
   useEffect(() => {
-    document.title = "Privacy Policy - TrendingJobs4All";
+    document.title = "Privacy Policy - Route2Hire";
     window.scrollTo(0, 0);
   }, []);
 
   const sections = [
     {
       title: "Introduction",
-      content: "Welcome to TrendingJobs4All. This Privacy Policy explains how we collect, use, and protect your personal information when you use our services. Please read it carefully.",
+      content: "Welcome to Route2Hire. This Privacy Policy explains how we collect, use, and protect your personal information when you use our services. Please read it carefully.",
       icon: FileText
     },
     {
@@ -63,7 +63,7 @@ export default function PrivacyPolicy() {
             Privacy Policy
           </h1>
           <p className="mt-4 text-blue-100">
-            Transparency and Trust at TrendingJobs4All
+            Transparency and Trust at Route2Hire
           </p>
         </motion.div>
 
@@ -134,7 +134,7 @@ export default function PrivacyPolicy() {
 
         {/* Footer */}
         <div className="bg-blue-600 text-white py-4 text-center">
-          <p>&copy; 2024 TrendingJobs4All. All Rights Reserved.</p>
+          <p>&copy; 2024 Route2Hire. All Rights Reserved.</p>
         </div>
       </div>
     </div>

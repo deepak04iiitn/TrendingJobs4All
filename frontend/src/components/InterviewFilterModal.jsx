@@ -187,6 +187,10 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
                 {[
                   { value: 'rating-desc', label: 'Highest Rating First', icon: '⭐', desc: 'Best experiences first' },
                   { value: 'rating-asc', label: 'Lowest Rating First', icon: '📈', desc: 'Learning opportunities' },
+                  { value: 'likes-desc', label: 'Most Liked First', icon: '👍', desc: 'Popular experiences first' },
+                  { value: 'likes-asc', label: 'Least Liked First', icon: '📊', desc: 'Hidden gems' },
+                  { value: 'dislikes-desc', label: 'Most Disliked First', icon: '👎', desc: 'Controversial experiences' },
+                  { value: 'dislikes-asc', label: 'Least Disliked First', icon: '💫', desc: 'Well-received experiences' }
                 ].map((option) => (
                   <button
                     key={option.value}

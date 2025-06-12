@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building, User, Heart, MessageCircle, ExternalLink, Sparkles, Trophy, Linkedin, Phone } from 'lucide-react';
+import { Building, User, Heart, MessageCircle, ExternalLink, Sparkles, Trophy, Linkedin, Phone, Briefcase } from 'lucide-react';
 
 export default function ReferralSidebar({ 
   referrals, 
@@ -179,23 +179,25 @@ export default function ReferralSidebar({
                   </div>
                 </div>
 
-                {/* Metadata with badges */}
-                <div className="flex flex-col gap-3 mb-4 w-full">
-                  <div className="flex items-center gap-2 flex-wrap w-full">
-                    {/* Referrer Badge */}
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 bg-gradient-to-r from-slate-100/80 to-slate-200/60 px-3 py-1.5 rounded-xl border border-slate-200/50 shadow-sm backdrop-blur-sm flex-shrink-0">
-                      <User size={12} className="text-slate-500 flex-shrink-0" />
-                      <span className="whitespace-nowrap truncate max-w-24">{referral.fullName || 'Anonymous'}</span>
-                    </div>
-
-                    {/* Contact Badge */}
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 bg-gradient-to-r from-green-100/80 to-green-200/60 px-3 py-1.5 rounded-xl border border-green-200/50 shadow-sm backdrop-blur-sm flex-shrink-0">
-                      <Phone size={12} className="text-green-500 flex-shrink-0" />
-                      <span className="whitespace-nowrap">Contact</span>
-                    </div>
+                {/* Metadata Badges */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Positions Badge */}
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-blue-700 bg-gradient-to-r from-blue-100/80 to-blue-200/60 px-3 py-1.5 rounded-xl border border-blue-200/50 shadow-sm backdrop-blur-sm">
+                    <Briefcase size={12} className="text-blue-500 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{referral.positions?.length || 0} Positions</span>
                   </div>
 
-                  
+                  {/* Likes Badge */}
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-700 bg-gradient-to-r from-emerald-100/80 to-emerald-200/60 px-3 py-1.5 rounded-xl border border-emerald-200/50 shadow-sm backdrop-blur-sm">
+                    <Heart size={12} className="text-emerald-500 flex-shrink-0 fill-current" />
+                    <span className="whitespace-nowrap">{referral.numberOfLikes || 0}</span>
+                  </div>
+
+                  {/* Dislikes Badge */}
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-rose-700 bg-gradient-to-r from-rose-100/80 to-rose-200/60 px-3 py-1.5 rounded-xl border border-rose-200/50 shadow-sm backdrop-blur-sm">
+                    <Heart size={12} className="text-rose-500 flex-shrink-0 fill-current rotate-180" />
+                    <span className="whitespace-nowrap">{referral.numberOfDislikes || 0}</span>
+                  </div>
                 </div>
 
                 {/* Positions Preview */}

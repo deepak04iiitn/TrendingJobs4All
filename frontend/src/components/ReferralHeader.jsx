@@ -32,7 +32,7 @@ const ReferralHeader = ({ onFilterClick, onShareClick }) => {
             </div>
             
             <p className="text-gray-600 max-w-4xl mx-auto leading-relaxed text-lg">
-              Find and share job referrals on <span className="font-semibold text-indigo-600">TrendingJobs4All</span>, 
+              Find and share job referrals on <span className="font-semibold text-indigo-600">Route2Hire</span>, 
               connecting with professionals for career growth. Sort referrals by company, position, or experience 
               level to access insider opportunities. Unlock networking and referral options to land your dream job!
             </p>

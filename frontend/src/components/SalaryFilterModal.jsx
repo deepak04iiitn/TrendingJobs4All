@@ -169,10 +169,12 @@ const SalaryFilterModal = ({ isOpen, onClose, filters, onSave, onClear }) => {
               
               <div className="space-y-3">
                 {[
-                  { value: 'ctc-desc', label: 'Highest CTC First', icon: '💰', desc: 'Top salaries first' },
-                  { value: 'ctc-asc', label: 'Lowest CTC First', icon: '📈', desc: 'Entry-level friendly' },
-                  { value: 'likes-desc', label: 'Most Liked First', icon: '👍', desc: 'Popular posts first' },
-                  { value: 'likes-asc', label: 'Least Liked First', icon: '🔍', desc: 'Hidden gems' }
+                  { value: 'ctc-desc', label: 'Highest CTC First', icon: '💰', desc: 'Highest paying roles first' },
+                  { value: 'ctc-asc', label: 'Lowest CTC First', icon: '📈', desc: 'Entry level opportunities' },
+                  { value: 'likes-desc', label: 'Most Liked First', icon: '👍', desc: 'Popular salaries first' },
+                  { value: 'likes-asc', label: 'Least Liked First', icon: '📊', desc: 'Hidden opportunities' },
+                  { value: 'dislikes-desc', label: 'Most Disliked First', icon: '👎', desc: 'Controversial salaries' },
+                  { value: 'dislikes-asc', label: 'Least Disliked First', icon: '💫', desc: 'Well-received salaries' }
                 ].map((option) => (
                   <button
                     key={option.value}

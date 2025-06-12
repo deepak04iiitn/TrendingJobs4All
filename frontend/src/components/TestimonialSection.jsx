@@ -62,7 +62,7 @@ export default function TestimonialSection() {
             </h2>
             
             <p className="max-w-2xl mx-auto text-xl text-gray-500 mb-10">
-              Join thousands of professionals who found their dream careers through TrendingJobs4All. Your journey could inspire others!
+              Join thousands of professionals who found their dream careers through Route2Hire. Your journey could inspire others!
             </p>
 
             {showAuthAlert && (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building, User, Star, CheckCircle, XCircle, ExternalLink, Sparkles, Trophy } from 'lucide-react';
+import { Building, User, Star, CheckCircle, XCircle, ExternalLink, Sparkles, Trophy, Heart } from 'lucide-react';
 
 export default function InterviewSidebar({ 
   experiences, 
@@ -222,6 +222,18 @@ export default function InterviewSidebar({
                           : 'Pending'
                         }
                       </span>
+                    </div>
+
+                    {/* Likes Badge */}
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-700 bg-gradient-to-r from-emerald-100/80 to-emerald-200/60 px-3 py-1.5 rounded-xl border border-emerald-200/50 shadow-sm backdrop-blur-sm flex-shrink-0">
+                      <Heart size={12} className="text-emerald-500 flex-shrink-0 fill-current" />
+                      <span className="whitespace-nowrap">{experience.numberOfLikes || 0}</span>
+                    </div>
+
+                    {/* Dislikes Badge */}
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-rose-700 bg-gradient-to-r from-rose-100/80 to-rose-200/60 px-3 py-1.5 rounded-xl border border-rose-200/50 shadow-sm backdrop-blur-sm flex-shrink-0">
+                      <Heart size={12} className="text-rose-500 flex-shrink-0 fill-current rotate-180" />
+                      <span className="whitespace-nowrap">{experience.numberOfDislikes || 0}</span>
                     </div>
                   </div>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Building2, Briefcase, Clock, XCircle, ThumbsUp, ThumbsDown, MessageCircle, X, Linkedin, ExternalLink, Sparkles, Trophy, FileText } from 'lucide-react';
+import { Download, Building2, Briefcase, Clock, XCircle, ThumbsUp, ThumbsDown, MessageCircle, X, Linkedin, ExternalLink, Sparkles, Trophy, FileText, Tag, Heart } from 'lucide-react';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { app } from '../firebase.js';
 import ResumeCommentSection from './ResumeCommentSection.jsx';

@@ -224,12 +224,16 @@ const SalarySidebar = ({
                     )}
 
                     {/* Likes */}
-                    {salary.numberOfLikes > 0 && (
-                      <div className="flex items-center gap-2 text-sm font-semibold text-pink-700 bg-gradient-to-r from-pink-100 to-rose-200 px-4 py-2 rounded-full shadow-sm border border-pink-200/50">
-                        <Heart size={15} className="text-pink-500 flex-shrink-0 fill-current" />
-                        <span>{salary.numberOfLikes}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-gradient-to-r from-emerald-100 to-emerald-200 px-4 py-2 rounded-full shadow-sm border border-emerald-200/50">
+                      <Heart size={15} className="text-emerald-500 flex-shrink-0 fill-current" />
+                      <span>{salary.numberOfLikes || 0}</span>
+                    </div>
+
+                    {/* Dislikes */}
+                    <div className="flex items-center gap-2 text-sm font-semibold text-rose-700 bg-gradient-to-r from-rose-100 to-rose-200 px-4 py-2 rounded-full shadow-sm border border-rose-200/50">
+                      <Heart size={15} className="text-rose-500 flex-shrink-0 fill-current rotate-180" />
+                      <span>{salary.numberOfDislikes || 0}</span>
+                    </div>
                   </div>
 
                   {/* Salary Breakdown */}

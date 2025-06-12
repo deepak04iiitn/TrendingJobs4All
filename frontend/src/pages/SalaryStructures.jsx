@@ -125,6 +125,8 @@ export default function SalaryStructures() {
         return (ctcA - ctcB) * sortValue;
       } else if (field === 'likes') {
         return ((a.numberOfLikes || 0) - (b.numberOfLikes || 0)) * sortValue;
+      } else if (field === 'dislikes') {
+        return ((a.numberOfDislikes || 0) - (b.numberOfDislikes || 0)) * sortValue;
       }
       return 0;
     });

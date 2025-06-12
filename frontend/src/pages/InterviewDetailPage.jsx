@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Building, BookOpen, Calendar, MapPin, Clock, Users, Star, Quote, Award, Target, CheckCircle, ExternalLink, User, Briefcase, TrendingUp, Code, Brain, MessageCircle, Trophy, Zap, Globe, Layers } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { ArrowLeft, Building, BookOpen, Calendar, MapPin, Clock, Users, Star, Quote, Award, Target, CheckCircle, ExternalLink, User, Briefcase, TrendingUp, Code, Brain, MessageCircle, Trophy, Zap, Globe, Layers, Copy, Linkedin, X, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 import InterviewCommentSection from '../components/InterviewCommentSection';
+import { motion } from 'framer-motion';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-hot-toast';
 
 
 // Floating Background Elements Component
@@ -68,7 +71,7 @@ function BackgroundPattern() {
 }
 
 // Responsive Open Book Component
-function ResponsiveBookExperience({ experience }) {
+function ResponsiveBookExperience({ experience, handleLike, handleDislike, likes, dislikes, isLiked, isDisliked, currentUser }) {
   if (!experience) return null;
 
   return (
@@ -252,20 +255,37 @@ function ResponsiveBookExperience({ experience }) {
                   <div className="bg-gradient-to-br from-indigo-50/80 to-purple-50/80 backdrop-blur-sm rounded-xl p-6 border border-indigo-200/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                     <h4 className="font-serif text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                       <div className="p-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
-                        <User className="text-white" size={16} />
+                        <ThumbsUp className="text-white" size={16} />
                       </div>
-                      Contributor
+                      Community Feedback
                     </h4>
-                    <div className="flex items-center gap-3 p-3 bg-white/60 rounded-lg backdrop-blur-sm">
-                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                        <User size={24} className="text-white" />
+                    <div className="flex items-center justify-between p-3 bg-white/60 rounded-lg backdrop-blur-sm">
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={handleLike}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                            isLiked
+                              ? 'bg-blue-100 text-blue-600 border border-blue-200'
+                              : 'bg-white/80 text-slate-600 hover:bg-blue-50 border border-slate-200'
+                          }`}
+                        >
+                          <ThumbsUp size={18} className={isLiked ? 'fill-current' : ''} />
+                          <span className="font-medium">{likes}</span>
+                        </button>
+                        <button
+                          onClick={handleDislike}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                            isDisliked
+                              ? 'bg-red-100 text-red-600 border border-red-200'
+                              : 'bg-white/80 text-slate-600 hover:bg-red-50 border border-slate-200'
+                          }`}
+                        >
+                          <ThumbsDown size={18} className={isDisliked ? 'fill-current' : ''} />
+                          <span className="font-medium">{dislikes}</span>
+                        </button>
                       </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">{experience.fullName || 'Anonymous'}</p>
-                        <p className="text-sm text-slate-600 flex items-center gap-1">
-                          <TrendingUp size={12} />
-                          {experience.yoe || 0} years experience
-                        </p>
+                      <div className="text-sm text-slate-600">
+                        {currentUser ? 'Share your feedback' : 'Sign in to provide feedback'}
                       </div>
                     </div>
                   </div>
@@ -340,10 +360,14 @@ export default function InterviewDetailPage() {
   const [experience, setExperience] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [likes, setLikes] = useState(0);
+  const [dislikes, setDislikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
   
-  // Get ID from URL params
-  const {id} = useParams();
-  const navigate = () => {};
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchExperience = async () => {
@@ -364,6 +388,13 @@ export default function InterviewDetailPage() {
         
         const experienceData = await response.json();
         setExperience(experienceData);
+        setLikes(experienceData.numberOfLikes || 0);
+        setDislikes(experienceData.numberOfDislikes || 0);
+        
+        if (currentUser) {
+          setIsLiked(experienceData.likes.includes(currentUser._id));
+          setIsDisliked(experienceData.dislikes.includes(currentUser._id));
+        }
         
       } catch (error) {
         console.error('Error fetching experience:', error);
@@ -376,7 +407,73 @@ export default function InterviewDetailPage() {
     if (id) {
       fetchExperience();
     }
-  }, [id]);
+  }, [id, currentUser]);
+
+  const handleLike = async () => {
+    if (!currentUser) {
+      toast.error('Please sign in to like experiences');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/backend/interviews/likeExperience/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentUser.token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to like experience');
+      }
+
+      const data = await response.json();
+      setLikes(data.likes);
+      setDislikes(data.dislikes);
+      setIsLiked(true);
+      setIsDisliked(false);
+      toast.success('Experience liked successfully');
+    } catch (error) {
+      console.error('Error liking experience:', error);
+      toast.error(error.message || 'Failed to like experience');
+    }
+  };
+
+  const handleDislike = async () => {
+    if (!currentUser) {
+      toast.error('Please sign in to dislike experiences');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/backend/interviews/dislikeExperience/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentUser.token}`
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to dislike experience');
+      }
+
+      const data = await response.json();
+      setLikes(data.likes);
+      setDislikes(data.dislikes);
+      setIsLiked(false);
+      setIsDisliked(true);
+      toast.success('Experience disliked successfully');
+    } catch (error) {
+      console.error('Error disliking experience:', error);
+      toast.error(error.message || 'Failed to dislike experience');
+    }
+  };
 
   const handleBackClick = () => {
     navigate('/interview-experiences');
@@ -435,11 +532,19 @@ export default function InterviewDetailPage() {
   }
 
   return (
-    <div className="mt-20 min-h-screen relative w-full overflow-x-hidden">
+    <div className="min-h-screen relative">
       <BackgroundPattern />
       <FloatingElements />
-      {/* Main Book Content */}
-      <ResponsiveBookExperience experience={experience} />
+      <ResponsiveBookExperience 
+        experience={experience} 
+        handleLike={handleLike}
+        handleDislike={handleDislike}
+        likes={likes}
+        dislikes={dislikes}
+        isLiked={isLiked}
+        isDisliked={isDisliked}
+        currentUser={currentUser}
+      />
     </div>
   );
 }

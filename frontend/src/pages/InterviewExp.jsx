@@ -116,6 +116,8 @@ export default function InterviewExp() {
         return ((a.rating || 0) - (b.rating || 0)) * sortValue;
       } else if (field === 'likes') {
         return ((a.numberOfLikes || 0) - (b.numberOfLikes || 0)) * sortValue;
+      } else if (field === 'dislikes') {
+        return ((a.numberOfDislikes || 0) - (b.numberOfDislikes || 0)) * sortValue;
       }
       return 0;
     });

@@ -32,7 +32,7 @@ const ResumeHeader = ({ onFilterClick, onShareClick }) => {
             </div>
             
             <p className="text-gray-600 max-w-4xl mx-auto leading-relaxed text-lg">
-              Find and share winning resume templates on <span className="font-semibold text-indigo-600">TrendingJobs4All</span>, 
+              Find and share winning resume templates on <span className="font-semibold text-indigo-600">Route2Hire</span>, 
               tailored for specific companies, roles, and experience levels. Sort templates by company, position, 
               or years of experience to craft a standout application.
             </p>

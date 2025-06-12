@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ThumbsUp, ThumbsDown, MessageCircle, Linkedin, Building2, User, Mail, Phone, Briefcase, Hash, ExternalLink, Heart, Share2, X } from 'lucide-react';
 import ReferralCommentSection from '../components/referralCommentSection';
 import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
 
 // Modal Component
 const CommentModal = ({ isOpen, onClose, referralId, companyName }) => {
@@ -53,29 +56,39 @@ export default function ReferralDetailPage() {
   const { id } = useParams();
   const [referral, setReferral] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showCommentModal, setShowCommentModal] = useState(false);
   const [likes, setLikes] = useState(0);
   const [dislikes, setDislikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
-  const [showCommentModal, setShowCommentModal] = useState(false);
+
+  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchReferral = async () => {
       try {
+        setLoading(true);
         const response = await fetch(`/backend/referrals/getReferral/${id}`);
         if (!response.ok) throw new Error('Failed to fetch referral');
         const data = await response.json();
         setReferral(data);
-        setLikes(data?.numberOfLikes || 0);
-        setDislikes(data?.numberOfDislikes || 0);
-      } catch (err) {
-        console.error('Error fetching referral:', err);
+        setLikes(data.numberOfLikes || 0);
+        setDislikes(data.numberOfDislikes || 0);
+        
+        if (currentUser) {
+          setIsLiked(data.likes.includes(currentUser._id));
+          setIsDisliked(data.dislikes.includes(currentUser._id));
+        }
+      } catch (error) {
+        setError(error.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchReferral();
-  }, [id]);
+  }, [id, currentUser]);
 
   // Close modal on ESC key
   useEffect(() => {
@@ -119,56 +132,60 @@ export default function ReferralDetailPage() {
   }
 
   const handleLike = async () => {
-    if (isDisliked) {
-      setIsDisliked(false);
-      setDislikes(prev => prev - 1);
+    if (!currentUser) {
+      toast.error('Please sign in to like referrals');
+      return;
     }
-    
-    if (!isLiked) {
-      setIsLiked(true);
-      setLikes(prev => prev + 1);
-      
-      try {
-        const response = await fetch(`/backend/referrals/likeReferral/${referral._id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!response.ok) throw new Error('Failed to like referral');
-        const data = await response.json();
-        setLikes(data.likes);
-        setDislikes(data.dislikes);
-      } catch (error) {
-        console.error('Error liking referral:', error);
-        setIsLiked(false);
-        setLikes(prev => prev - 1);
+
+    try {
+      const response = await fetch(`/backend/referrals/likeReferral/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to like referral');
       }
+
+      const data = await response.json();
+      setLikes(data.likes);
+      setDislikes(data.dislikes);
+      setIsLiked(true);
+      setIsDisliked(false);
+    } catch (error) {
+      console.error('Error liking referral:', error);
+      toast.error('Failed to like referral');
     }
   };
 
   const handleDislike = async () => {
-    if (isLiked) {
-      setIsLiked(false);
-      setLikes(prev => prev - 1);
+    if (!currentUser) {
+      toast.error('Please sign in to dislike referrals');
+      return;
     }
-    
-    if (!isDisliked) {
-      setIsDisliked(true);
-      setDislikes(prev => prev + 1);
-      
-      try {
-        const response = await fetch(`/backend/referrals/dislikeReferral/${referral._id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!response.ok) throw new Error('Failed to dislike referral');
-        const data = await response.json();
-        setLikes(data.likes);
-        setDislikes(data.dislikes);
-      } catch (error) {
-        console.error('Error disliking referral:', error);
-        setIsDisliked(false);
-        setDislikes(prev => prev - 1);
+
+    try {
+      const response = await fetch(`/backend/referrals/dislikeReferral/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to dislike referral');
       }
+
+      const data = await response.json();
+      setLikes(data.likes);
+      setDislikes(data.dislikes);
+      setIsLiked(false);
+      setIsDisliked(true);
+    } catch (error) {
+      console.error('Error disliking referral:', error);
+      toast.error('Failed to dislike referral');
     }
   };
 
@@ -193,7 +210,7 @@ export default function ReferralDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900">
       {/* Header */}
       <div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-gray-200/50 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -328,35 +345,39 @@ export default function ReferralDetailPage() {
             <div className="bg-white rounded-3xl shadow-xl p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Community Feedback</h3>
               <div className="space-y-4">
-                <button
-                  onClick={handleLike}
+                <motion.button
                   className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${
                     isLiked 
                       ? 'bg-green-50 border-2 border-green-200 text-green-700' 
                       : 'bg-gray-50 hover:bg-green-50 text-gray-700'
                   }`}
+                  onClick={handleLike}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <div className="flex items-center gap-3">
                     <ThumbsUp size={20} className={isLiked ? 'text-green-600' : 'text-gray-500'} />
                     <span className="font-medium">Helpful</span>
                   </div>
                   <span className="text-xl font-bold">{likes}</span>
-                </button>
+                </motion.button>
                 
-                <button
-                  onClick={handleDislike}
+                <motion.button
                   className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${
                     isDisliked 
                       ? 'bg-red-50 border-2 border-red-200 text-red-700' 
                       : 'bg-gray-50 hover:bg-red-50 text-gray-700'
                   }`}
+                  onClick={handleDislike}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <div className="flex items-center gap-3">
                     <ThumbsDown size={20} className={isDisliked ? 'text-red-600' : 'text-gray-500'} />
                     <span className="font-medium">Not Helpful</span>
                   </div>
                   <span className="text-xl font-bold">{dislikes}</span>
-                </button>
+                </motion.button>
               </div>
             </div>
 

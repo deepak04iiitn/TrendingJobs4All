@@ -32,7 +32,7 @@ const SalaryHeader = ({ onFilterClick, onShareClick }) => {
             </div>
             
             <p className="text-gray-600 max-w-4xl mx-auto leading-relaxed text-lg">
-              Explore and share salary details on <span className="font-semibold text-emerald-600">TrendingJobs4All</span> to 
+              Explore and share salary details on <span className="font-semibold text-emerald-600">Route2Hire</span> to 
               compare pay scales and trends across roles. Sort salary data by company, position, or experience to gain 
               clear insights and make smarter career choices.
             </p>
