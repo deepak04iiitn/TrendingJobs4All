@@ -42,7 +42,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8 mt-20">
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="flex flex-col md:flex-row">
           {/* Left side - Hero Section */}
@@ -58,7 +58,7 @@ export default function SignUp() {
               EXPLORE • APPLY • SUCCEED
             </h2>
             <p className="text-lg text-center text-white/90 font-light italic mb-8">
-              "Building Bridges to Connect Careers and Opportunities – Welcome to CareerConnect!"
+              "Building Routes to Connect Careers and Opportunities – Welcome to Route2Hire!"
             </p>
             <div className="space-y-4">
               <div className="flex items-center space-x-4 bg-white/10 p-4 rounded-lg">
