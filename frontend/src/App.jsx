@@ -30,6 +30,7 @@ import ReferralDetailPage from './pages/ReferralDetailPage';
 import ResumeBuilder from './pages/ResumeBuilder';
 import InterviewQuestions from './pages/InterviewQuestions';
 import AdminInterviewQuestions from './pages/AdminInterviewQuestions';
+import Newsletter from './pages/Newsletter';
 
 export default function App() {
   return (
@@ -65,6 +66,7 @@ export default function App() {
             <Route path='/BuyMeACoffee' element={<PremiumSubscription />} />
             <Route path='/contactUs' element={<ContactUs />} />
             <Route path='/privacyPolicy' element={<PrivacyPolicy />} />
+            <Route path='/newsletter' element={<Newsletter />} />
             <Route path='/jobs' element={<Jobs />} />
             <Route path='/resume-builder' element={<ResumeBuilder />} />
             <Route path='/interview-questions' element={<InterviewQuestions />} />

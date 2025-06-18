@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const NewsletterBanner = () => {
+
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubscribe = () => {
-    // Here you would typically open a subscription modal or redirect to a subscription page
-    setIsSubscribed(true);
-    setTimeout(() => {
-      setIsSubscribed(false);
-    }, 3000);
+    navigate('/newsletter');
   };
 
   return (
@@ -64,7 +63,16 @@ const NewsletterBanner = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.7 }}
             onClick={handleSubscribe}
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-8 py-4 text-xl rounded-full shadow-lg transform hover:scale-105 transition-all duration-300"
+            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold 
+              px-4 sm:px-8 py-3 sm:py-4 
+              text-sm sm:text-xl 
+              rounded-full shadow-lg 
+              transform hover:scale-105 
+              transition-all duration-300 
+              max-w-full 
+              whitespace-normal 
+              break-words 
+              inline-block"
           >
             Subscribe Now - Only ₹99/Month!
           </motion.button>
