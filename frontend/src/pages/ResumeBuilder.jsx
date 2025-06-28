@@ -7,6 +7,7 @@ import ResumePreview from '../components/resume/ResumePreview';
 import FieldSelection from '../components/resume/FieldSelection';
 import { FileText, Edit2, Trash2, Plus, Briefcase, FileEdit, Sparkles, Crown, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { FaDownload } from 'react-icons/fa';
 
 const AVAILABLE_FIELDS = [
     'Header',
@@ -174,6 +175,31 @@ const ResumeBuilder = () => {
         } catch (error) {
             console.error('Error deleting resume:', error);
             toast.error('Failed to delete resume');
+        }
+    };
+
+    // Server-side PDF download handler
+    const handleServerPdfDownload = async () => {
+        if (!activeResumeId) return;
+        try {
+            const response = await fetch(`/backend/resume/pdf/${activeResumeId}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'resume.pdf';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } else {
+                // handle error
+                alert('Failed to download PDF.');
+            }
+        } catch (err) {
+            alert('Error downloading PDF.');
         }
     };
 
@@ -446,6 +472,7 @@ const ResumeBuilder = () => {
                                     selectedFields={selectedFields}
                                     resumeData={resumeData}
                                 />
+                                
                             </motion.div>
                         </motion.div>
                     )}

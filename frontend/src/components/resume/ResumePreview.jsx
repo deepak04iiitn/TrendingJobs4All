@@ -1,80 +1,339 @@
 import React, { useRef } from 'react';
 import { FaDownload } from 'react-icons/fa';
-import html2pdf from 'html2pdf.js';
+import jsPDF from 'jspdf';
 
 const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
     const resumeRef = useRef(null);
 
     const handleDownload = async () => {
-        const element = resumeRef.current;
-
-        if (!element) {
-            console.error("Resume element not found for PDF generation.");
-            return;
-        }
-
         try {
-            // Create a clone of the element
-            const clone = element.cloneNode(true);
-            
-            // Create a container div for proper PDF generation
-            const container = document.createElement('div');
-            container.style.width = '8.5in';
-            container.style.backgroundColor = 'white';
-            container.appendChild(clone);
-            
-            // Temporarily add to document
-            document.body.appendChild(container);
-            
-            // Configure html2pdf options
-            const opt = {
-                margin: 0,
-                filename: 'resume.pdf',
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { 
-                    scale: 2,
-                    useCORS: true,
-                    logging: true, // Enable logging for debugging
-                    letterRendering: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    windowWidth: 816, // 8.5in * 96dpi
-                    windowHeight: 1056, // 11in * 96dpi
-                    onclone: (clonedDoc) => {
-                        // Ensure all styles are properly applied
-                        const styleSheets = document.styleSheets;
-                        for (let i = 0; i < styleSheets.length; i++) {
-                            try {
-                                const rules = styleSheets[i].cssRules;
-                                for (let j = 0; j < rules.length; j++) {
-                                    clonedDoc.styleSheets[i].insertRule(rules[j].cssText);
-                                }
-                            } catch (e) {
-                                console.warn('Could not copy stylesheet:', e);
-                            }
-                        }
+            // Create PDF with proper dimensions
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'in',
+                format: 'letter'
+            });
+
+            // Set font and size
+            pdf.setFont('helvetica');
+            pdf.setFontSize(10);
+
+            let yPosition = 0.5; // Start position from top
+            const leftMargin = 0.5;
+            const rightMargin = 8.0;
+            const lineHeight = 0.15;
+            const sectionSpacing = 0.2;
+
+            // Helper function to add text with word wrapping
+            const addWrappedText = (text, x, y, maxWidth) => {
+                const words = text.split(' ');
+                let line = '';
+                let currentY = y;
+
+                for (let i = 0; i < words.length; i++) {
+                    const testLine = line + words[i] + ' ';
+                    const testWidth = pdf.getTextWidth(testLine);
+                    
+                    if (testWidth > maxWidth && i > 0) {
+                        pdf.text(line, x, currentY);
+                        line = words[i] + ' ';
+                        currentY += lineHeight;
+                    } else {
+                        line = testLine;
                     }
-                },
-                jsPDF: { 
-                    unit: 'in', 
-                    format: 'letter', 
-                    orientation: 'portrait',
-                    compress: true
                 }
+                pdf.text(line, x, currentY);
+                return currentY + lineHeight;
             };
 
-            // Generate PDF
-            await html2pdf()
-                .set(opt)
-                .from(container)
-                .save()
-                .catch(err => {
-                    console.error('PDF generation error:', err);
-                    throw err;
-                });
+            // Helper function to add section header
+            const addSectionHeader = (title) => {
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(12);
+                pdf.text(title.toUpperCase(), leftMargin, yPosition);
+                yPosition += 0.08;
+                
+                // Add thin underline
+                pdf.setLineWidth(0.01); // Make the line thin
+                pdf.line(leftMargin, yPosition, rightMargin, yPosition);
+                yPosition += 0.15;
+                
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(10);
+            };
 
-            // Clean up
-            document.body.removeChild(container);
+            // Process each selected field
+            for (const field of selectedFields) {
+                const value = resumeData[field] || (Array.isArray(resumeData[field]) ? [] : '');
+
+                // Skip empty sections
+                if (Array.isArray(value) && value.length === 0 && field !== 'Header' && field !== 'Objective') {
+                    continue;
+                }
+                if (typeof value === 'string' && !value && field !== 'Header' && field !== 'Objective') {
+                    continue;
+                }
+
+                switch (field) {
+                    case 'Header':
+                        const headerValue = value || {};
+                        if (!headerValue.name && !headerValue.email && !headerValue.phone && !headerValue.location) {
+                            continue;
+                        }
+
+                        // Center the name
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setFontSize(16);
+                        const nameWidth = pdf.getTextWidth(headerValue.name || '');
+                        const nameX = (8.5 - nameWidth) / 2;
+                        pdf.text(headerValue.name || '', nameX, yPosition);
+                        yPosition += 0.3;
+
+                        // Contact information
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setFontSize(10);
+                        const contactInfo = [];
+                        if (headerValue.email) contactInfo.push(`Email: ${headerValue.email}`);
+                        if (headerValue.phone) contactInfo.push(`Phone: ${headerValue.phone}`);
+                        if (headerValue.location) contactInfo.push(headerValue.location);
+                        if (headerValue.linkedin) contactInfo.push(`LinkedIn: ${headerValue.linkedin}`);
+                        if (headerValue.github) contactInfo.push(`GitHub: ${headerValue.github}`);
+                        if (headerValue.portfolio) contactInfo.push(`Portfolio: ${headerValue.portfolio}`);
+
+                        const contactText = contactInfo.join(' • ');
+                        const contactWidth = pdf.getTextWidth(contactText);
+                        const contactX = (8.5 - contactWidth) / 2;
+                        pdf.text(contactText, contactX, yPosition);
+                        yPosition += 0.4;
+                        break;
+
+                    case 'Objective':
+                        if (!value) continue;
+                        addSectionHeader('Objective');
+                        yPosition = addWrappedText(value, leftMargin, yPosition, rightMargin - leftMargin);
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Education':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Education');
+                        
+                        for (const edu of value) {
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(`${edu.degree}, ${edu.institution}`, leftMargin, yPosition);
+                            pdf.setFont('helvetica', 'normal');
+                            pdf.text(edu.year || '', rightMargin - 1, yPosition, { align: 'right' });
+                            yPosition += lineHeight;
+                            
+                            if (edu.gpa) {
+                                pdf.text(`GPA: ${edu.gpa}`, leftMargin, yPosition);
+                                yPosition += lineHeight;
+                            }
+                            
+                            if (Array.isArray(edu.description)) {
+                                for (const desc of edu.description) {
+                                    if (desc) {
+                                        yPosition = addWrappedText(`• ${desc}`, leftMargin + 0.1, yPosition, rightMargin - leftMargin - 0.1);
+                                    }
+                                }
+                            }
+                            yPosition += 0.1;
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Technical Skills':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Technical Skills');
+                        
+                        if (value.length > 0 && typeof value[0] === 'object' && 'category' in value[0]) {
+                            // Categorized skills
+                            for (const category of value) {
+                                const skillText = `${category.category}: ${category.skills.join(', ')}`;
+                                yPosition = addWrappedText(`• ${skillText}`, leftMargin, yPosition, rightMargin - leftMargin);
+                            }
+                        } else {
+                            // Simple skills list
+                            for (const skill of value) {
+                                if (typeof skill === 'string') {
+                                    yPosition = addWrappedText(`• ${skill}`, leftMargin, yPosition, rightMargin - leftMargin);
+                                }
+                            }
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Projects':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Projects');
+                        
+                        for (const project of value) {
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(project.title || '', leftMargin, yPosition);
+                            yPosition += lineHeight;
+                            
+                            pdf.setFont('helvetica', 'normal');
+                            if (Array.isArray(project.technologies) && project.technologies.length > 0) {
+                                pdf.text(`Technologies: ${project.technologies.join(', ')}`, leftMargin, yPosition);
+                                yPosition += lineHeight;
+                            }
+                            
+                            if (Array.isArray(project.description)) {
+                                for (const desc of project.description) {
+                                    if (desc) {
+                                        yPosition = addWrappedText(`• ${desc}`, leftMargin + 0.1, yPosition, rightMargin - leftMargin - 0.1);
+                                    }
+                                }
+                            }
+                            yPosition += 0.1;
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Work Experience':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Work Experience');
+                        
+                        for (const exp of value) {
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(`${exp.position}, ${exp.company}`, leftMargin, yPosition);
+                            pdf.setFont('helvetica', 'normal');
+                            pdf.text(exp.duration || '', rightMargin - 1, yPosition, { align: 'right' });
+                            yPosition += lineHeight;
+                            
+                            if (Array.isArray(exp.description)) {
+                                for (const desc of exp.description) {
+                                    if (desc) {
+                                        yPosition = addWrappedText(`• ${desc}`, leftMargin + 0.1, yPosition, rightMargin - leftMargin - 0.1);
+                                    }
+                                }
+                            }
+                            yPosition += 0.1;
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Positions of Responsibility':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Positions of Responsibility');
+                        
+                        for (const pos of value) {
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(`${pos.title}, ${pos.organization}`, leftMargin, yPosition);
+                            pdf.setFont('helvetica', 'normal');
+                            pdf.text(pos.duration || '', rightMargin - 1, yPosition, { align: 'right' });
+                            yPosition += lineHeight;
+                            
+                            if (Array.isArray(pos.description)) {
+                                for (const desc of pos.description) {
+                                    if (desc) {
+                                        yPosition = addWrappedText(`• ${desc}`, leftMargin + 0.1, yPosition, rightMargin - leftMargin - 0.1);
+                                    }
+                                }
+                            }
+                            yPosition += 0.1;
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Certifications':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Certifications');
+                        
+                        for (const cert of value) {
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(cert.name || '', leftMargin, yPosition);
+                            pdf.setFont('helvetica', 'normal');
+                            if (cert.date) {
+                                pdf.text(cert.date, rightMargin - 1, yPosition, { align: 'right' });
+                            }
+                            yPosition += lineHeight;
+                            
+                            if (cert.issuer) {
+                                pdf.text(`Issuer: ${cert.issuer}`, leftMargin, yPosition);
+                                yPosition += lineHeight;
+                            }
+                            yPosition += 0.1;
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Achievements':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Achievements');
+                        
+                        for (const achievement of value) {
+                            if (achievement) {
+                                yPosition = addWrappedText(`• ${achievement}`, leftMargin, yPosition, rightMargin - leftMargin);
+                            }
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Research/Publications':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Research & Publications');
+                        
+                        for (const pub of value) {
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(pub.title || '', leftMargin, yPosition);
+                            yPosition += lineHeight;
+                            
+                            pdf.setFont('helvetica', 'normal');
+                            if (pub.authors) {
+                                pdf.text(`Authors: ${pub.authors}`, leftMargin, yPosition);
+                                yPosition += lineHeight;
+                            }
+                            if (pub.publication) {
+                                pdf.text(`Publication: ${pub.publication}`, leftMargin, yPosition);
+                                yPosition += lineHeight;
+                            }
+                            if (pub.date) {
+                                pdf.text(`Date: ${pub.date}`, leftMargin, yPosition);
+                                yPosition += lineHeight;
+                            }
+                            yPosition += 0.1;
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Languages':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Languages');
+                        
+                        for (const lang of value) {
+                            if (lang.language || lang.proficiency) {
+                                const langText = lang.language && lang.proficiency 
+                                    ? `${lang.language} (${lang.proficiency})`
+                                    : lang.language || lang.proficiency;
+                                yPosition = addWrappedText(`• ${langText}`, leftMargin, yPosition, rightMargin - leftMargin);
+                            }
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+
+                    case 'Hobbies':
+                        if (!Array.isArray(value) || value.length === 0) continue;
+                        addSectionHeader('Hobbies');
+                        
+                        for (const hobby of value) {
+                            if (hobby) {
+                                yPosition = addWrappedText(`• ${hobby}`, leftMargin, yPosition, rightMargin - leftMargin);
+                            }
+                        }
+                        yPosition += sectionSpacing;
+                        break;
+                }
+
+                // Check if we need a new page
+                if (yPosition > 10) {
+                    pdf.addPage();
+                    yPosition = 0.5;
+                }
+            }
+
+            // Save the PDF
+            pdf.save('resume.pdf');
         } catch (error) {
             console.error('Error generating PDF:', error);
         }
@@ -155,11 +414,11 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                                 </div>
                                 {edu.gpa && <p className="text-gray-700 text-xs">GPA: {edu.gpa}</p>}
                                 {(edu.description || []).length > 0 && (
-                                     <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                                    <div className="text-gray-700 text-xs mt-0.5">
                                         {(edu.description || []).map((desc, descIndex) => (
-                                            desc && <li key={descIndex}>{desc}</li>
+                                            desc && <div key={descIndex}><span style={{fontWeight: 'bold', marginRight: 4}}>•</span>{desc}</div>
                                         ))}
-                                     </ul>
+                                    </div>
                                 )}
                             </div>
                         ))}
@@ -174,13 +433,12 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                     return (
                         <div className="mb-2">
                             <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Technical Skills</h2>
-                            <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
-                                {value.map((category, index) => (
-                                    <li key={index}>
-                                        <span className="font-semibold">{category.category}:</span> {category.skills.join(', ')}
-                                    </li>
-                                ))}
-                            </ul>
+                            {value.map((category, index) => (
+                                <div key={index} className="text-gray-700 text-xs mt-0.5">
+                                    <span style={{fontWeight: 'bold', marginRight: 4}}>•</span>
+                                    <span className="font-semibold">{category.category}:</span> {category.skills.join(', ')}
+                                </div>
+                            ))}
                         </div>
                     );
                 }
@@ -189,11 +447,11 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Technical Skills</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
-                            {value.map((skill, index) => (
-                                <li key={index}>{typeof skill === 'string' ? skill : ''}</li>
-                            ))}
-                        </ul>
+                        {value.map((skill, index) => (
+                            <div key={index} className="text-gray-700 text-xs mt-0.5">
+                                <span style={{fontWeight: 'bold', marginRight: 4}}>•</span>{typeof skill === 'string' ? skill : ''}
+                            </div>
+                        ))}
                     </div>
                 );
 
@@ -232,11 +490,11 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                                     <p className="text-gray-700 text-xs mt-0.5"><strong>Tech:</strong> {project.technologies.join(', ')}</p>
                                 )}
                                 {(project.description || []).length > 0 && (
-                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                                    <div className="text-gray-700 text-xs mt-0.5">
                                         {(project.description || []).map((desc, descIndex) => (
-                                            desc && <li key={descIndex}>{desc}</li>
+                                            desc && <div key={descIndex}><span style={{fontWeight: 'bold', marginRight: 4}}>•</span>{desc}</div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 )}
                             </div>
                         ))}
@@ -254,11 +512,11 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                                     <span className="text-gray-600">{exp.duration}</span>
                                 </div>
                                 {(exp.description || []).length > 0 && (
-                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                                    <div className="text-gray-700 text-xs mt-0.5">
                                         {(exp.description || []).map((desc, descIndex) => (
-                                            desc && <li key={descIndex}>{desc}</li>
+                                            desc && <div key={descIndex}><span style={{fontWeight: 'bold', marginRight: 4}}>•</span>{desc}</div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 )}
                             </div>
                         ))}
@@ -276,11 +534,11 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                                     <span className="text-gray-600">{pos.duration}</span>
                                 </div>
                                 {(pos.description || []).length > 0 && (
-                                    <ul className="list-disc list-inside text-gray-700 text-xs mt-0.5 space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                                    <div className="text-gray-700 text-xs mt-0.5">
                                         {(pos.description || []).map((desc, descIndex) => (
-                                            desc && <li key={descIndex}>{desc}</li>
+                                            desc && <div key={descIndex}><span style={{fontWeight: 'bold', marginRight: 4}}>•</span>{desc}</div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 )}
                             </div>
                         ))}
@@ -318,11 +576,11 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Achievements</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                        <div className="text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                             {(value || []).map((item, index) => (
-                                item && <li key={index}>{item}</li>
+                                item && <div key={index}><span style={{fontWeight: 'bold', marginRight: 4}}>•</span>{item}</div>
                             ))}
-                        </ul>
+                        </div>
                     </div>
                 );
 
@@ -362,11 +620,11 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Languages</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                        <div className="text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                             {(value || []).map((item, index) => (
-                                (item.language || item.proficiency) && <li key={index}>{item.language}{item.language && item.proficiency && ' '}({item.proficiency})</li>
+                                (item.language || item.proficiency) && <div key={index}><span style={{fontWeight: 'bold', marginRight: 4}}>•</span>{item.language}{item.language && item.proficiency && ' '}({item.proficiency})</div>
                             ))}
-                        </ul>
+                        </div>
                     </div>
                 );
 
@@ -375,11 +633,11 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
                 return (
                     <div className="mb-2">
                         <h2 className="text-base font-bold border-b border-gray-400 pb-2 mb-1 uppercase">Hobbies</h2>
-                        <ul className="list-disc list-inside text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
+                        <div className="text-gray-700 text-xs space-y-0" style={{ listStyleType: 'disc', listStylePosition: 'inside' }}>
                             {(value || []).map((item, index) => (
-                                item && <li key={index}>{item}</li>
+                                item && <div key={index}><span style={{fontWeight: 'bold', marginRight: 4}}>•</span>{item}</div>
                             ))}
-                        </ul>
+                        </div>
                     </div>
                 );
 

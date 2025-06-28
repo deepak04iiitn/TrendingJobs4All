@@ -39,7 +39,6 @@ export default function MyCorner() {
     { id: 'referral', icon: Users, label: 'Referrals' },
     { id: 'salary', icon: DollarSign, label: 'Salary Structures' },
     { id: 'resume', icon: FileEdit, label: 'Resume Templates' },
-    { id: 'resumeBuilder', icon: FileEdit, label: 'Resume Builder' },
   ];
 
   const handleMenuItemClick = (itemId) => {

@@ -109,7 +109,7 @@ export default function MyReferrals() {
     <div className="container mx-auto px-4 py-8">
 
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-12 mb-8 rounded-lg shadow-lg">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-12 mb-8 mt-10 rounded-lg shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center">
           <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-6">

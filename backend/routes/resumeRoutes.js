@@ -1,6 +1,7 @@
 import express from 'express';
 import { createResume, getResumes, getResume, updateResume, deleteResume } from '../controllers/resumeController.js';
 import { verifyToken } from '../utils/verifyUser.js';
+import { generateResumePdf } from '../controllers/resumePdf.controller.js';
 
 const router = express.Router();
 
@@ -21,5 +22,8 @@ router.put('/:id', updateResume);
 
 // Delete resume
 router.delete('/:id', deleteResume);
+
+// Generate PDF for a specific resume
+router.get('/pdf/:id', generateResumePdf);
 
 export default router; 
