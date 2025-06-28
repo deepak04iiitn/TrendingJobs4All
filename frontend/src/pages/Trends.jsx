@@ -116,7 +116,7 @@ export default function TrendsVisualization() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="min-h-screen bg-gradient-to-br from-white to-gray-100 p-8"
+      className="min-h-screen bg-gradient-to-br from-white to-gray-100 p-8 mt-10"
     >
       <div className="max-w-6xl mx-auto">
         {/* Enhanced Header with Descriptive Insights */}
