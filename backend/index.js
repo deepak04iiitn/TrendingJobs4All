@@ -198,6 +198,43 @@ app.get('*', (req, res) => {
 // Sync indexes to ensure they are applied
 Naukri.syncIndexes();
 
+// Cron job to delete jobs older than 1 month (runs daily at midnight)
+cron.schedule('0 0 * * *', async () => {
+    try {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        const result = await Naukri.deleteMany({ time: { $lt: oneMonthAgo } });
+        if (result.deletedCount > 0) {
+            console.log(`Cron Job: Deleted ${result.deletedCount} jobs older than 1 month.`);
+        }
+    } catch (error) {
+        console.error('Cron Job Error (deleting old jobs):', error);
+    }
+});
+
+// Function to delete jobs older than 1 month
+async function deleteOldJobs() {
+    try {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        const result = await Naukri.deleteMany({ time: { $lt: oneMonthAgo } });
+        if (result.deletedCount > 0) {
+            console.log(`Manual Run: Deleted ${result.deletedCount} jobs older than 1 month.`);
+        } else {
+            console.log('Manual Run: No jobs older than 1 month to delete.');
+        }
+    } catch (error) {
+        console.error('Manual Run Error (deleting old jobs):', error);
+    } finally {
+        mongoose.connection.close();
+    }
+}
+
+// If run with 'run-cron' argument, execute the deletion immediately and exit
+if (process.argv[2] === 'run-cron') {
+    deleteOldJobs();
+}
+
 // Start the server
 app.listen(3000, () => {
     console.log('Server is running on port 3000!');

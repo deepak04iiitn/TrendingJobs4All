@@ -144,11 +144,15 @@ export default function JobTable() {
         window.history.pushState({}, '', window.location.pathname);
     };
 
-    const handleApplyClick = (id, company, title) => {
+    const handleApplyClick = (id, company, title, job) => {
         if (currentUser) {
             const formattedUrl = formatUrlString(company, title);
             const currentParams = new URLSearchParams(window.location.search);
-            window.open(`/fulljd/${formattedUrl}/${id}?${currentParams.toString()}`, '_blank');
+            // Store job data in sessionStorage with a unique key
+            const jobKey = `jobData-${id}`;
+            sessionStorage.setItem(jobKey, JSON.stringify(job));
+            // Open in new tab with jobKey as a query param
+            window.open(`/fulljd/${formattedUrl}/${id}?${currentParams.toString()}&jobKey=${jobKey}`, '_blank');
         } else {
             setShowSignInModal(true);
         }
@@ -465,7 +469,7 @@ export default function JobTable() {
                                         
                                         <div className="flex flex-col gap-2 sm:ml-6">
                                             <button
-                                                onClick={() => handleApplyClick(job._id, job.company, job.title)}
+                                                onClick={() => handleApplyClick(job._id, job.company, job.title, job)}
                                                 className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg sm:rounded-xl transition-all duration-200 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
                                             >
                                                 <ExternalLink className="w-4 h-4" />

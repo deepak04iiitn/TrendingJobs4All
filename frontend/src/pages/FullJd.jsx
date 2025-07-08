@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { BookmarkIcon, Share2, MapPin, Briefcase, Clock, BarChart3, ExternalLink, Sparkles } from "lucide-react";
 import Modal from "react-modal";
@@ -62,6 +62,8 @@ const LoadingSpinner = () => (
 export default function FullJd() {
   const { id, url } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const passedJob = location.state?.job;
   const [job, setJob] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,19 +74,44 @@ export default function FullJd() {
   const { currentUser } = useSelector((state) => state.user);
   const userId = currentUser?._id;
 
+  // Helper to get jobKey from URL
+  const getJobKeyFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('jobKey');
+  };
+
   useEffect(() => {
     if (userId) {
-      axios
-        .get(`/backend/naukri/${url}/${id}`)
-        .then((response) => {
-          const jobData = response.data;
-          console.log("Received job data:", jobData);
-          setJob(jobData);
-          checkIfJobIsSaved(jobData._id);
-        })
-        .catch((error) => console.error("Error fetching job data:", error));
+      if (passedJob) {
+        setJob(passedJob);
+        checkIfJobIsSaved(passedJob._id);
+      } else {
+        // Try to get job from sessionStorage if jobKey is present
+        const jobKey = getJobKeyFromUrl();
+        if (jobKey) {
+          const storedJob = sessionStorage.getItem(jobKey);
+          if (storedJob) {
+            try {
+              const jobObj = JSON.parse(storedJob);
+              setJob(jobObj);
+              checkIfJobIsSaved(jobObj._id);
+              return;
+            } catch (e) {
+              // Fallback to fetch if parsing fails
+            }
+          }
+        }
+        axios
+          .get(`/backend/naukri/${url}/${id}`)
+          .then((response) => {
+            const jobData = response.data;
+            setJob(jobData);
+            checkIfJobIsSaved(jobData._id);
+          })
+          .catch((error) => console.error("Error fetching job data:", error));
+      }
     }
-  }, [id, url, userId]);
+  }, [id, url, userId, passedJob]);
 
   const handleSaveJob = async () => {
     try {
@@ -265,7 +292,7 @@ const checkIfJobIsSaved = async (jobId) => {
                   </div>
                   <span className="text-sm font-medium text-emerald-700 uppercase tracking-wide">Location</span>
                 </div>
-                <p className="text-slate-800 font-semibold text-lg">{job.location.join(", ")}</p>
+                <p className="text-slate-800 font-semibold text-lg">{Array.isArray(job.location) ? job.location.join(", ") : job.location}</p>
               </div>
 
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200/50">
@@ -425,7 +452,7 @@ const checkIfJobIsSaved = async (jobId) => {
 
                 {/* Email */}
                 <a
-                  href={`mailto:?subject=${encodeURIComponent(`Job Opportunity: ${job.title}`)}&body=${encodeURIComponent(`I found this interesting job opportunity that might interest you:\n\n${job.title} at ${job.company}\n\nLocation: ${job.location.join(', ')}\nExperience: ${job.min_exp} years\n\nCheck it out: ${window.location.href}`)}`}
+                  href={`mailto:?subject=${encodeURIComponent(`Job Opportunity: ${job.title}`)}&body=${encodeURIComponent(`I found this interesting job opportunity that might interest you:\n\n${job.title} at ${job.company}\n\nLocation: ${Array.isArray(job.location) ? job.location.join(', ') : job.location}\nExperience: ${job.min_exp} years\n\nCheck it out: ${window.location.href}`)}`}
                   className="group flex flex-col items-center p-6 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-2xl border border-gray-200/50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 >
                   <div className="w-12 h-12 bg-gray-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
