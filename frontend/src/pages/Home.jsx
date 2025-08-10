@@ -181,7 +181,7 @@ ${question}`;
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
+    <div className="home-page mt-10 min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
       
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -540,21 +540,21 @@ ${question}`;
         }
 
         /* Premium Scrollbar */
-        ::-webkit-scrollbar {
+        .home-page ::-webkit-scrollbar {
           width: 8px;
         }
 
-        ::-webkit-scrollbar-track {
+        .home-page ::-webkit-scrollbar-track {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 10px;
         }
 
-        ::-webkit-scrollbar-thumb {
+        .home-page ::-webkit-scrollbar-thumb {
           background: linear-gradient(45deg, #667eea, #764ba2);
           border-radius: 10px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
+        .home-page ::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(45deg, #5a67d8, #6b46c1);
         }
 
@@ -614,8 +614,8 @@ ${question}`;
           box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
         }
 
-        /* Smooth transitions for all interactive elements */
-        * {
+        /* Smooth transitions for all interactive elements (scoped to Home only) */
+        .home-page * {
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 

@@ -62,11 +62,13 @@ app.use((err, req, res, next) => {
 // Mongoose schemas and models with indexing
 const JobSchema = new mongoose.Schema({
     job_title: String,
-    min_exp: String,
+    min_exp: mongoose.Schema.Types.Mixed, // stored as string/number in source, support both
     company: String,
     location: [String],
     jd: String,
-    date: String,
+    full_jd: String,
+    date: String, // some records may have this as string
+    time: Date,   // some records may have this as Date
     apply_link: String,
     category: String,
 });
@@ -80,6 +82,7 @@ JobSchema.index({ jd: 1 });
 JobSchema.index({ apply_link: 1 });
 JobSchema.index({ job_title: 1 });
 JobSchema.index({ date: -1 });
+JobSchema.index({ time: -1 });
 
 const Naukri = mongoose.model('Naukri', JobSchema, 'naukri');
 
@@ -139,13 +142,90 @@ app.use('/backend/interview-question-comments', interviewQuestionCommentRoutes);
 // Routes
 app.get('/backend/naukri', cacheMiddleware, async (req, res) => {
   try {
-    const data = await Naukri.find()
-      .lean()
-      .sort({ date: -1 }); // Sort by latest date
-    
+    const {
+      page: pageParam,
+      limit: limitParam,
+      search,
+      exp,
+      date,
+      category,
+    } = req.query;
+
+    // If no pagination or filters requested, maintain backward compatibility (return all)
+    const shouldReturnAll = !pageParam && !limitParam && !search && !exp && !date && !category;
+
+    if (shouldReturnAll) {
+      const data = await Naukri.find()
+        .lean()
+        .sort({ time: -1, date: -1 });
+      const key = `jobs:${req.originalUrl}`;
+      cacheResponse(key, data);
+      return res.json(data);
+    }
+
+    const page = Math.max(parseInt(pageParam || '1', 10), 1);
+    const limit = Math.min(Math.max(parseInt(limitParam || '10', 10), 1), 50);
+
+    const filter = {};
+
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      filter.$or = [
+        { job_title: regex },
+        { company: regex },
+        { jd: regex },
+        { full_jd: regex },
+        { location: regex },
+      ];
+    }
+
+    if (exp !== undefined && exp !== '') {
+      const expNum = Number(exp);
+      if (!Number.isNaN(expNum)) {
+        filter.$or = (filter.$or || []).concat([
+          { min_exp: exp },
+          { min_exp: expNum },
+          { min_exp: { $in: [String(expNum), expNum] } },
+        ]);
+      }
+    }
+
+    if (category) {
+      filter.category = new RegExp(`^${category}$`, 'i');
+    }
+
+    if (date) {
+      const start = new Date(date);
+      if (!isNaN(start.getTime())) {
+        const end = new Date(start);
+        end.setDate(end.getDate() + 1);
+        // support both 'time' Date and 'date' string formats
+        filter.$and = (filter.$and || []).concat([
+          {
+            $or: [
+              { time: { $gte: start, $lt: end } },
+              { date: { $regex: `^${date}` } },
+            ],
+          },
+        ]);
+      }
+    }
+
+    const [total, items] = await Promise.all([
+      Naukri.countDocuments(filter),
+      Naukri.find(filter)
+        .lean()
+        .sort({ time: -1, date: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit),
+    ]);
+
+    const totalPages = Math.ceil(total / limit) || 0;
+    const response = { items, total, page, totalPages, limit };
+
     const key = `jobs:${req.originalUrl}`;
-    cacheResponse(key, data);
-    res.json(data);
+    cacheResponse(key, response);
+    res.json(response);
   } catch (error) {
     console.error('Error fetching jobs:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -164,16 +244,13 @@ app.get('/backend/premium', async (req, res) => {
 app.get('/backend/naukri/:url/:id', cacheMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
-    const data = await Naukri.find().lean();
-    const job = data.find((d) => d._id.toString() === id);
+    const job = await Naukri.findById(id).lean();
     const key = `jobs:${req.originalUrl}`;
-
     if (job) {
       cacheResponse(key, job);
-      res.json(job);
-    } else {
-      res.status(404).json({ message: 'Job not found' });
+      return res.json(job);
     }
+    return res.status(404).json({ message: 'Job not found' });
   } catch (error) {
     console.error('Error fetching job data:', error);
     res.status(500).json({ message: 'Internal server error' });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, MapPin, Calendar, Briefcase, Filter, ChevronLeft, ChevronRight, Eye, ExternalLink, Clock, Building2, Zap, X } from 'lucide-react';
+import { Search, MapPin, Briefcase, Filter, ChevronLeft, ChevronRight, ExternalLink, Clock, Building2, Zap, X } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -59,7 +59,6 @@ export default function JobTable() {
     const urlParams = new URLSearchParams(window.location.search);
     
     const [jobs, setJobs] = useState([]);
-    const [filteredJobs, setFilteredJobs] = useState([]);
     const [currentPage, setCurrentPage] = useState(parseInt(urlParams.get('page')) || 1);
     const jobsPerPage = 8;
     const [searchKeyword, setSearchKeyword] = useState(urlParams.get('search') || '');
@@ -68,6 +67,7 @@ export default function JobTable() {
     const [searchDate, setSearchDate] = useState(urlParams.get('date') || '');
     const [categoryFilter, setCategoryFilter] = useState(urlParams.get('category') || '');
     const [totalPages, setTotalPages] = useState(1);
+    const [totalJobs, setTotalJobs] = useState(0);
     const [isFilterChange, setIsFilterChange] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [showSignInModal, setShowSignInModal] = useState(false);
@@ -167,108 +167,70 @@ export default function JobTable() {
         }
     };
 
-    // Fetch initial data
+    // Fetch jobs from server with pagination and filters
     useEffect(() => {
         const fetchJobs = async () => {
             try {
                 setIsLoading(true);
-                
-                // Add cache-busting parameter if needed
-                const cacheBuster = new URLSearchParams(window.location.search).get('cache') || Date.now();
-                const jobsResponse = await axios.get(`/backend/naukri?cache=${cacheBuster}`);
 
-                // Process jobs data
-                const processedJobs = jobsResponse.data
-                    .filter(item => item.apply_link && item.apply_link !== "Not Found")
+                const params = new URLSearchParams();
+                params.set('page', String(currentPage));
+                params.set('limit', String(jobsPerPage));
+                if (searchKeyword) params.set('search', searchKeyword);
+                if (minExpFilter !== '') params.set('exp', String(minExpFilter));
+                if (searchDate) params.set('date', searchDate);
+                if (categoryFilter) params.set('category', categoryFilter);
+
+                const { data } = await axios.get(`/backend/naukri?${params.toString()}`);
+
+                // data may be array (back-compat), normalize
+                const items = Array.isArray(data) ? data : (data.items || []);
+                const total = Array.isArray(data) ? items.length : (data.total || 0);
+                const serverTotalPages = Array.isArray(data) ? Math.ceil(total / jobsPerPage) : (data.totalPages || 1);
+
+                const processedJobs = items
+                    .filter(item => item.apply_link && item.apply_link !== 'Not Found')
                     .map(item => ({
                         ...item,
                         _id: item._id,
-                        title: item.job_title || item.title || "Unknown",
+                        title: item.job_title || item.title || 'Unknown',
                         min_exp: parseFloat(item.min_exp) || 0,
-                        company: item.company || "Unknown",
+                        company: item.company || 'Unknown',
                         location: Array.isArray(item.location) && item.location.length > 0
-                            ? item.location.join(" / ")
-                            : "Unknown",
-                        jd: item.full_jd || "",
-                        date: new Date(item.time).toISOString(),
+                            ? item.location.join(' / ')
+                            : (typeof item.location === 'string' ? item.location : 'Unknown'),
+                        jd: item.full_jd || item.jd || '',
+                        date: item.time ? new Date(item.time).toISOString() : (item.date ? new Date(item.date).toISOString() : new Date().toISOString()),
                         apply_link: item.apply_link,
-                        category: item.category || ""
+                        category: item.category || ''
                     }))
                     .filter(job => job._id);
 
-                // Sort jobs by date
-                processedJobs.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                // Update state
                 setJobs(processedJobs);
+                setTotalJobs(total);
+                setTotalPages(Math.max(serverTotalPages, 1));
 
-                // Handle pagination
-                const totalPages = Math.ceil(processedJobs.length / jobsPerPage);
-                const pageFromUrl = parseInt(urlParams.get('page')) || 1;
-
-                if (pageFromUrl > totalPages) {
-                    setCurrentPage(totalPages);
-                    updateSearchParams({ page: totalPages.toString() });
-                } else {
-                    setCurrentPage(pageFromUrl);
+                // If filters changed and current page becomes invalid, reset to 1
+                if (isFilterChange && currentPage > Math.max(serverTotalPages, 1)) {
+                    setCurrentPage(1);
+                    updateSearchParams({ page: '1' });
                 }
-
-                setTotalPages(totalPages);
             } catch (error) {
-                console.error("Error fetching jobs:", error);
+                console.error('Error fetching jobs:', error);
                 setJobs([]);
+                setTotalJobs(0);
                 setTotalPages(1);
             } finally {
                 setIsLoading(false);
+                setIsFilterChange(false);
             }
         };
 
         fetchJobs();
-    }, [currentUser]);
-
-    // Filter jobs effect 
-    useEffect(() => {
-        const filtered = jobs.filter(job => {
-            const keyword = searchKeyword.toLowerCase();
-            
-            const matchesSearch = !keyword || (
-                safeString(job.title).includes(keyword) ||
-                safeString(job.company).includes(keyword) ||
-                safeString(job.location).includes(keyword) ||
-                safeString(job.jd).includes(keyword)
-            );
-
-            let matchesMinExp = true;
-            if (minExpFilter !== '') {
-                const minExpValue = parseFloat(minExpFilter);
-                const jobExp = parseFloat(job.min_exp) || 0;
-                matchesMinExp = !isNaN(minExpValue) && jobExp == minExpValue;
-            }
-
-            const jobDate = job.date ? formatDateForComparison(job.date) : '';
-            const searchDateFormatted = searchDate ? formatDateForComparison(searchDate) : '';
-            const matchesDate = !searchDate || jobDate === searchDateFormatted;
-
-            const matchesCategory = !categoryFilter || 
-                safeString(job.category) === safeString(categoryFilter);
-
-            return matchesSearch && matchesMinExp && matchesDate && matchesCategory;
-        });
-
-        setFilteredJobs(filtered);
-        const newTotalPages = Math.ceil(filtered.length / jobsPerPage);
-        setTotalPages(newTotalPages);
-
-        // Only reset page if filters were explicitly changed and current page is out of bounds
-        if (isFilterChange && currentPage > newTotalPages) {
-            setCurrentPage(1);
-            updateSearchParams({ page: '1' });
-        }
-        setIsFilterChange(false);
-    }, [searchKeyword, minExpFilter, searchDate, categoryFilter, jobs]);
+    }, [currentUser, currentPage, searchKeyword, minExpFilter, searchDate, categoryFilter]);
 
     const startIndex = (currentPage - 1) * jobsPerPage;
-    const currentJobs = filteredJobs.slice(startIndex, startIndex + jobsPerPage);
+    const currentJobs = jobs;
 
     return (
         <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 ${showSignInModal ? 'filter blur-sm pointer-events-none' : ''}`}>
@@ -401,7 +363,7 @@ export default function JobTable() {
                     {/* Results Summary */}
                     <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
                         <span>
-                            Showing {startIndex + 1}-{Math.min(startIndex + jobsPerPage, filteredJobs.length)} of {filteredJobs.length} jobs
+                            Showing {totalJobs === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + jobsPerPage, totalJobs)} of {totalJobs} jobs
                         </span>
                         <span>
                             Page {currentPage} of {totalPages}
@@ -539,7 +501,7 @@ export default function JobTable() {
                 )}
 
                 {/* Empty State */}
-                {filteredJobs.length === 0 && !isLoading && (
+                {jobs.length === 0 && !isLoading && (
                     <div className="text-center py-12 sm:py-16">
                         <div className="mx-auto w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-3 sm:mb-4">
                             <Search className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />

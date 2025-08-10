@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -343,17 +344,18 @@ export default function Header() {
 
   // Enhanced Mobile Menu
   const MobileMenu = () => (
-    <AnimatePresence>
-      {isMobileMenuOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0, x: -300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -300 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed top-0 left-0 w-80 h-full bg-white shadow-2xl z-50 flex flex-col"
-            ref={mobileMenuRef}
-          >
+    createPortal(
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0, x: -300 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -300 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="fixed top-0 left-0 w-80 h-full bg-white shadow-2xl z-[100] flex flex-col"
+              ref={mobileMenuRef}
+            >
             {/* Header */}
             <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
               <div className="flex justify-between items-center">
@@ -410,19 +412,21 @@ export default function Header() {
               </div>
             </div>
 
-            <MobileProfileSection />
-          </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-            onClick={closeMobileMenu}
-          />
-        </>
-      )}
-    </AnimatePresence>
+              <MobileProfileSection />
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90]"
+              onClick={closeMobileMenu}
+            />
+          </>
+        )}
+      </AnimatePresence>,
+      document.body
+    )
   );
 
   return (
