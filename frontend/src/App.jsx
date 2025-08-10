@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { BrowserRouter , Routes , Route } from 'react-router-dom';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -31,11 +31,77 @@ import ResumeBuilder from './pages/ResumeBuilder';
 import InterviewQuestions from './pages/InterviewQuestions';
 import AdminInterviewQuestions from './pages/AdminInterviewQuestions';
 import Newsletter from './pages/Newsletter';
+import { useDispatch, useSelector } from 'react-redux';
+import { signoutSuccess, initializeSessionExpiry } from './redux/user/userSlice';
+import { useNavigate } from 'react-router-dom';
+
+function SessionManager() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { currentUser, sessionExpiry } = useSelector((state) => state.user);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    // On mount or user change, ensure we have an expiry
+    if (currentUser && !sessionExpiry) {
+      dispatch(initializeSessionExpiry());
+    }
+  }, [currentUser, sessionExpiry, dispatch]);
+
+  useEffect(() => {
+    // Clear any existing timers
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    if (!currentUser || !sessionExpiry) return;
+
+    const now = Date.now();
+    const msUntilExpiry = Math.max(0, sessionExpiry - now);
+
+    if (msUntilExpiry === 0) {
+      // Expired already
+      dispatch(signoutSuccess());
+      navigate('/sign-in');
+      return;
+    }
+
+    timerRef.current = setTimeout(() => {
+      dispatch(signoutSuccess());
+      navigate('/sign-in');
+    }, msUntilExpiry);
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [currentUser, sessionExpiry, dispatch, navigate]);
+
+  // Additionally, when the document becomes visible again, if expired, logout
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        if (currentUser && sessionExpiry && Date.now() >= sessionExpiry) {
+          dispatch(signoutSuccess());
+          navigate('/sign-in');
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [currentUser, sessionExpiry, dispatch, navigate]);
+
+  return null;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
+        <SessionManager />
         <Header />
         <div className="flex-grow">
           <Routes>

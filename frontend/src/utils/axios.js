@@ -19,7 +19,7 @@ instance.interceptors.response.use(
             // that falls out of the range of 2xx
             if (error.response.status === 401) {
                 // Handle unauthorized access
-                window.location.href = '/signin';
+                window.location.href = '/sign-in';
             }
             return Promise.reject(error);
         } else if (error.request) {

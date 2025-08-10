@@ -134,7 +134,7 @@ export default function Header() {
     return (
       <>
         {menuItems.map(({ path, icon: Icon, label }) => (
-          <Link key={path} to={path}>
+          <Link key={path} to={path} onClick={() => { if (isMobile) closeMobileMenu(); }}>
             <motion.div 
               whileHover={{ y: -2 }}
               className={`

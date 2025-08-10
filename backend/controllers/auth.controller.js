@@ -58,14 +58,18 @@ export const signin = async (req, res, next) => {
                 id: validUser._id,
                 isUserAdmin: validUser.isUserAdmin  // Include isUserAdmin in the token
             },
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
         );
 
         const { password: pass, ...rest } = validUser._doc;
 
         res.status(200)
            .cookie('access_token', token, {
-                httpOnly: true
+                httpOnly: true,
+                maxAge: 60 * 60 * 1000, // 1 hour
+                sameSite: 'strict',
+                secure: process.env.NODE_ENV === 'production'
            })
            .json(rest);
 
@@ -87,14 +91,18 @@ export const google = async(req, res, next) => {
                     id: user._id,
                     isUserAdmin: user.isUserAdmin  // Include isUserAdmin in the token
                 },
-                process.env.JWT_SECRET
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' }
             );
 
             const { password, ...rest } = user._doc;
 
             res.status(200)
                .cookie('access_token', token, {
-                    httpOnly: true
+                    httpOnly: true,
+                    maxAge: 60 * 60 * 1000, // 1 hour
+                    sameSite: 'strict',
+                    secure: process.env.NODE_ENV === 'production'
                })
                .json(rest);
         } else {
@@ -118,14 +126,18 @@ export const google = async(req, res, next) => {
                     id: newUser._id,
                     isUserAdmin: newUser.isUserAdmin  // Include isUserAdmin in the token
                 },
-                process.env.JWT_SECRET
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' }
             );
 
             const { password, ...rest } = newUser._doc;
 
             res.status(200)
                .cookie('access_token', token, {
-                    httpOnly: true
+                    httpOnly: true,
+                    maxAge: 60 * 60 * 1000, // 1 hour
+                    sameSite: 'strict',
+                    secure: process.env.NODE_ENV === 'production'
                })
                .json(rest);
         }

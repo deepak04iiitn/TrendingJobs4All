@@ -133,7 +133,14 @@ export const deleteUser = async(req, res, next) => {
 export const signout = async(req , res , next) => {
 
     try {
-        res.clearCookie('access_token').status(200).json('User has been signed out!');
+        res
+          .clearCookie('access_token', {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+          })
+          .status(200)
+          .json('User has been signed out!');
     } catch (error) {
         next(error);
     }
@@ -240,7 +247,23 @@ export const getusers = async(req, res, next) => {
       const limit = parseInt(req.query.limit) || 9;
       const sortDirection = req.query.sort === 'asc' ? 1 : -1;
 
-      const users = await User.find()
+      // Optional filter by a specific calendar date (YYYY-MM-DD)
+      const { date } = req.query;
+      const filter = {};
+      let startOfDay = null;
+      let endOfDay = null;
+      if (date) {
+          const start = new Date(date);
+          if (!isNaN(start.getTime())) {
+              const end = new Date(start);
+              end.setDate(end.getDate() + 1);
+              startOfDay = start;
+              endOfDay = end;
+              filter.createdAt = { $gte: start, $lt: end };
+          }
+      }
+
+      const users = await User.find(filter)
           .sort({ createdAt: sortDirection })
           .skip(startIndex)
           .limit(limit);
@@ -251,6 +274,10 @@ export const getusers = async(req, res, next) => {
       });
 
       const totalUsers = await User.countDocuments();
+      const matchedCount = await User.countDocuments(filter);
+      const visitedCount = startOfDay && endOfDay
+          ? await User.countDocuments({ lastVisit: { $gte: startOfDay, $lt: endOfDay } })
+          : null;
 
       const now = new Date();
       const oneMonthAgo = new Date(
@@ -267,6 +294,8 @@ export const getusers = async(req, res, next) => {
           users: usersWithoutPassword,
           totalUsers,
           lastMonthUsers,
+          matchedCount,
+          visitedCount,
       });
   } catch (error) {
       next(error);

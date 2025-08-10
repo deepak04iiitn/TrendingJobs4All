@@ -28,6 +28,10 @@ const Dashboard = () => {
   const [currentUser, setCurrentUser] = useState({ isUserAdmin: true }); 
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [userFilterDate, setUserFilterDate] = useState('');
+  const [filteredUsersCount, setFilteredUsersCount] = useState(null);
+  const [visitedUsersCount, setVisitedUsersCount] = useState(null);
+  
   const sidebarRef = useRef(null);
 
   const ITEMS_PER_PAGE = 8;
@@ -56,7 +60,7 @@ const Dashboard = () => {
           break;
       }
     }
-  }, [currentUser.isUserAdmin, activeTab]);
+  }, [currentUser.isUserAdmin, activeTab, userFilterDate]);
 
 
   const fetchResumeTemplates = async () => {
@@ -81,18 +85,26 @@ const Dashboard = () => {
   };
 
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (pageOverride) => {
     try {
       setLoading(true);
-      const res = await fetch(`/backend/user/getusers?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const effectivePage = pageOverride ?? page;
+      const params = new URLSearchParams({
+        startIndex: String((effectivePage - 1) * ITEMS_PER_PAGE),
+        limit: String(ITEMS_PER_PAGE),
+      });
+      if (userFilterDate) params.set('date', userFilterDate);
+      const res = await fetch(`/backend/user/getusers?${params.toString()}`);
       const data = await res.json();
       if (res.ok) {
-        if (page === 1) {
+        if (effectivePage === 1) {
           setUsers(data.users);
         } else {
           setUsers(prev => [...prev, ...data.users]);
         }
         setShowMore(data.users.length === ITEMS_PER_PAGE);
+        setFilteredUsersCount(typeof data.matchedCount === 'number' ? data.matchedCount : null);
+        setVisitedUsersCount(typeof data.visitedCount === 'number' ? data.visitedCount : null);
       }
     } catch (error) {
       console.log(error.message);
@@ -186,10 +198,11 @@ const Dashboard = () => {
   };
 
   const handleShowMore = () => {
-    setPage(prev => prev + 1);
+    const nextPage = page + 1;
+    setPage(nextPage);
     switch (activeTab) {
       case 'users':
-        fetchUsers();
+        fetchUsers(nextPage);
         break;
       case 'comments':
         fetchComments();
@@ -283,7 +296,47 @@ const Dashboard = () => {
   );
 
   const UsersTable = () => (
-    <table className="w-full">
+    <div className="w-full mt-12">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 p-4">
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by date</label>
+          <input
+            type="date"
+            value={userFilterDate}
+            onChange={(e) => {
+              setPage(1);
+              setUserFilterDate(e.target.value);
+            }}
+            className="px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+          />
+          {userFilterDate && (
+            <button
+              onClick={() => {
+                setUserFilterDate('');
+                setPage(1);
+              }}
+              className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 underline"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="text-sm text-gray-600 dark:text-gray-300">
+            {filteredUsersCount !== null && userFilterDate ? (
+              <span>
+                Registered: <span className="font-semibold">{filteredUsersCount}</span>
+              </span>
+            ) : null}
+            {visitedUsersCount !== null && userFilterDate ? (
+              <span className="ml-4">
+                Visited: <span className="font-semibold">{visitedUsersCount}</span>
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </div>
+      <table className="w-full">
       <thead>
         <tr className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
           {[
@@ -372,11 +425,13 @@ const Dashboard = () => {
           </tr>
         ))}
       </tbody>
-    </table>
+      </table>
+    </div>
   );
 
   const CommentsTable = () => (
-    <table className="w-full">
+    <div className="w-full mt-12">
+      <table className="w-full mt-12">
       <thead>
         <tr className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
           {[
@@ -442,11 +497,13 @@ const Dashboard = () => {
           </tr>
         ))}
       </tbody>
-    </table>
+      </table>
+    </div>
   );
 
   const ResumeTemplatesTable = () => (
-    <table className="w-full">
+    <div className="w-full mt-12">
+      <table className="w-full mt-12">
       <thead>
         <tr className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
           {[
@@ -514,11 +571,13 @@ const Dashboard = () => {
           </tr>
         ))}
       </tbody>
-    </table>
+      </table>
+    </div>
   );
 
   const SalariesTable = () => (
-    <table className="w-full">
+    <div className="w-full mt-12">
+      <table className="w-full mt-12">
       <thead>
         <tr className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
           {[
@@ -604,11 +663,13 @@ const Dashboard = () => {
           </tr>
         ))}
       </tbody>
-    </table>
+      </table>
+    </div>
   );
 
   const InterviewExperiencesTable = () => (
-    <table className="w-full">
+    <div className="w-full">
+      <table className="w-full mt-12">
       <thead>
         <tr className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
           {[
@@ -678,11 +739,13 @@ const Dashboard = () => {
           </tr>
         ))}
       </tbody>
-    </table>
+      </table>
+    </div>
   );
 
   const ReferralsTable = () => (
-    <table className="w-full">
+    <div className="w-full">
+      <table className="w-full mt-12">
       <thead>
         <tr className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800">
           {[
@@ -767,7 +830,8 @@ const Dashboard = () => {
           </tr>
         ))}
       </tbody>
-    </table>
+      </table>
+    </div>
   );
 
 

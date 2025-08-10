@@ -31,7 +31,7 @@ export default function ContactUs() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-16 px-4 flex items-center justify-center">
+    <div className="min-h-screen mt-10 bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-16 px-4 flex items-center justify-center">
       <motion.div 
         className="container max-w-6xl mx-auto"
         initial={{ opacity: 0, scale: 0.9 }}
