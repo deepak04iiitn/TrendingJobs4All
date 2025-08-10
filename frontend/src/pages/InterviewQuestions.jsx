@@ -26,6 +26,32 @@ export default function InterviewQuestions() {
   const [isEditing, setIsEditing] = useState(false);
   const [editQuestionId, setEditQuestionId] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const [imagesFilesByIndex, setImagesFilesByIndex] = useState({});
+  const [imageModal, setImageModal] = useState({ open: false, images: [], index: 0 });
+
+  const openImageModal = (images, startIndex) => {
+    setImageModal({ open: true, images, index: startIndex });
+  };
+
+  const closeImageModal = () => {
+    setImageModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const showPrevImage = (e) => {
+    e?.stopPropagation();
+    setImageModal((prev) => ({
+      ...prev,
+      index: (prev.index - 1 + prev.images.length) % prev.images.length,
+    }));
+  };
+
+  const showNextImage = (e) => {
+    e?.stopPropagation();
+    setImageModal((prev) => ({
+      ...prev,
+      index: (prev.index + 1) % prev.images.length,
+    }));
+  };
 
   const navigate = useNavigate();
   const { topicSlug } = useParams();
@@ -81,6 +107,17 @@ export default function InterviewQuestions() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (!imageModal.open) return;
+      if (e.key === 'Escape') closeImageModal();
+      if (e.key === 'ArrowLeft') showPrevImage();
+      if (e.key === 'ArrowRight') showNextImage();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [imageModal.open]);
+
   const handleLike = async (questionId) => {
     if (!currentUser) {
       toast.error('Please sign in to like questions');
@@ -124,6 +161,11 @@ export default function InterviewQuestions() {
       ...formData,
       questions: newQuestions
     });
+    setImagesFilesByIndex((prev) => {
+      const copy = { ...prev };
+      delete copy[index];
+      return copy;
+    });
   };
 
   const handleQuestionChange = (index, field, value) => {
@@ -135,16 +177,43 @@ export default function InterviewQuestions() {
     });
   };
 
+  const handleImagesChange = (index, files) => {
+    const fileArray = Array.from(files || []);
+    setImagesFilesByIndex((prev) => ({ ...prev, [index]: fileArray }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       let res;
       if (isEditing) {
-        res = await axios.post(`/backend/interview-questions/update/${editQuestionId}`, formData);
+        const payload = new FormData();
+        payload.append('topic', formData.topic);
+        payload.append('description', formData.description);
+        const normalized = formData.questions.map((q) => ({ question: q.question, answer: q.answer, images: q.images || [] }));
+        payload.append('questions', JSON.stringify(normalized));
+        Object.entries(imagesFilesByIndex).forEach(([idx, files]) => {
+          files.forEach((file) => payload.append(`images_${idx}`, file));
+        });
+        res = await axios.post(`/backend/interview-questions/update/${editQuestionId}`, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          withCredentials: true,
+        });
         setQuestions(questions.map(q => q._id === editQuestionId ? res.data : q));
         toast.success('Question set updated successfully!');
       } else {
-        res = await axios.post('/backend/interview-questions/create', formData);
+        const payload = new FormData();
+        payload.append('topic', formData.topic);
+        payload.append('description', formData.description);
+        const normalized = formData.questions.map((q) => ({ question: q.question, answer: q.answer, images: q.images || [] }));
+        payload.append('questions', JSON.stringify(normalized));
+        Object.entries(imagesFilesByIndex).forEach(([idx, files]) => {
+          files.forEach((file) => payload.append(`images_${idx}`, file));
+        });
+        res = await axios.post('/backend/interview-questions/create', payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          withCredentials: true,
+        });
         setQuestions([...questions, res.data]);
         toast.success('Question set created successfully!');
       }
@@ -156,6 +225,7 @@ export default function InterviewQuestions() {
         description: '',
         questions: [{ question: '', answer: '' }]
       });
+      setImagesFilesByIndex({});
     } catch (error) {
       console.error(`Error ${isEditing ? 'updating' : 'creating'} question set:`, error);
       toast.error(`Failed to ${isEditing ? 'update' : 'create'} question set`);
@@ -387,6 +457,19 @@ export default function InterviewQuestions() {
                               rows="3"
                               required
                             />
+                            <div className="mt-3">
+                              <label className="block text-gray-700 font-medium mb-2">Attach images (optional)</label>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={(e) => handleImagesChange(index, e.target.files)}
+                                className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                              />
+                              {imagesFilesByIndex[index]?.length ? (
+                                <p className="text-xs text-gray-500 mt-1">{imagesFilesByIndex[index].length} image(s) selected</p>
+                              ) : null}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -485,6 +568,26 @@ export default function InterviewQuestions() {
                             <div className="bg-blue-50/50 border-l-4 border-blue-500 pl-4 py-3 rounded-r-lg">
                               <p className="text-gray-700 leading-relaxed text-sm">{qa.answer}</p>
                             </div>
+                                {Array.isArray(qa.images) && qa.images.length > 0 && (
+                                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {qa.images.map((imgUrl, imgIdx) => (
+                                      <button
+                                        type="button"
+                                        key={imgIdx}
+                                        onClick={() => openImageModal(qa.images, imgIdx)}
+                                        className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        aria-label={`Open image ${imgIdx + 1}`}
+                                      >
+                                        <img
+                                          src={imgUrl}
+                                          alt={`Answer image ${imgIdx + 1}`}
+                                          className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                                          loading="lazy"
+                                        />
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
                           </div>
                         </div>
                       </div>
@@ -513,6 +616,51 @@ export default function InterviewQuestions() {
           </div>
         )}
       </div>
+
+      {imageModal.open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={closeImageModal}
+        >
+          <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="relative flex items-center justify-center">
+              <button
+                type="button"
+                onClick={showPrevImage}
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow"
+                aria-label="Previous image"
+              >
+                ‹
+              </button>
+              <img
+                src={imageModal.images[imageModal.index]}
+                alt={`Preview ${imageModal.index + 1}`}
+                className="max-h-[80vh] w-full object-contain rounded-lg border border-white/20"
+              />
+              <button
+                type="button"
+                onClick={showNextImage}
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow"
+                aria-label="Next image"
+              >
+                ›
+              </button>
+              <button
+                type="button"
+                onClick={closeImageModal}
+                className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-white text-gray-700 rounded-full p-2 shadow hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <span className="text-lg">✕</span>
+              </button>
+            </div>
+
+            <div className="mt-4 text-center text-white text-sm opacity-80">
+              {imageModal.index + 1} / {imageModal.images.length}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes fadeInUp {

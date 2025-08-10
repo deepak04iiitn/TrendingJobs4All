@@ -16,6 +16,7 @@ export default function AdminInterviewQuestions() {
     description: '',
     questions: [{ question: '', answer: '' }]
   });
+  const [imagesFilesByIndex, setImagesFilesByIndex] = useState({}); // { [qIndex]: File[] }
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,6 +53,11 @@ export default function AdminInterviewQuestions() {
       ...formData,
       questions: newQuestions
     });
+    setImagesFilesByIndex((prev) => {
+      const copy = { ...prev };
+      delete copy[index];
+      return copy;
+    });
   };
 
   const handleQuestionChange = (index, field, value) => {
@@ -63,10 +69,29 @@ export default function AdminInterviewQuestions() {
     });
   };
 
+  const handleImagesChange = (index, files) => {
+    const fileArray = Array.from(files || []);
+    setImagesFilesByIndex((prev) => ({ ...prev, [index]: fileArray }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('/backend/interview-questions/create', formData);
+      const payload = new FormData();
+      payload.append('topic', formData.topic);
+      payload.append('description', formData.description);
+      // Include existing images arrays as empty (create) to keep schema consistent
+      const questionsMinimal = formData.questions.map((q) => ({ question: q.question, answer: q.answer, images: q.images || [] }));
+      payload.append('questions', JSON.stringify(questionsMinimal));
+      // Append files per question index with key images_{index}
+      Object.entries(imagesFilesByIndex).forEach(([idx, files]) => {
+        files.forEach((file) => payload.append(`images_${idx}`, file));
+      });
+
+      const res = await axios.post('/backend/interview-questions/create', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true,
+      });
       setQuestions([...questions, res.data]);
       setShowForm(false);
       setFormData({
@@ -74,6 +99,7 @@ export default function AdminInterviewQuestions() {
         description: '',
         questions: [{ question: '', answer: '' }]
       });
+      setImagesFilesByIndex({});
       toast.success('Question set created successfully!');
     } catch (error) {
       console.error('Error creating question set:', error);
@@ -177,6 +203,18 @@ export default function AdminInterviewQuestions() {
                   rows="3"
                   required
                 />
+                <div className="mt-3">
+                  <label className="block text-gray-700 mb-2">Attach images (optional)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => handleImagesChange(index, e.target.files)}
+                  />
+                  {imagesFilesByIndex[index]?.length ? (
+                    <p className="text-sm text-gray-500 mt-1">{imagesFilesByIndex[index].length} image(s) selected</p>
+                  ) : null}
+                </div>
               </div>
             ))}
             <button

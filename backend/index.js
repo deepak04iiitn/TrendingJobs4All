@@ -23,6 +23,7 @@ import cors from 'cors';
 import path from 'path';
 import cron from 'node-cron';
 import resumeRoutes from './routes/resumeRoutes.js';
+import './utils/cloudinary.js';
 
 dotenv.config();
 

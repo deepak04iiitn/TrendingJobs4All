@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import TypeWriterEffect from 'react-typewriter-effect';
 import JobTable from '../components/JobTable';
 import { FloatButton } from 'antd';
-import { MessageFilled, PlusOutlined, FormOutlined, UsergroupAddOutlined, CloseOutlined, SendOutlined, BarChartOutlined, CoffeeOutlined, RocketOutlined, TrophyOutlined, StarOutlined, ThunderboltOutlined, FireOutlined, CrownOutlined } from '@ant-design/icons';
+import { MessageFilled, PlusOutlined, FormOutlined, UsergroupAddOutlined, RiseOutlined, CloseOutlined, SendOutlined, BarChartOutlined, CoffeeOutlined, RocketOutlined, TrophyOutlined, StarOutlined, ThunderboltOutlined, FireOutlined, CrownOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'flowbite-react';
 import FadedJobTablePreview from '../components/FadedJobTablePreview';
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -248,11 +248,20 @@ ${question}`;
               </button>
               
               <button
+                onClick={() => navigate('/jobs')}
+                className="group inline-flex items-center justify-center gap-3 sm:gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-xl text-white px-6 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg font-bold transition-all duration-500 hover:scale-105 shadow-2xl border border-white/20 hover:border-white/30 w-full sm:w-auto max-w-xs sm:max-w-none"
+              >
+                <RiseOutlined className="text-xl sm:text-2xl flex-shrink-0" />
+                <span className="whitespace-nowrap">Explore All Jobs</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              </button>
+
+              <button
                 onClick={() => navigate('/publicpolls')}
                 className="group inline-flex items-center justify-center gap-3 sm:gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-xl text-white px-6 sm:px-10 py-4 sm:py-5 rounded-2xl text-base sm:text-lg font-bold transition-all duration-500 hover:scale-105 shadow-2xl border border-white/20 hover:border-white/30 w-full sm:w-auto max-w-xs sm:max-w-none"
               >
                 <BarChartOutlined className="text-xl sm:text-2xl flex-shrink-0" />
-                <span className="whitespace-nowrap">Explore Community</span>
+                <span className="whitespace-nowrap">Create Polls</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </button>
             </div>
@@ -264,7 +273,7 @@ ${question}`;
                 <div className="text-white/60 font-medium text-sm sm:text-base">Premium Jobs</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">200+</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">350+</div>
                 <div className="text-white/60 font-medium text-sm sm:text-base">Active Users</div>
               </div>
               <div className="text-center">

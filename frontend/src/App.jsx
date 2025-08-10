@@ -56,7 +56,6 @@ export default function App() {
             <Route path="/salary/:id" element={<SalaryDetailPage />} />
             <Route path="/referrals" element={<Referrals />} />
             <Route path="/referral/:id" element={<ReferralDetailPage />} />
-            {/* <Route path="/resumeReviews" element={<ResumeReviews />} /> */}
             <Route path='/resumeTemplates' element={<ResumeTemplates />} />
             <Route path='/myCorner' element={<MyCorner />} />
             <Route element={<PrivateRoute />}>

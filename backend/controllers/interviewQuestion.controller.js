@@ -9,7 +9,12 @@ export const createInterviewQuestion = async (req, res, next) => {
       return next(errorHandler(403, 'You are not allowed to create interview questions'));
     }
 
-    const { topic, description, questions } = req.body;
+    const { topic, description } = req.body;
+    let { questions } = req.body;
+    // If questions arrives as a JSON string (when multipart), parse it
+    if (typeof questions === 'string') {
+      try { questions = JSON.parse(questions); } catch (e) {}
+    }
     if (!topic || !description || !questions || !Array.isArray(questions) || questions.length === 0) {
       return next(errorHandler(400, 'All fields are required'));
     }
@@ -86,7 +91,11 @@ export const updateInterviewQuestion = async (req, res, next) => {
       return next(errorHandler(404, 'Question not found'));
     }
 
-    const { topic, description, questions } = req.body;
+    const { topic, description } = req.body;
+    let { questions } = req.body;
+    if (typeof questions === 'string') {
+      try { questions = JSON.parse(questions); } catch (e) {}
+    }
     if (!topic || !description || !questions || !Array.isArray(questions) || questions.length === 0) {
       return next(errorHandler(400, 'All fields are required'));
     }

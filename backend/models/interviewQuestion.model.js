@@ -8,7 +8,11 @@ const questionAnswerSchema = new mongoose.Schema({
   answer: {
     type: String,
     required: true,
-  }
+  },
+  images: {
+    type: [String],
+    default: [],
+  },
 });
 
 const interviewQuestionSchema = new mongoose.Schema(
