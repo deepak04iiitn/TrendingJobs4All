@@ -6,7 +6,7 @@ import { FaThumbsUp, FaThumbsDown, FaSearch, FaSort, FaPlus, FaTrash, FaEdit, Fa
 import { toast } from 'react-toastify';
 import InterviewCommentSection from '../components/InterviewCommentSection';
 import slugify from '../utils/slugify';
-import FormattedText from '../components/FormattedText';
+import StructuredAnswer from '../components/StructuredAnswer';
 
 
 export default function InterviewQuestions() {
@@ -23,13 +23,19 @@ export default function InterviewQuestions() {
   const [formData, setFormData] = useState({
     topic: '',
     description: '',
-    questions: [{ question: '', answer: '', images: [] }]
+    questions: [{ 
+      question: '', 
+      answer: '', 
+      structuredAnswer: [{ subheading: '', bulletPoints: [''] }],
+      images: [] 
+    }]
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editQuestionId, setEditQuestionId] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [imagesFilesByIndex, setImagesFilesByIndex] = useState({});
   const [imageModal, setImageModal] = useState({ open: false, images: [], index: 0 });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const openImageModal = (images, startIndex) => {
     setImageModal({ open: true, images, index: startIndex });
@@ -153,7 +159,12 @@ export default function InterviewQuestions() {
   const handleAddQuestion = () => {
     setFormData({
       ...formData,
-      questions: [...formData.questions, { question: '', answer: '', images: [] }]
+      questions: [...formData.questions, { 
+        question: '', 
+        answer: '', 
+        structuredAnswer: [{ subheading: '', bulletPoints: [''] }],
+        images: [] 
+      }]
     });
   };
 
@@ -207,18 +218,22 @@ export default function InterviewQuestions() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       let res;
-      if (isEditing) {
+
+      const processedQuestions = formData.questions.map(q => ({
+        question: q.question,
+        answer: q.answer || 'See structured answer below', // Fallback value
+        structuredAnswer: q.structuredAnswer || [],
+        images: q.images || []
+      }));
+
+      if(isEditing) {
         const payload = new FormData();
         payload.append('topic', formData.topic);
         payload.append('description', formData.description);
-        const normalized = formData.questions.map((q) => ({ 
-          question: q.question, 
-          answer: q.answer, 
-          images: q.images || [] 
-        }));
-        payload.append('questions', JSON.stringify(normalized));
+        payload.append('questions', JSON.stringify(processedQuestions));
         Object.entries(imagesFilesByIndex).forEach(([idx, files]) => {
           files.forEach((file) => payload.append(`images_${idx}`, file));
         });
@@ -232,12 +247,7 @@ export default function InterviewQuestions() {
         const payload = new FormData();
         payload.append('topic', formData.topic);
         payload.append('description', formData.description);
-        const normalized = formData.questions.map((q) => ({ 
-          question: q.question, 
-          answer: q.answer, 
-          images: q.images || [] 
-        }));
-        payload.append('questions', JSON.stringify(normalized));
+        payload.append('questions', JSON.stringify(processedQuestions));
         Object.entries(imagesFilesByIndex).forEach(([idx, files]) => {
           files.forEach((file) => payload.append(`images_${idx}`, file));
         });
@@ -256,12 +266,19 @@ export default function InterviewQuestions() {
       setFormData({
         topic: '',
         description: '',
-        questions: [{ question: '', answer: '', images: [] }]
+        questions: [{ 
+          question: '', 
+          answer: '', 
+          structuredAnswer: [{ subheading: '', bulletPoints: [''] }],
+          images: [] 
+        }]
       });
       setImagesFilesByIndex({});
     } catch (error) {
       console.error(`Error ${isEditing ? 'updating' : 'creating'} question set:`, error);
       toast.error(`Failed to ${isEditing ? 'update' : 'create'} question set`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -273,7 +290,10 @@ export default function InterviewQuestions() {
       questions: question.questions.map(q => ({
         question: q.question,
         answer: q.answer,
-        images: q.images || [] // Preserve existing images
+        structuredAnswer: q.structuredAnswer?.length > 0 
+          ? q.structuredAnswer 
+          : [{ subheading: '', bulletPoints: [''] }],
+        images: q.images || []
       })),
     });
     setEditQuestionId(question._id);
@@ -292,6 +312,52 @@ export default function InterviewQuestions() {
       console.error('Error deleting question set:', error);
       toast.error('Failed to delete question set');
     }
+  };
+
+  const handleSectionChange = (questionIndex, sectionIndex, field, value) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex].structuredAnswer[sectionIndex][field] = value;
+    setFormData({ ...formData, questions: newQuestions });
+  };
+  
+  const handleBulletPointChange = (questionIndex, sectionIndex, pointIndex, value) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex].structuredAnswer[sectionIndex].bulletPoints[pointIndex] = value;
+    setFormData({ ...formData, questions: newQuestions });
+  };
+  
+  const handleAddBulletPoint = (questionIndex, sectionIndex) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex].structuredAnswer[sectionIndex].bulletPoints.push('');
+    setFormData({ ...formData, questions: newQuestions });
+  };
+  
+  const handleRemoveBulletPoint = (questionIndex, sectionIndex, pointIndex) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex].structuredAnswer[sectionIndex].bulletPoints.splice(pointIndex, 1);
+    setFormData({ ...formData, questions: newQuestions });
+  };
+  
+  const handleAddSection = (questionIndex) => {
+    const newQuestions = [...formData.questions];
+    
+    // Initialize structuredAnswer if it doesn't exist
+    if (!newQuestions[questionIndex].structuredAnswer) {
+      newQuestions[questionIndex].structuredAnswer = [];
+    }
+    
+    newQuestions[questionIndex].structuredAnswer.push({ 
+      subheading: '', 
+      bulletPoints: [''] 
+    });
+    
+    setFormData({ ...formData, questions: newQuestions });
+  };
+  
+  const handleRemoveSection = (questionIndex, sectionIndex) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex].structuredAnswer.splice(sectionIndex, 1);
+    setFormData({ ...formData, questions: newQuestions });
   };
 
   const selectedQuestion = questions.find(q => q._id === selectedTopic);
@@ -429,7 +495,12 @@ export default function InterviewQuestions() {
                       setFormData({
                         topic: '',
                         description: '',
-                        questions: [{ question: '', answer: '', images: [] }]
+                        questions: [{ 
+                          question: '', 
+                          answer: '', 
+                          structuredAnswer: [{ subheading: '', bulletPoints: [''] }],
+                          images: [] 
+                        }]
                       });
                       setImagesFilesByIndex({});
                     }}
@@ -490,14 +561,90 @@ export default function InterviewQuestions() {
                               className="w-full p-3 border border-gray-200 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300"
                               required
                             />
-                            <textarea
-                              value={qa.answer}
-                              onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
-                              placeholder="Enter the answer..."
-                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300"
-                              rows="3"
-                              required
-                            />
+                            
+                            <div className="space-y-4">
+                              <label className="block text-gray-700 font-medium mb-2">Structured Answer</label>
+                              {qa.structuredAnswer ? qa.structuredAnswer.map((section, sectionIdx) => (
+                                <div key={sectionIdx} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <h4 className="font-medium text-gray-700">Section {sectionIdx + 1}</h4>
+                                    {sectionIdx > 0 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveSection(index, sectionIdx)}
+                                        className="text-red-500 hover:text-red-700"
+                                      >
+                                        <FaTrash size={12} />
+                                      </button>
+                                    )}
+                                  </div>
+                                  
+                                  <input
+                                    type="text"
+                                    value={section.subheading}
+                                    onChange={(e) => handleSectionChange(index, sectionIdx, 'subheading', e.target.value)}
+                                    placeholder="Enter subheading..."
+                                    className="w-full p-2 border border-gray-200 rounded-lg mb-3"
+                                    required
+                                  />
+                                  
+                                  {section.bulletPoints.map((point, pointIdx) => (
+                                    <div key={pointIdx} className="flex gap-2 mb-2">
+                                      <input
+                                        type="text"
+                                        value={point}
+                                        onChange={(e) => handleBulletPointChange(index, sectionIdx, pointIdx, e.target.value)}
+                                        placeholder="Enter bullet point..."
+                                        className="flex-1 p-2 border border-gray-200 rounded-lg"
+                                        required
+                                      />
+                                      {pointIdx > 0 && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveBulletPoint(index, sectionIdx, pointIdx)}
+                                          className="text-red-500 hover:text-red-700 p-2"
+                                        >
+                                          <FaTrash size={12} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  ))}
+                                  
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAddBulletPoint(index, sectionIdx)}
+                                    className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1 mt-2"
+                                  >
+                                    <FaPlus size={10} />
+                                    Add Bullet Point
+                                  </button>
+                                </div>
+                              )): (
+                                <div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newQuestions = [...formData.questions];
+                                      newQuestions[index].structuredAnswer = [{ subheading: '', bulletPoints: [''] }];
+                                      setFormData({ ...formData, questions: newQuestions });
+                                    }}
+                                    className="text-blue-600 hover:text-blue-700 flex items-center gap-2"
+                                  >
+                                    <FaPlus />
+                                    Initialize Structured Answer
+                                  </button>
+                                </div>
+                              )}
+                              
+                              <button
+                                type="button"
+                                onClick={() => handleAddSection(index)}
+                                className="text-green-600 hover:text-green-700 flex items-center gap-2"
+                              >
+                                <FaPlus />
+                                Add Section
+                              </button>
+                            </div>
                             
                             {/* Existing Images Display and Management */}
                             {qa.images && qa.images.length > 0 && (
@@ -558,9 +705,19 @@ export default function InterviewQuestions() {
 
                     <button
                       type="submit"
-                      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+                      disabled={isSubmitting}
+                      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                      {isEditing ? 'Update Question Set' : 'Create Question Set'}
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                          {isEditing ? 'Updating...' : 'Creating...'}
+                        </>
+                      ) : (
+                        <>
+                          {isEditing ? 'Update Question Set' : 'Create Question Set'}
+                        </>
+                      )}
                     </button>
                   </form>
                 )}
@@ -640,7 +797,10 @@ export default function InterviewQuestions() {
                             </h3>
                             <div className="bg-blue-50/50 border-l-4 border-blue-500 pl-4 py-3 rounded-r-lg">
                               <div className="text-sm">
-                                <FormattedText text={qa.answer} />
+                                <StructuredAnswer 
+                                  structuredAnswer={qa.structuredAnswer} 
+                                  fallbackAnswer={qa.answer} 
+                                />
                               </div>
                             </div>
                             {Array.isArray(qa.images) && qa.images.length > 0 && (

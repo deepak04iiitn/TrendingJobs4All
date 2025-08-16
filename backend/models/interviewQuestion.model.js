@@ -7,7 +7,21 @@ const questionAnswerSchema = new mongoose.Schema({
   },
   answer: {
     type: String,
-    required: true,
+    required: false, 
+    default: '', 
+  },
+  structuredAnswer: {
+    type: [{
+      subheading: {
+        type: String,
+        required: true,
+      },
+      bulletPoints: [{
+        type: String,
+        required: true,
+      }]
+    }],
+    default: [],
   },
   images: {
     type: [String],
