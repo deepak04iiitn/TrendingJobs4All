@@ -6,6 +6,8 @@ import { FaThumbsUp, FaThumbsDown, FaSearch, FaSort, FaPlus, FaTrash, FaEdit, Fa
 import { toast } from 'react-toastify';
 import InterviewCommentSection from '../components/InterviewCommentSection';
 import slugify from '../utils/slugify';
+import FormattedText from '../components/FormattedText';
+
 
 export default function InterviewQuestions() {
   const { currentUser } = useSelector((state) => state.user);
@@ -637,7 +639,9 @@ export default function InterviewQuestions() {
                               {qa.question}
                             </h3>
                             <div className="bg-blue-50/50 border-l-4 border-blue-500 pl-4 py-3 rounded-r-lg">
-                              <p className="text-gray-700 leading-relaxed text-sm">{qa.answer}</p>
+                              <div className="text-sm">
+                                <FormattedText text={qa.answer} />
+                              </div>
                             </div>
                             {Array.isArray(qa.images) && qa.images.length > 0 && (
                               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
