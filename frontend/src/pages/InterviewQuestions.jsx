@@ -21,7 +21,7 @@ export default function InterviewQuestions() {
   const [formData, setFormData] = useState({
     topic: '',
     description: '',
-    questions: [{ question: '', answer: '' }]
+    questions: [{ question: '', answer: '', images: [] }]
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editQuestionId, setEditQuestionId] = useState(null);
@@ -151,7 +151,7 @@ export default function InterviewQuestions() {
   const handleAddQuestion = () => {
     setFormData({
       ...formData,
-      questions: [...formData.questions, { question: '', answer: '' }]
+      questions: [...formData.questions, { question: '', answer: '', images: [] }]
     });
   };
 
@@ -161,10 +161,21 @@ export default function InterviewQuestions() {
       ...formData,
       questions: newQuestions
     });
+    // Clean up the images for this index
     setImagesFilesByIndex((prev) => {
       const copy = { ...prev };
       delete copy[index];
-      return copy;
+      // Reindex remaining images
+      const reindexed = {};
+      Object.keys(copy).forEach(key => {
+        const oldIndex = parseInt(key);
+        if (oldIndex > index) {
+          reindexed[oldIndex - 1] = copy[key];
+        } else {
+          reindexed[key] = copy[key];
+        }
+      });
+      return reindexed;
     });
   };
 
@@ -182,6 +193,16 @@ export default function InterviewQuestions() {
     setImagesFilesByIndex((prev) => ({ ...prev, [index]: fileArray }));
   };
 
+  // Function to remove existing image from a question
+  const handleRemoveExistingImage = (questionIndex, imageIndex) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex].images = newQuestions[questionIndex].images.filter((_, idx) => idx !== imageIndex);
+    setFormData({
+      ...formData,
+      questions: newQuestions
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -190,7 +211,11 @@ export default function InterviewQuestions() {
         const payload = new FormData();
         payload.append('topic', formData.topic);
         payload.append('description', formData.description);
-        const normalized = formData.questions.map((q) => ({ question: q.question, answer: q.answer, images: q.images || [] }));
+        const normalized = formData.questions.map((q) => ({ 
+          question: q.question, 
+          answer: q.answer, 
+          images: q.images || [] 
+        }));
         payload.append('questions', JSON.stringify(normalized));
         Object.entries(imagesFilesByIndex).forEach(([idx, files]) => {
           files.forEach((file) => payload.append(`images_${idx}`, file));
@@ -205,7 +230,11 @@ export default function InterviewQuestions() {
         const payload = new FormData();
         payload.append('topic', formData.topic);
         payload.append('description', formData.description);
-        const normalized = formData.questions.map((q) => ({ question: q.question, answer: q.answer, images: q.images || [] }));
+        const normalized = formData.questions.map((q) => ({ 
+          question: q.question, 
+          answer: q.answer, 
+          images: q.images || [] 
+        }));
         payload.append('questions', JSON.stringify(normalized));
         Object.entries(imagesFilesByIndex).forEach(([idx, files]) => {
           files.forEach((file) => payload.append(`images_${idx}`, file));
@@ -217,13 +246,15 @@ export default function InterviewQuestions() {
         setQuestions([...questions, res.data]);
         toast.success('Question set created successfully!');
       }
+      
+      // Reset form
       setShowForm(false);
       setIsEditing(false);
       setEditQuestionId(null);
       setFormData({
         topic: '',
         description: '',
-        questions: [{ question: '', answer: '' }]
+        questions: [{ question: '', answer: '', images: [] }]
       });
       setImagesFilesByIndex({});
     } catch (error) {
@@ -233,14 +264,21 @@ export default function InterviewQuestions() {
   };
 
   const handleEdit = (question) => {
+    // Properly set the form data including existing images
     setFormData({
       topic: question.topic,
       description: question.description,
-      questions: question.questions,
+      questions: question.questions.map(q => ({
+        question: q.question,
+        answer: q.answer,
+        images: q.images || [] // Preserve existing images
+      })),
     });
     setEditQuestionId(question._id);
     setIsEditing(true);
     setShowForm(true);
+    // Clear new image files when editing
+    setImagesFilesByIndex({});
   };
 
   const handleDelete = async (id) => {
@@ -389,8 +427,9 @@ export default function InterviewQuestions() {
                       setFormData({
                         topic: '',
                         description: '',
-                        questions: [{ question: '', answer: '' }]
+                        questions: [{ question: '', answer: '', images: [] }]
                       });
+                      setImagesFilesByIndex({});
                     }}
                     className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center gap-2 hover:scale-105"
                   >
@@ -457,8 +496,38 @@ export default function InterviewQuestions() {
                               rows="3"
                               required
                             />
+                            
+                            {/* Existing Images Display and Management */}
+                            {qa.images && qa.images.length > 0 && (
+                              <div className="mt-4">
+                                <label className="block text-gray-700 font-medium mb-2">Current Images:</label>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                                  {qa.images.map((imgUrl, imgIdx) => (
+                                    <div key={imgIdx} className="relative group">
+                                      <img
+                                        src={imgUrl}
+                                        alt={`Current image ${imgIdx + 1}`}
+                                        className="w-full h-20 object-cover rounded-lg border border-gray-200"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveExistingImage(index, imgIdx)}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                                        title="Remove image"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* New Images Upload */}
                             <div className="mt-3">
-                              <label className="block text-gray-700 font-medium mb-2">Attach images (optional)</label>
+                              <label className="block text-gray-700 font-medium mb-2">
+                                {isEditing ? 'Add new images (optional)' : 'Attach images (optional)'}
+                              </label>
                               <input
                                 type="file"
                                 accept="image/*"
@@ -467,7 +536,9 @@ export default function InterviewQuestions() {
                                 className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                               />
                               {imagesFilesByIndex[index]?.length ? (
-                                <p className="text-xs text-gray-500 mt-1">{imagesFilesByIndex[index].length} image(s) selected</p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {imagesFilesByIndex[index].length} new image(s) selected
+                                </p>
                               ) : null}
                             </div>
                           </div>
@@ -568,26 +639,26 @@ export default function InterviewQuestions() {
                             <div className="bg-blue-50/50 border-l-4 border-blue-500 pl-4 py-3 rounded-r-lg">
                               <p className="text-gray-700 leading-relaxed text-sm">{qa.answer}</p>
                             </div>
-                                {Array.isArray(qa.images) && qa.images.length > 0 && (
-                                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {qa.images.map((imgUrl, imgIdx) => (
-                                      <button
-                                        type="button"
-                                        key={imgIdx}
-                                        onClick={() => openImageModal(qa.images, imgIdx)}
-                                        className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        aria-label={`Open image ${imgIdx + 1}`}
-                                      >
-                                        <img
-                                          src={imgUrl}
-                                          alt={`Answer image ${imgIdx + 1}`}
-                                          className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-                                          loading="lazy"
-                                        />
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
+                            {Array.isArray(qa.images) && qa.images.length > 0 && (
+                              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {qa.images.map((imgUrl, imgIdx) => (
+                                  <button
+                                    type="button"
+                                    key={imgIdx}
+                                    onClick={() => openImageModal(qa.images, imgIdx)}
+                                    className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    aria-label={`Open image ${imgIdx + 1}`}
+                                  >
+                                    <img
+                                      src={imgUrl}
+                                      alt={`Answer image ${imgIdx + 1}`}
+                                      className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                                      loading="lazy"
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
