@@ -140,6 +140,12 @@ app.use('/backend/resume', resumeRoutes);
 app.use('/backend/interview-questions', interviewQuestionRoutes);
 app.use('/backend/interview-question-comments', interviewQuestionCommentRoutes);
 
+
+app.get('/backend/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
+
 // Routes
 app.get('/backend/naukri', cacheMiddleware, async (req, res) => {
   try {
