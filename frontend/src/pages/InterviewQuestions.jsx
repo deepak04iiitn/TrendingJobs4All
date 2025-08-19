@@ -26,7 +26,6 @@ export default function InterviewQuestions() {
     questions: [{ 
       question: '', 
       answer: '', 
-      structuredAnswer: [{ subheading: '', bulletPoints: [''] }],
       images: [] 
     }]
   });
@@ -161,8 +160,7 @@ export default function InterviewQuestions() {
       ...formData,
       questions: [...formData.questions, { 
         question: '', 
-        answer: '', 
-        structuredAnswer: [{ subheading: '', bulletPoints: [''] }],
+        answer: '', // Remove structuredAnswer
         images: [] 
       }]
     });
@@ -221,14 +219,14 @@ export default function InterviewQuestions() {
     setIsSubmitting(true);
     try {
       let res;
-
+  
+      // Remove structured answer processing - just keep it simple
       const processedQuestions = formData.questions.map(q => ({
         question: q.question,
-        answer: q.answer || 'See structured answer below', // Fallback value
-        structuredAnswer: q.structuredAnswer || [],
+        answer: q.answer, // Remove the fallback - just use the actual answer
         images: q.images || []
       }));
-
+  
       if(isEditing) {
         const payload = new FormData();
         payload.append('topic', formData.topic);
@@ -259,7 +257,7 @@ export default function InterviewQuestions() {
         toast.success('Question set created successfully!');
       }
       
-      // Reset form
+      // Reset form - remove structuredAnswer from reset
       setShowForm(false);
       setIsEditing(false);
       setEditQuestionId(null);
@@ -268,8 +266,7 @@ export default function InterviewQuestions() {
         description: '',
         questions: [{ 
           question: '', 
-          answer: '', 
-          structuredAnswer: [{ subheading: '', bulletPoints: [''] }],
+          answer: '', // Remove structuredAnswer from here
           images: [] 
         }]
       });
@@ -283,16 +280,13 @@ export default function InterviewQuestions() {
   };
 
   const handleEdit = (question) => {
-    // Properly set the form data including existing images
+    // Remove structuredAnswer processing
     setFormData({
       topic: question.topic,
       description: question.description,
       questions: question.questions.map(q => ({
         question: q.question,
-        answer: q.answer,
-        structuredAnswer: q.structuredAnswer?.length > 0 
-          ? q.structuredAnswer 
-          : [{ subheading: '', bulletPoints: [''] }],
+        answer: q.answer, // Just keep the answer as is
         images: q.images || []
       })),
     });
@@ -312,52 +306,6 @@ export default function InterviewQuestions() {
       console.error('Error deleting question set:', error);
       toast.error('Failed to delete question set');
     }
-  };
-
-  const handleSectionChange = (questionIndex, sectionIndex, field, value) => {
-    const newQuestions = [...formData.questions];
-    newQuestions[questionIndex].structuredAnswer[sectionIndex][field] = value;
-    setFormData({ ...formData, questions: newQuestions });
-  };
-  
-  const handleBulletPointChange = (questionIndex, sectionIndex, pointIndex, value) => {
-    const newQuestions = [...formData.questions];
-    newQuestions[questionIndex].structuredAnswer[sectionIndex].bulletPoints[pointIndex] = value;
-    setFormData({ ...formData, questions: newQuestions });
-  };
-  
-  const handleAddBulletPoint = (questionIndex, sectionIndex) => {
-    const newQuestions = [...formData.questions];
-    newQuestions[questionIndex].structuredAnswer[sectionIndex].bulletPoints.push('');
-    setFormData({ ...formData, questions: newQuestions });
-  };
-  
-  const handleRemoveBulletPoint = (questionIndex, sectionIndex, pointIndex) => {
-    const newQuestions = [...formData.questions];
-    newQuestions[questionIndex].structuredAnswer[sectionIndex].bulletPoints.splice(pointIndex, 1);
-    setFormData({ ...formData, questions: newQuestions });
-  };
-  
-  const handleAddSection = (questionIndex) => {
-    const newQuestions = [...formData.questions];
-    
-    // Initialize structuredAnswer if it doesn't exist
-    if (!newQuestions[questionIndex].structuredAnswer) {
-      newQuestions[questionIndex].structuredAnswer = [];
-    }
-    
-    newQuestions[questionIndex].structuredAnswer.push({ 
-      subheading: '', 
-      bulletPoints: [''] 
-    });
-    
-    setFormData({ ...formData, questions: newQuestions });
-  };
-  
-  const handleRemoveSection = (questionIndex, sectionIndex) => {
-    const newQuestions = [...formData.questions];
-    newQuestions[questionIndex].structuredAnswer.splice(sectionIndex, 1);
-    setFormData({ ...formData, questions: newQuestions });
   };
 
   const selectedQuestion = questions.find(q => q._id === selectedTopic);
@@ -562,88 +510,16 @@ export default function InterviewQuestions() {
                               required
                             />
                             
-                            <div className="space-y-4">
-                              <label className="block text-gray-700 font-medium mb-2">Structured Answer</label>
-                              {qa.structuredAnswer ? qa.structuredAnswer.map((section, sectionIdx) => (
-                                <div key={sectionIdx} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <h4 className="font-medium text-gray-700">Section {sectionIdx + 1}</h4>
-                                    {sectionIdx > 0 && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleRemoveSection(index, sectionIdx)}
-                                        className="text-red-500 hover:text-red-700"
-                                      >
-                                        <FaTrash size={12} />
-                                      </button>
-                                    )}
-                                  </div>
-                                  
-                                  <input
-                                    type="text"
-                                    value={section.subheading}
-                                    onChange={(e) => handleSectionChange(index, sectionIdx, 'subheading', e.target.value)}
-                                    placeholder="Enter subheading..."
-                                    className="w-full p-2 border border-gray-200 rounded-lg mb-3"
-                                    required
-                                  />
-                                  
-                                  {section.bulletPoints.map((point, pointIdx) => (
-                                    <div key={pointIdx} className="flex gap-2 mb-2">
-                                      <input
-                                        type="text"
-                                        value={point}
-                                        onChange={(e) => handleBulletPointChange(index, sectionIdx, pointIdx, e.target.value)}
-                                        placeholder="Enter bullet point..."
-                                        className="flex-1 p-2 border border-gray-200 rounded-lg"
-                                        required
-                                      />
-                                      {pointIdx > 0 && (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveBulletPoint(index, sectionIdx, pointIdx)}
-                                          className="text-red-500 hover:text-red-700 p-2"
-                                        >
-                                          <FaTrash size={12} />
-                                        </button>
-                                      )}
-                                    </div>
-                                  ))}
-                                  
-                                  <button
-                                    type="button"
-                                    onClick={() => handleAddBulletPoint(index, sectionIdx)}
-                                    className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1 mt-2"
-                                  >
-                                    <FaPlus size={10} />
-                                    Add Bullet Point
-                                  </button>
-                                </div>
-                              )): (
-                                <div>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const newQuestions = [...formData.questions];
-                                      newQuestions[index].structuredAnswer = [{ subheading: '', bulletPoints: [''] }];
-                                      setFormData({ ...formData, questions: newQuestions });
-                                    }}
-                                    className="text-blue-600 hover:text-blue-700 flex items-center gap-2"
-                                  >
-                                    <FaPlus />
-                                    Initialize Structured Answer
-                                  </button>
-                                </div>
-                              )}
-                              
-                              <button
-                                type="button"
-                                onClick={() => handleAddSection(index)}
-                                className="text-green-600 hover:text-green-700 flex items-center gap-2"
-                              >
-                                <FaPlus />
-                                Add Section
-                              </button>
+                            <div>
+                              <label className="block text-gray-700 font-medium mb-2">Answer</label>
+                              <textarea
+                                value={qa.answer}
+                                onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
+                                placeholder="Paste your answer here with any formatting..."
+                                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300"
+                                rows="8"
+                                required
+                              />
                             </div>
                             
                             {/* Existing Images Display and Management */}
@@ -796,11 +672,8 @@ export default function InterviewQuestions() {
                               {qa.question}
                             </h3>
                             <div className="bg-blue-50/50 border-l-4 border-blue-500 pl-4 py-3 rounded-r-lg">
-                              <div className="text-sm">
-                                <StructuredAnswer 
-                                  structuredAnswer={qa.structuredAnswer} 
-                                  fallbackAnswer={qa.answer} 
-                                />
+                              <div className="text-sm whitespace-pre-wrap break-words">
+                                {qa.answer}
                               </div>
                             </div>
                             {Array.isArray(qa.images) && qa.images.length > 0 && (
