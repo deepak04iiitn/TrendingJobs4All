@@ -140,14 +140,14 @@ export default function Header() {
               className={`
                 flex items-center space-x-2 group relative
                 ${isMobile 
-                  ? 'text-slate-700 py-4 px-6 hover:bg-blue-50 rounded-xl mx-3' 
-                  : 'text-slate-700 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-50'
+                  ? 'text-slate-700 py-3 px-4 hover:bg-blue-50 rounded-xl mx-2' 
+                  : 'text-slate-700 hover:text-blue-600 px-2 lg:px-3 py-2 rounded-lg hover:bg-blue-50'
                 } 
-                transition-all duration-300
+                transition-all duration-300 text-sm lg:text-base
               `}
             >
-              <Icon size={18} className="transition-transform group-hover:scale-110" />
-              <span className="font-medium">{label}</span>
+              <Icon size={16} className="transition-transform group-hover:scale-110 flex-shrink-0" />
+              <span className="font-medium whitespace-nowrap">{label}</span>
               {!isMobile && (
                 <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300" />
               )}
@@ -435,14 +435,14 @@ export default function Header() {
         fixed top-0 left-0 right-0 z-50 transition-all duration-300
         ${scrolled 
           ? 'py-2 bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-200' 
-          : 'py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100'
+          : 'py-3 lg:py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100'
         }
       `}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         {/* Mobile View */}
         <div className="md:hidden flex items-center justify-between">
           <motion.button
@@ -458,7 +458,7 @@ export default function Header() {
             <img
               src="/assets/Route2Hire.png"
               alt="Route2Hire"
-              className="h-12 w-12 rounded-xl shadow-lg"
+              className="h-10 w-10 rounded-xl shadow-lg"
             />
             <span className="font-bold text-lg text-slate-800">
               Route2Hire
@@ -473,7 +473,7 @@ export default function Header() {
               <img
                 src={currentUser.profilePicture}
                 alt="user"
-                className="w-10 h-10 rounded-full border-2 border-blue-400 shadow-lg cursor-pointer"
+                className="w-9 h-9 rounded-full border-2 border-blue-400 shadow-lg cursor-pointer"
                 onClick={() => handleProfileNavigation('/profile')}
               />
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
@@ -492,83 +492,92 @@ export default function Header() {
         </div>
 
         {/* Desktop View */}
-        <div className="hidden md:flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-3 group">
-            <motion.img
-              whileHover={{ rotate: 5 }}
-              src="/assets/Route2Hire.png"
-              alt="Route2Hire"
-              className="h-12 w-12 rounded-xl shadow-lg"
-            />
-            <span className="font-bold text-xl text-slate-800 transition-colors">
-              Route2Hire
-            </span>
-          </Link>
+        <div className="hidden md:flex items-center justify-between w-full">
+          {/* Logo - Fixed width */}
+          <div className="flex-shrink-0">
+            <Link to="/" className="flex items-center space-x-2 group">
+              <motion.img
+                whileHover={{ rotate: 5 }}
+                src="/assets/Route2Hire.png"
+                alt="Route2Hire"
+                className="h-10 w-10 lg:h-12 lg:w-12 rounded-xl shadow-lg"
+              />
+              <span className="font-bold text-lg lg:text-xl text-slate-800 transition-colors whitespace-nowrap">
+                Route2Hire
+              </span>
+            </Link>
+          </div>
 
-          <div className="flex items-center space-x-8">
-            <MenuItems />
-            
-            <div className="relative" ref={featuresRef}>
-              <motion.button
-                whileHover={{ y: -2 }}
-                onClick={() => setIsFeaturesOpen(!isFeaturesOpen)}
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300"
-              >
-                <Puzzle size={18} />
-                <span className="font-medium">Features</span>
-                <motion.div
-                  animate={{ rotate: isFeaturesOpen ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
+          {/* Navigation - Flexible center */}
+          <div className="flex items-center justify-center flex-1 max-w-2xl mx-4">
+            <div className="flex items-center space-x-1 lg:space-x-4">
+              <MenuItems />
+              
+              <div className="relative" ref={featuresRef}>
+                <motion.button
+                  whileHover={{ y: -2 }}
+                  onClick={() => setIsFeaturesOpen(!isFeaturesOpen)}
+                  className="flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-2 rounded-lg text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 whitespace-nowrap"
                 >
-                  <ChevronDown size={18} />
-                </motion.div>
-              </motion.button>
-              <FeaturesDropdown />
+                  <Puzzle size={16} />
+                  <span className="font-medium text-sm lg:text-base">Features</span>
+                  <motion.div
+                    animate={{ rotate: isFeaturesOpen ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChevronDown size={16} />
+                  </motion.div>
+                </motion.button>
+                <FeaturesDropdown />
+              </div>
             </div>
           </div>
 
-          {currentUser ? (
-            <div className="flex items-center space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                className="p-2 rounded-full text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <Bell size={20} />
-              </motion.button>
-              
-              <div className="relative" ref={profileRef}>
+          {/* User Section - Fixed width */}
+          <div className="flex-shrink-0">
+            {currentUser ? (
+              <div className="flex items-center space-x-2 lg:space-x-4">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
-                  onClick={toggleProfile}
-                  className="relative group"
+                  className="p-2 rounded-full text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                 >
-                  <img
-                    src={currentUser.profilePicture}
-                    alt="user"
-                    className="w-10 h-10 rounded-full border-2 border-blue-400 shadow-lg"
-                  />
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
-                  <motion.div
-                    animate={{ rotate: isProfileOpen ? 180 : 0 }}
-                    className="absolute -bottom-1 -left-1 bg-blue-600 rounded-full p-0.5"
-                  >
-                    <ChevronDown size={10} className="text-white" />
-                  </motion.div>
+                  <Bell size={18} />
                 </motion.button>
-                <ProfileDropdown />
+                
+                <div className="relative" ref={profileRef}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    onClick={toggleProfile}
+                    className="relative group"
+                  >
+                    <img
+                      src={currentUser.profilePicture}
+                      alt="user"
+                      className="w-9 h-9 lg:w-10 lg:h-10 rounded-full border-2 border-blue-400 shadow-lg"
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
+                    <motion.div
+                      animate={{ rotate: isProfileOpen ? 180 : 0 }}
+                      className="absolute -bottom-1 -left-1 bg-blue-600 rounded-full p-0.5"
+                    >
+                      <ChevronDown size={8} className="text-white" />
+                    </motion.div>
+                  </motion.button>
+                  <ProfileDropdown />
+                </div>
               </div>
-            </div>
-          ) : (
-            <Link to="/sign-in">
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:bg-blue-700 transition-all duration-300 font-medium"
-              >
-                Sign In
-              </motion.button>
-            </Link>
-          )}
+            ) : (
+              <Link to="/sign-in">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 lg:px-6 py-2 lg:py-3 bg-blue-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:bg-blue-700 transition-all duration-300 font-medium text-sm lg:text-base whitespace-nowrap"
+                >
+                  Sign In
+                </motion.button>
+              </Link>
+            )}
+          </div>
         </div>
 
         <MobileMenu />
