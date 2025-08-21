@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, MapPin, Briefcase, Filter, ChevronLeft, ChevronRight, ExternalLink, Clock, Building2, Zap, X } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const truncateDescription = (description, wordLimit) => {
     if (typeof description !== "string" || !description.trim() || description === "Not Available") {
@@ -73,8 +74,7 @@ export default function JobTable() {
     const [showSignInModal, setShowSignInModal] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
 
-    // Mock current user - replace with your actual Redux selector
-    const [currentUser] = useState(true);
+    const { currentUser } = useSelector((state) => state.user);
     const navigate = useNavigate();
 
     // Safe string check helper
@@ -168,6 +168,10 @@ export default function JobTable() {
     };
 
     // Fetch jobs from server with pagination and filters
+    // Frontend changes for JobTable component
+
+// In the useEffect fetchJobs function, replace the processedJobs filtering with this:
+
     useEffect(() => {
         const fetchJobs = async () => {
             try {
@@ -188,8 +192,8 @@ export default function JobTable() {
                 const total = Array.isArray(data) ? items.length : (data.total || 0);
                 const serverTotalPages = Array.isArray(data) ? Math.ceil(total / jobsPerPage) : (data.totalPages || 1);
 
+                // Since filtering is now done at database level, just process the data
                 const processedJobs = items
-                    .filter(item => item.apply_link && item.apply_link !== 'Not Found')
                     .map(item => ({
                         ...item,
                         _id: item._id,
@@ -204,7 +208,7 @@ export default function JobTable() {
                         apply_link: item.apply_link,
                         category: item.category || ''
                     }))
-                    .filter(job => job._id);
+                    .filter(job => job._id); // Only filter out jobs without _id
 
                 setJobs(processedJobs);
                 setTotalJobs(total);

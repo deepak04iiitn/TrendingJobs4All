@@ -161,8 +161,20 @@ app.get('/backend/naukri', cacheMiddleware, async (req, res) => {
     // If no pagination or filters requested, maintain backward compatibility (return all)
     const shouldReturnAll = !pageParam && !limitParam && !search && !exp && !date && !category;
 
+    // BASE FILTER - Always exclude jobs without valid apply_links
+    const baseFilter = {
+      $and: [
+        { apply_link: { $exists: true, $ne: null, $ne: '' } },
+        { apply_link: { $ne: 'Not Found' } },
+        { apply_link: { $ne: 'about:blank' } },
+        { apply_link: { $not: { $regex: /invalid-url|\/404\/|\/404$|not.found|not.available/i } } },
+        { apply_link: { $regex: /^https?:\/\/.+\..+/i } }, // Must be a valid URL with domain
+        { apply_link: { $not: { $regex: /^https?:\/\/(localhost|127\.0\.0\.1|example\.com)/i } } } // Exclude test URLs
+      ]
+    };
+
     if (shouldReturnAll) {
-      const data = await Naukri.find()
+      const data = await Naukri.find(baseFilter)
         .lean()
         .sort({ time: -1, date: -1 });
       const key = `jobs:${req.originalUrl}`;
@@ -173,7 +185,8 @@ app.get('/backend/naukri', cacheMiddleware, async (req, res) => {
     const page = Math.max(parseInt(pageParam || '1', 10), 1);
     const limit = Math.min(Math.max(parseInt(limitParam || '10', 10), 1), 50);
 
-    const filter = {};
+    // Start with base filter and add additional filters
+    const filter = { ...baseFilter };
 
     if (search) {
       const regex = new RegExp(search, 'i');
@@ -189,11 +202,23 @@ app.get('/backend/naukri', cacheMiddleware, async (req, res) => {
     if (exp !== undefined && exp !== '') {
       const expNum = Number(exp);
       if (!Number.isNaN(expNum)) {
-        filter.$or = (filter.$or || []).concat([
+        // If we already have $or from search, we need to combine them properly
+        const expConditions = [
           { min_exp: exp },
           { min_exp: expNum },
           { min_exp: { $in: [String(expNum), expNum] } },
-        ]);
+        ];
+        
+        if (filter.$or) {
+          // Combine search $or with exp $or using $and
+          filter.$and = [
+            { $or: filter.$or },
+            { $or: expConditions }
+          ];
+          delete filter.$or;
+        } else {
+          filter.$or = expConditions;
+        }
       }
     }
 
@@ -207,14 +232,18 @@ app.get('/backend/naukri', cacheMiddleware, async (req, res) => {
         const end = new Date(start);
         end.setDate(end.getDate() + 1);
         // support both 'time' Date and 'date' string formats
-        filter.$and = (filter.$and || []).concat([
-          {
-            $or: [
-              { time: { $gte: start, $lt: end } },
-              { date: { $regex: `^${date}` } },
-            ],
-          },
-        ]);
+        const dateCondition = {
+          $or: [
+            { time: { $gte: start, $lt: end } },
+            { date: { $regex: `^${date}` } },
+          ],
+        };
+        
+        if (filter.$and) {
+          filter.$and.push(dateCondition);
+        } else {
+          filter.$and = [dateCondition];
+        }
       }
     }
 
@@ -263,6 +292,74 @@ app.get('/backend/naukri/:url/:id', cacheMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
+// // Add this temporary debug route to your backend to check what's in your database
+// app.get('/backend/debug/apply-links', async (req, res) => {
+//   try {
+//     // Get a sample of unique apply_link values
+//     const uniqueApplyLinks = await Naukri.aggregate([
+//       { $group: { _id: "$apply_link", count: { $sum: 1 } } },
+//       { $sort: { count: -1 } },
+//       { $limit: 20 }
+//     ]);
+    
+//     console.log('Unique apply_link values:', uniqueApplyLinks);
+//     res.json(uniqueApplyLinks);
+//   } catch (error) {
+//     console.error('Debug error:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+// // Also add this route to test your filter
+// app.get('/backend/debug/filter-test', async (req, res) => {
+//   try {
+//     const baseFilter = {
+//       $and: [
+//         { apply_link: { $exists: true, $ne: null, $ne: '' } },
+//         { apply_link: { $ne: 'Not Found' } },
+//         { apply_link: { $ne: 'about:blank' } },
+//         { apply_link: { $not: { $regex: /invalid-url|\/404\/|\/404$|not.found|not.available/i } } },
+//         { apply_link: { $regex: /^https?:\/\/.+\..+/i } }, // Must be a valid URL with domain
+//         { apply_link: { $not: { $regex: /^https?:\/\/(localhost|127\.0\.0\.1|example\.com)/i } } } // Exclude test URLs
+//       ]
+//     };
+    
+//     const totalJobs = await Naukri.countDocuments({});
+//     const filteredJobs = await Naukri.countDocuments(baseFilter);
+//     const excludedJobs = totalJobs - filteredJobs;
+//     const sampleFiltered = await Naukri.find(baseFilter).limit(5);
+    
+//     // Get some excluded jobs to verify filter is working
+//     const sampleExcluded = await Naukri.find({
+//       $or: [
+//         { apply_link: 'Not Found' },
+//         { apply_link: 'about:blank' },
+//         { apply_link: { $regex: /invalid-url|\/404\//i } }
+//       ]
+//     }).limit(5);
+    
+//     res.json({
+//       totalJobs,
+//       filteredJobs,
+//       excludedJobs,
+//       sampleFiltered: sampleFiltered.map(job => ({
+//         _id: job._id,
+//         job_title: job.job_title,
+//         apply_link: job.apply_link
+//       })),
+//       sampleExcluded: sampleExcluded.map(job => ({
+//         _id: job._id,
+//         job_title: job.job_title,
+//         apply_link: job.apply_link
+//       }))
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
 
 // Webhook endpoint for cache invalidation
 app.post('/backend/webhook/jobs-update', async (req, res) => {
