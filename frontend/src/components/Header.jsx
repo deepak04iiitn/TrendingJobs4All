@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -21,13 +21,13 @@ import {
   Map,
 } from 'lucide-react';
 import { signoutSuccess } from '../redux/user/userSlice';
+import { focusRing } from '../theme/tokens';
 
 const MENU_ITEMS = [
   { path: '/', label: 'Home' },
   { path: '/about', label: 'About' },
   { path: '/my-jobs', label: 'My Jobs' },
   { path: '/jobs', label: 'Jobs' },
-  { path: '/publicpolls', label: 'Polls' },
   { path: '/contactUs', label: 'Contact' },
 ];
 
@@ -58,9 +58,6 @@ const FEATURE_GROUPS = [
   },
 ];
 
-const focusRing =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2';
-
 export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -73,20 +70,13 @@ export default function Header() {
     typeof window !== 'undefined' ? window.innerWidth : 1024
   );
   const [scrolled, setScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
 
   const mobileMenuRef = useRef(null);
   const profileRef = useRef(null);
   const featuresRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY;
-      setScrolled(y > 16);
-      const doc = document.documentElement;
-      const max = doc.scrollHeight - window.innerHeight;
-      setScrollProgress(max > 0 ? Math.min(y / Math.max(max * 0.35, 1), 1) : 0);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 12);
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -105,19 +95,11 @@ export default function Header() {
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
-
     const handleClickOutside = (event) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
-        closeMobileMenu();
-      }
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setIsProfileOpen(false);
-      }
-      if (featuresRef.current && !featuresRef.current.contains(event.target)) {
-        setIsFeaturesOpen(false);
-      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) closeMobileMenu();
+      if (profileRef.current && !profileRef.current.contains(event.target)) setIsProfileOpen(false);
+      if (featuresRef.current && !featuresRef.current.contains(event.target)) setIsFeaturesOpen(false);
     };
-
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setIsProfileOpen(false);
@@ -125,11 +107,9 @@ export default function Header() {
         closeMobileMenu();
       }
     };
-
     window.addEventListener('resize', handleResize);
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
-
     return () => {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('mousedown', handleClickOutside);
@@ -163,9 +143,8 @@ export default function Header() {
       closeMobileMenu();
       const res = await fetch('/backend/user/signout', { method: 'POST' });
       const data = await res.json();
-      if (!res.ok) {
-        console.log(data.message);
-      } else {
+      if (!res.ok) console.log(data.message);
+      else {
         dispatch(signoutSuccess());
         navigate('/sign-in');
       }
@@ -198,6 +177,21 @@ export default function Header() {
     location.pathname + location.search + location.hash
   )}`;
 
+  const BrandMark = ({ size = 'md' }) => (
+    <Link to="/" className={`inline-flex items-center gap-2.5 rounded-xl ${focusRing}`}>
+      <img
+        src="/assets/Route2Hire.png"
+        alt="Route2Hire"
+        className={`${size === 'lg' ? 'h-11 w-11' : 'h-9 w-9'} rounded-xl object-cover shadow-sm`}
+      />
+      <span
+        className={`font-display ${size === 'lg' ? 'text-xl' : 'text-lg'} font-semibold tracking-tight text-[#1C1917]`}
+      >
+        Route<span className="text-[#C4A574]">2</span>Hire
+      </span>
+    </Link>
+  );
+
   const NavLinks = ({ isMobile = false }) => (
     <>
       {MENU_ITEMS.map(({ path, label }) => {
@@ -206,43 +200,36 @@ export default function Header() {
           <Link
             key={path}
             to={path}
-            onClick={() => {
-              if (isMobile) closeMobileMenu();
-            }}
+            onClick={() => isMobile && closeMobileMenu()}
             className={`${focusRing} rounded-lg ${isMobile ? 'block' : ''}`}
           >
             <span
               className={`
                 relative inline-flex items-center font-medium transition-colors duration-200
-                ${isMobile
-                  ? `w-full px-4 py-3 rounded-xl text-[15px] ${
-                      active
-                        ? 'bg-slate-50 text-[#1E3A8A]'
-                        : 'text-slate-700 hover:bg-slate-50 hover:text-[#1E3A8A]'
-                    }`
-                  : `px-2.5 lg:px-3 py-2 text-sm ${
-                      active
-                        ? 'text-[#1E3A8A]'
-                        : 'text-slate-600 hover:text-[#1E3A8A]'
-                    }`
+                ${
+                  isMobile
+                    ? `w-full rounded-xl px-4 py-3 text-[15px] ${
+                        active
+                          ? 'bg-[#EFE8DC] text-[#2C241B]'
+                          : 'text-[#57534E] hover:bg-[#EFE8DC] hover:text-[#2C241B]'
+                      }`
+                    : `px-2.5 py-2 text-sm lg:px-3 ${
+                        active ? 'text-[#2C241B]' : 'text-[#57534E] hover:text-[#2C241B]'
+                      }`
                 }
               `}
             >
               {label}
               {!isMobile && (
                 <motion.span
-                  className="absolute left-3 right-3 -bottom-0.5 h-[2px] rounded-full bg-[#16A34A]"
+                  className="absolute -bottom-0.5 left-1/2 h-[2px] w-4 -translate-x-1/2 rounded-full bg-[#C4A574]"
                   initial={false}
-                  animate={{
-                    scaleX: active ? 1 : 0,
-                    opacity: active ? 1 : 0,
-                  }}
-                  transition={{ duration: 0.22, ease: 'easeOut' }}
-                  style={{ originX: 0 }}
+                  animate={{ scaleX: active ? 1 : 0, opacity: active ? 1 : 0 }}
+                  transition={{ duration: 0.2 }}
                 />
               )}
               {isMobile && active && (
-                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#16A34A]" />
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#C4A574]" />
               )}
             </span>
           </Link>
@@ -255,30 +242,23 @@ export default function Header() {
     <AnimatePresence>
       {isFeaturesOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 8, scale: 0.98 }}
+          initial={{ opacity: 0, y: 10, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.98 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="absolute right-0 mt-3 w-[min(42rem,calc(100vw-2rem))] rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)] overflow-hidden z-50"
+          transition={{ duration: 0.2 }}
+          className="absolute right-0 z-50 mt-3 w-[min(52rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] shadow-[0_24px_50px_-20px_rgba(44,36,27,0.22)]"
           role="menu"
-          aria-label="Destination toolkit"
         >
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+          <div className="flex items-center justify-between border-b border-[#E5DCCE] bg-[#EFE8DC] px-5 py-3.5">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1E3A8A]">
-                Destination map
-              </p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Tools along your route to hire
-              </p>
+              <p className="font-display text-sm font-semibold text-[#1C1917]">Toolkit</p>
+              <p className="mt-0.5 text-xs text-[#78716C]">Everything for QA & SDET careers</p>
             </div>
-            <Map size={16} className="text-[#16A34A]" aria-hidden />
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 sm:gap-px bg-[#E2E8F0]">
+          <div className="grid grid-cols-1 gap-px bg-[#E5DCCE] sm:grid-cols-3">
             {FEATURE_GROUPS.map((group) => (
-              <div key={group.title} className="bg-white p-3">
-                <p className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#1E3A8A]">
+              <div key={group.title} className="bg-[#FFFDF8] p-3">
+                <p className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B5A48]">
                   {group.title}
                 </p>
                 <div className="space-y-0.5">
@@ -288,21 +268,16 @@ export default function Header() {
                       type="button"
                       disabled={comingSoon}
                       onClick={() => handleFeatureNavigation(path, comingSoon)}
-                      className={`
-                        w-full flex items-start gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors duration-200
-                        ${focusRing}
-                        ${
-                          comingSoon
-                            ? 'opacity-55 cursor-not-allowed'
-                            : 'hover:bg-slate-50 group'
-                        }
-                      `}
+                      className={`group flex w-full items-start gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors ${focusRing} ${
+                        comingSoon ? 'cursor-not-allowed opacity-55' : 'hover:bg-[#EFE8DC]'
+                      }`}
                     >
                       <span
-                        className={`
-                          mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E2E8F0]
-                          ${comingSoon ? 'bg-slate-50 text-slate-400' : 'bg-white text-[#1E3A8A] group-hover:border-[#16A34A]/40 group-hover:text-[#16A34A]'}
-                        `}
+                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#E5DCCE] ${
+                          comingSoon
+                            ? 'bg-[#EFE8DC] text-[#78716C]'
+                            : 'bg-[#FFFDF8] text-[#6B5A48] group-hover:border-[#C4A574]/50 group-hover:text-[#2C241B]'
+                        }`}
                       >
                         <Icon size={15} />
                       </span>
@@ -310,29 +285,23 @@ export default function Header() {
                         <span className="flex items-center gap-2">
                           <span
                             className={`text-sm font-semibold ${
-                              comingSoon ? 'text-slate-400' : 'text-slate-800 group-hover:text-[#0F172A]'
+                              comingSoon ? 'text-[#78716C]' : 'text-[#1C1917]'
                             }`}
                           >
                             {label}
                           </span>
                           {comingSoon && (
-                            <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-100">
+                            <span className="rounded-md border border-[#E5DCCE] bg-[#EFE8DC] px-1.5 py-0.5 text-[10px] font-semibold text-[#6B5A48]">
                               Soon
                             </span>
                           )}
                         </span>
-                        <span
-                          className={`mt-0.5 block text-xs ${
-                            comingSoon ? 'text-slate-400' : 'text-slate-500'
-                          }`}
-                        >
-                          {desc}
-                        </span>
+                        <span className="mt-0.5 block text-xs text-[#78716C]">{desc}</span>
                       </span>
                       {!comingSoon && (
                         <ArrowUpRight
                           size={14}
-                          className="mt-1 shrink-0 text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 group-hover:text-[#0EA5E9]"
+                          className="mt-1 shrink-0 text-[#E5DCCE] opacity-0 transition group-hover:opacity-100 group-hover:text-[#C4A574]"
                         />
                       )}
                     </button>
@@ -350,90 +319,65 @@ export default function Header() {
     <AnimatePresence>
       {isProfileOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 8, scale: 0.98 }}
+          initial={{ opacity: 0, y: 10, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.98 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="absolute right-0 mt-3 w-80 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0_20px_50px_-24px_rgba(15,23,42,0.35)] overflow-hidden z-50"
+          className="absolute right-0 z-50 mt-3 w-80 overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] shadow-[0_24px_50px_-20px_rgba(44,36,27,0.22)]"
           role="menu"
-          aria-label="Account menu"
         >
-          <div className="relative px-5 py-4 border-b border-[#E2E8F0]">
-            <div
-              className="absolute left-0 top-0 bottom-0 w-1 bg-[#1E3A8A]"
-              aria-hidden
-            />
+          <div className="relative border-b border-[#E5DCCE] bg-[#EFE8DC] px-5 py-4">
+            <div className="absolute bottom-0 left-0 top-0 w-1 bg-[#C4A574]" aria-hidden />
             <div className="flex items-center gap-3">
               <img
                 src={currentUser.profilePicture}
                 alt=""
-                className="h-12 w-12 rounded-full object-cover ring-2 ring-[#1E3A8A]/25 ring-offset-2 ring-offset-white"
+                className="h-12 w-12 rounded-full object-cover ring-2 ring-[#C4A574]/40 ring-offset-2 ring-offset-[#EFE8DC]"
               />
               <div className="min-w-0">
-                <p className="truncate text-base font-semibold text-[#0F172A]">
+                <p className="font-display truncate text-base font-semibold text-[#1C1917]">
                   @{currentUser.username}
                 </p>
-                <p className="truncate text-sm text-slate-500">{currentUser.email}</p>
+                <p className="truncate text-sm text-[#78716C]">{currentUser.email}</p>
               </div>
             </div>
           </div>
-
           <div className="p-2">
             {[
-              {
-                action: () => handleProfileNavigation('/profile'),
-                icon: User,
-                label: 'My Profile',
-                desc: 'Manage your account',
-              },
+              { action: () => handleProfileNavigation('/profile'), icon: User, label: 'My Profile', desc: 'Manage your account' },
               ...(currentUser?.isUserAdmin
-                ? [
-                    {
-                      action: () => handleProfileNavigation('/dashboard'),
-                      icon: LayoutDashboard,
-                      label: 'Admin Dashboard',
-                      desc: 'System overview',
-                    },
-                  ]
+                ? [{ action: () => handleProfileNavigation('/dashboard'), icon: LayoutDashboard, label: 'Admin Dashboard', desc: 'System overview' }]
                 : []),
-              {
-                action: () => handleProfileNavigation('/myCorner'),
-                icon: BookOpen,
-                label: 'My Corner',
-                desc: 'Personal workspace',
-              },
+              { action: () => handleProfileNavigation('/myCorner'), icon: BookOpen, label: 'My Corner', desc: 'Personal workspace' },
             ].map(({ action, icon: Icon, label, desc }) => (
               <button
                 key={label}
                 type="button"
                 onClick={action}
-                className={`w-full flex items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-slate-50 group ${focusRing}`}
+                className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-[#EFE8DC] ${focusRing}`}
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-[#1E3A8A] group-hover:border-[#16A34A]/35 group-hover:text-[#16A34A]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E5DCCE] bg-[#FFFDF8] text-[#6B5A48] group-hover:text-[#2C241B]">
                   <Icon size={16} />
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-slate-800">{label}</span>
-                  <span className="block text-xs text-slate-500">{desc}</span>
+                  <span className="block text-sm font-semibold text-[#1C1917]">{label}</span>
+                  <span className="block text-xs text-[#78716C]">{desc}</span>
                 </span>
               </button>
             ))}
-
-            <div className="my-2 h-px bg-[#E2E8F0]" />
-
+            <div className="my-2 h-px bg-[#E5DCCE]" />
             <button
               type="button"
               onClick={handleSignout}
-              className={`w-full flex items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-red-50 group ${focusRing}`}
+              className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-red-50 ${focusRing}`}
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-600">
                 <LogOut size={16} />
               </span>
               <span>
-                <span className="block text-sm font-semibold text-slate-800 group-hover:text-red-700">
+                <span className="block text-sm font-semibold text-[#1C1917] group-hover:text-red-700">
                   Sign Out
                 </span>
-                <span className="block text-xs text-slate-500">See you on the route</span>
+                <span className="block text-xs text-[#78716C]">See you soon</span>
               </span>
             </button>
           </div>
@@ -451,7 +395,7 @@ export default function Header() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[90] bg-slate-900/40 backdrop-blur-[2px]"
+              className="fixed inset-0 z-[90] bg-[#2C241B]/35 backdrop-blur-[2px]"
               onClick={closeMobileMenu}
               aria-hidden
             />
@@ -460,132 +404,110 @@ export default function Header() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.98 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-3 bottom-3 top-[4.75rem] z-[100] flex flex-col overflow-hidden rounded-3xl border border-[#E2E8F0] bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.45)]"
+              className="fixed inset-x-3 bottom-3 top-[4.75rem] z-[100] flex flex-col overflow-hidden rounded-3xl border border-[#E5DCCE] bg-[#F7F3EC] shadow-[0_24px_60px_-20px_rgba(44,36,27,0.3)]"
               ref={mobileMenuRef}
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
             >
-              <div className="relative flex items-center justify-between border-b border-[#E2E8F0] px-5 py-4">
-                <div
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-[#1E3A8A]"
-                  aria-hidden
-                />
+              <div className="flex items-center justify-between border-b border-[#E5DCCE] bg-[#EFE8DC] px-5 py-4">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1E3A8A]">
-                    Route menu
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B5A48]">
+                    Menu
                   </p>
-                  <p className="text-sm font-semibold text-[#0F172A]">Where next?</p>
+                  <p className="font-display text-base font-semibold text-[#1C1917]">Explore Route2Hire</p>
                 </div>
                 <button
                   type="button"
                   onClick={closeMobileMenu}
-                  className={`rounded-xl border border-[#E2E8F0] p-2 text-slate-600 hover:bg-slate-50 hover:text-[#1E3A8A] ${focusRing}`}
+                  className={`rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] p-2 text-[#57534E] hover:text-[#2C241B] ${focusRing}`}
                   aria-label="Close menu"
                 >
                   <X size={18} />
                 </button>
               </div>
-
               <div className="flex-1 overflow-y-auto py-3">
                 <div className="px-2">
                   <NavLinks isMobile />
                 </div>
-
-                <div className="mx-4 my-3 h-px bg-[#E2E8F0]" />
-
+                <div className="mx-4 my-3 h-px bg-[#E5DCCE]" />
                 <div className="px-4 pb-2">
-                  <p className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1E3A8A]">
-                    <Map size={12} />
-                    Destination map
-                  </p>
-                  <div className="space-y-4">
-                    {FEATURE_GROUPS.map((group) => (
-                      <div key={group.title}>
-                        <p className="mb-1.5 px-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
-                          {group.title}
-                        </p>
-                        <div className="space-y-0.5">
-                          {group.items.map(({ path, icon: Icon, label, comingSoon }) => (
-                            <button
-                              key={label}
-                              type="button"
-                              disabled={comingSoon}
-                              onClick={() => handleFeatureNavigation(path, comingSoon)}
-                              className={`
-                                flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left
-                                ${comingSoon
-                                  ? 'cursor-not-allowed opacity-55 text-slate-400'
-                                  : 'text-slate-700 hover:bg-slate-50 hover:text-[#1E3A8A]'
-                                }
-                                ${focusRing}
-                              `}
-                            >
-                              <Icon size={16} className="shrink-0" />
-                              <span className="flex-1 text-sm font-medium">{label}</span>
-                              {comingSoon && (
-                                <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
-                                  Soon
-                                </span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="mb-2 font-display text-sm font-semibold text-[#1C1917]">Toolkit</p>
+                  {FEATURE_GROUPS.map((group) => (
+                    <div key={group.title} className="mb-4">
+                      <p className="mb-1.5 px-2 text-[11px] font-medium uppercase tracking-wider text-[#78716C]">
+                        {group.title}
+                      </p>
+                      {group.items.map(({ path, icon: Icon, label, comingSoon }) => (
+                        <button
+                          key={label}
+                          type="button"
+                          disabled={comingSoon}
+                          onClick={() => handleFeatureNavigation(path, comingSoon)}
+                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left ${focusRing} ${
+                            comingSoon
+                              ? 'cursor-not-allowed opacity-55 text-[#78716C]'
+                              : 'text-[#57534E] hover:bg-[#EFE8DC] hover:text-[#2C241B]'
+                          }`}
+                        >
+                          <Icon size={16} className="shrink-0" />
+                          <span className="flex-1 text-sm font-medium">{label}</span>
+                          {comingSoon && (
+                            <span className="rounded-md bg-[#EFE8DC] px-1.5 py-0.5 text-[10px] font-semibold text-[#6B5A48]">
+                              Soon
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
                 </div>
               </div>
-
               {currentUser && (
-                <div className="border-t border-[#E2E8F0] bg-[#F8FAFC] p-4">
+                <div className="border-t border-[#E5DCCE] bg-[#EFE8DC] p-4">
                   <div className="mb-3 flex items-center gap-3">
                     <img
                       src={currentUser.profilePicture}
                       alt=""
-                      className="h-10 w-10 rounded-full object-cover ring-2 ring-[#1E3A8A]/30 ring-offset-2 ring-offset-[#F8FAFC]"
+                      className="h-10 w-10 rounded-full object-cover ring-2 ring-[#C4A574]/40 ring-offset-2 ring-offset-[#EFE8DC]"
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-[#0F172A]">
+                      <p className="truncate text-sm font-semibold text-[#1C1917]">
                         @{currentUser.username}
                       </p>
-                      <p className="truncate text-xs text-slate-500">{currentUser.email}</p>
+                      <p className="truncate text-xs text-[#78716C]">{currentUser.email}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => handleProfileNavigation('/profile')}
-                      className={`flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-sm font-medium text-[#1E3A8A] hover:border-[#1E3A8A]/30 ${focusRing}`}
+                      className={`flex items-center justify-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] py-2.5 text-sm font-medium text-[#2C241B] ${focusRing}`}
                     >
-                      <User size={14} />
-                      Profile
+                      <User size={14} /> Profile
                     </button>
                     <button
                       type="button"
                       onClick={() => handleProfileNavigation('/myCorner')}
-                      className={`flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-2.5 text-sm font-medium text-slate-700 hover:border-slate-300 ${focusRing}`}
+                      className={`flex items-center justify-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] py-2.5 text-sm font-medium text-[#57534E] ${focusRing}`}
                     >
-                      <BookOpen size={14} />
-                      Corner
+                      <BookOpen size={14} /> Corner
                     </button>
                     {currentUser?.isUserAdmin && (
                       <button
                         type="button"
                         onClick={() => handleProfileNavigation('/dashboard')}
-                        className={`col-span-2 flex items-center justify-center gap-2 rounded-xl bg-[#1E3A8A] py-2.5 text-sm font-medium text-white hover:bg-[#1E3A8A]/90 ${focusRing}`}
+                        className={`col-span-2 flex items-center justify-center gap-2 rounded-xl bg-[#2C241B] py-2.5 text-sm font-medium text-[#FFFDF8] hover:bg-[#1A1510] ${focusRing}`}
                       >
-                        <LayoutDashboard size={14} />
-                        Admin Dashboard
+                        <LayoutDashboard size={14} /> Admin Dashboard
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={handleSignout}
-                      className={`col-span-2 flex items-center justify-center gap-2 rounded-xl border border-red-100 bg-white py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 ${focusRing}`}
+                      className={`col-span-2 flex items-center justify-center gap-2 rounded-xl border border-red-100 bg-[#FFFDF8] py-2.5 text-sm font-medium text-red-600 ${focusRing}`}
                     >
-                      <LogOut size={14} />
-                      Sign Out
+                      <LogOut size={14} /> Sign Out
                     </button>
                   </div>
                 </div>
@@ -600,63 +522,40 @@ export default function Header() {
   return (
     <>
       <motion.header
-        className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 lg:px-6 pt-3"
+        className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-4 lg:px-6"
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
         <nav
-          className={`
-            relative mx-auto max-w-7xl overflow-hidden rounded-2xl border transition-all duration-300
-            ${
-              scrolled
-                ? 'border-[#E2E8F0] bg-white/95 shadow-[0_12px_40px_-18px_rgba(15,23,42,0.28)] backdrop-blur-xl'
-                : 'border-[#E2E8F0]/80 bg-white/90 shadow-[0_8px_30px_-20px_rgba(15,23,42,0.2)] backdrop-blur-md'
-            }
-          `}
+          className={`relative mx-auto max-w-7xl rounded-2xl border transition-all duration-300 ${
+            scrolled
+              ? 'border-[#E5DCCE] bg-[#FFFDF8]/95 shadow-[0_14px_40px_-18px_rgba(44,36,27,0.18)] backdrop-blur-xl'
+              : 'border-[#E5DCCE]/90 bg-[#FFFDF8]/88 shadow-[0_8px_28px_-18px_rgba(44,36,27,0.12)] backdrop-blur-md'
+          }`}
           aria-label="Primary"
         >
-          {/* Route marker — grows with scroll */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#1E3A8A]/20"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C4A574]/60 to-transparent"
             aria-hidden
-          >
-            <motion.div
-              className="w-full origin-top bg-[#1E3A8A]"
-              style={{ height: `${Math.max(18, scrollProgress * 100)}%` }}
-            />
-          </div>
+          />
 
           <div
-            className={`
-              flex items-center justify-between gap-3 pl-4 pr-3 sm:pl-5 sm:pr-4
-              transition-[padding] duration-300
-              ${scrolled ? 'py-2.5' : 'py-3 md:py-3.5'}
-            `}
+            className={`flex items-center justify-between gap-3 px-3 transition-[padding] duration-300 sm:px-4 ${
+              scrolled ? 'py-2.5' : 'py-3 md:py-3.5'
+            }`}
           >
-            {/* Mobile */}
             <div className="flex w-full items-center justify-between md:hidden">
               <button
                 type="button"
                 onClick={openMobileMenu}
-                className={`rounded-xl border border-[#E2E8F0] p-2 text-[#1E3A8A] hover:bg-slate-50 ${focusRing}`}
+                className={`rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] p-2 text-[#2C241B] hover:bg-[#EFE8DC] ${focusRing}`}
                 aria-label="Open menu"
                 aria-expanded={isMobileMenuOpen}
               >
                 <Menu size={20} />
               </button>
-
-              <Link to="/" className={`flex items-center gap-2.5 ${focusRing} rounded-xl`}>
-                <img
-                  src="/assets/Route2Hire.png"
-                  alt="Route2Hire"
-                  className="h-9 w-9 rounded-xl object-cover shadow-sm"
-                />
-                <span className="text-[15px] font-bold tracking-tight text-[#0F172A]">
-                  Route<span className="text-[#16A34A]">2</span>Hire
-                </span>
-              </Link>
-
+              <BrandMark />
               {currentUser ? (
                 <button
                   type="button"
@@ -667,13 +566,13 @@ export default function Header() {
                   <img
                     src={currentUser.profilePicture}
                     alt=""
-                    className="h-9 w-9 rounded-full object-cover ring-2 ring-[#1E3A8A]/35 ring-offset-2 ring-offset-white"
+                    className="h-9 w-9 rounded-full object-cover ring-2 ring-[#C4A574]/45 ring-offset-2 ring-offset-[#FFFDF8]"
                   />
                 </button>
               ) : (
                 <Link to={signInHref}>
                   <span
-                    className={`inline-flex items-center rounded-full bg-[#16A34A] px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#15803D] ${focusRing}`}
+                    className={`inline-flex items-center rounded-full bg-[#2C241B] px-3.5 py-2 text-sm font-semibold text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
                   >
                     Sign In
                   </span>
@@ -681,28 +580,13 @@ export default function Header() {
               )}
             </div>
 
-            {/* Desktop */}
             <div className="hidden w-full items-center gap-4 md:flex">
-              <Link
-                to="/"
-                className={`flex shrink-0 items-center gap-2.5 group ${focusRing} rounded-xl`}
-              >
-                <motion.img
-                  whileHover={{ rotate: 4 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 18 }}
-                  src="/assets/Route2Hire.png"
-                  alt="Route2Hire"
-                  className="h-10 w-10 lg:h-11 lg:w-11 rounded-xl object-cover shadow-sm"
-                />
-                <span className="text-lg font-bold tracking-tight text-[#0F172A] whitespace-nowrap">
-                  Route<span className="text-[#16A34A]">2</span>Hire
-                </span>
-              </Link>
-
+              <div className="shrink-0">
+                <BrandMark size="lg" />
+              </div>
               <div className="flex flex-1 items-center justify-center">
                 <div className="flex items-center gap-0.5 lg:gap-1">
                   <NavLinks />
-
                   <div className="relative" ref={featuresRef}>
                     <button
                       type="button"
@@ -712,40 +596,29 @@ export default function Header() {
                       }}
                       aria-expanded={isFeaturesOpen}
                       aria-haspopup="menu"
-                      className={`
-                        relative inline-flex items-center gap-1.5 rounded-lg px-2.5 lg:px-3 py-2 text-sm font-medium transition-colors
-                        ${focusRing}
-                        ${
-                          isFeaturesOpen || isFeaturesActive
-                            ? 'text-[#1E3A8A]'
-                            : 'text-slate-600 hover:text-[#1E3A8A]'
-                        }
-                      `}
+                      className={`relative inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors lg:px-3 ${focusRing} ${
+                        isFeaturesOpen || isFeaturesActive
+                          ? 'text-[#2C241B]'
+                          : 'text-[#57534E] hover:text-[#2C241B]'
+                      }`}
                     >
                       Toolkit
-                      <motion.span
-                        animate={{ rotate: isFeaturesOpen ? 180 : 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="inline-flex"
-                      >
+                      <motion.span animate={{ rotate: isFeaturesOpen ? 180 : 0 }} className="inline-flex">
                         <ChevronDown size={15} />
                       </motion.span>
                       <motion.span
-                        className="absolute left-3 right-3 -bottom-0.5 h-[2px] rounded-full bg-[#16A34A]"
+                        className="absolute -bottom-0.5 left-1/2 h-[2px] w-4 -translate-x-1/2 rounded-full bg-[#C4A574]"
                         initial={false}
                         animate={{
                           scaleX: isFeaturesActive && !isFeaturesOpen ? 1 : 0,
                           opacity: isFeaturesActive && !isFeaturesOpen ? 1 : 0,
                         }}
-                        transition={{ duration: 0.22, ease: 'easeOut' }}
-                        style={{ originX: 0 }}
                       />
                     </button>
                     <FeaturesDropdown />
                   </div>
                 </div>
               </div>
-
               <div className="flex shrink-0 items-center" ref={profileRef}>
                 {currentUser ? (
                   <div className="relative">
@@ -759,13 +632,10 @@ export default function Header() {
                       <img
                         src={currentUser.profilePicture}
                         alt=""
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#1E3A8A]/40 ring-offset-2 ring-offset-white transition group-hover:ring-[#16A34A]/50"
+                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#C4A574]/50 ring-offset-2 ring-offset-[#FFFDF8]"
                       />
-                      <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#1E3A8A] text-white shadow-sm">
-                        <motion.span
-                          animate={{ rotate: isProfileOpen ? 180 : 0 }}
-                          className="inline-flex"
-                        >
+                      <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#2C241B] text-[#FFFDF8] shadow-sm">
+                        <motion.span animate={{ rotate: isProfileOpen ? 180 : 0 }} className="inline-flex">
                           <ChevronDown size={10} />
                         </motion.span>
                       </span>
@@ -777,7 +647,7 @@ export default function Header() {
                     <motion.span
                       whileHover={{ y: -1 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`inline-flex items-center rounded-full bg-[#16A34A] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_-8px_rgba(22,163,74,0.7)] transition hover:bg-[#15803D] ${focusRing}`}
+                      className={`inline-flex items-center rounded-full bg-[#2C241B] px-5 py-2.5 text-sm font-semibold text-[#FFFDF8] shadow-[0_10px_24px_-10px_rgba(44,36,27,0.45)] transition hover:bg-[#1A1510] ${focusRing}`}
                     >
                       Sign In
                     </motion.span>
@@ -788,7 +658,6 @@ export default function Header() {
           </div>
         </nav>
       </motion.header>
-
       <MobileMenu />
     </>
   );

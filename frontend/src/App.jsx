@@ -10,8 +10,6 @@ import FlashStrip from './components/FlashStrip';
 import Profile from './pages/Profile';
 import FullJd from './pages/FullJd';
 import MyJobs from './pages/MyJobs';
-import PublicPolls from './pages/PublicPolls';
-import MyPolls from './pages/MyPolls';
 import InterviewExp from './pages/InterviewExp';
 import SalaryStructures from './pages/SalaryStructures';
 import Referrals from './pages/Referrals';
@@ -34,7 +32,6 @@ import ResumeBuilder from './pages/ResumeBuilder';
 import InterviewQuestions from './pages/InterviewQuestions';
 import AdminInterviewQuestions from './pages/AdminInterviewQuestions';
 import Newsletter from './pages/Newsletter';
-import GlobalPollModal from './components/GlobalPollModal';
 import SocialIconFab from './components/SocialIconFab';
 import { useDispatch, useSelector } from 'react-redux';
 import { signoutSuccess, initializeSessionExpiry } from './redux/user/userSlice';
@@ -143,8 +140,6 @@ export default function App() {
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/fulljd/:url/:id' element={<FullJd />} />
                 <Route path="/my-jobs" element={<MyJobs />} />
-                <Route path='/publicpolls' element={<PublicPolls />} />
-                <Route path="/mypolls" element={<MyPolls />} />
                 <Route path="/interviewExp" element={<InterviewExp />} />
                 <Route path="/interview-experiences" element={<InterviewExp />} />
                 <Route path="/interview-experience/:slug/:experienceId" element={<InterviewExp />} />
@@ -208,7 +203,6 @@ export default function App() {
               </Routes>
             </div>
             <Footer />
-            <GlobalPollModal />
             <SocialIconFab />
             <ToastContainer position="bottom-right" autoClose={2500} hideProgressBar={false} newestOnTop theme="colored" closeOnClick pauseOnFocusLoss={false} draggable pauseOnHover />
           </div>

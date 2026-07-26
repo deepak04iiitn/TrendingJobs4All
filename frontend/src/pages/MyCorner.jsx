@@ -7,8 +7,7 @@ import {
   Settings,
   Menu,
   X,
-  ChevronRight,
-  Puzzle
+  ChevronRight
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import Breadcrumb from '../components/Breadcrumb';
@@ -19,7 +18,6 @@ import MyReferrals from '../components/MyReferrals';
 import MySalary from '../components/MySalary';
 import MyResumeTemplates from '../components/MyResumeTemplates';
 import ResumeBuilder from './ResumeBuilder';
-import MyPolls from './MyPolls';
 
 export default function MyCorner() {
   const { currentUser } = useSelector((state) => state.user);
@@ -44,7 +42,6 @@ export default function MyCorner() {
     { id: 'referral', icon: Users, label: 'Referrals' },
     { id: 'salary', icon: DollarSign, label: 'Salary Structures' },
     { id: 'resume', icon: FileEdit, label: 'Resume Templates' },
-    { id: 'polls', icon: Puzzle, label: 'My Polls' },
   ];
 
   const handleMenuItemClick = (itemId) => {
@@ -66,8 +63,6 @@ export default function MyCorner() {
         return <MyResumeTemplates />;
       case 'resumeBuilder':
         return <ResumeBuilder />;
-      case 'polls':
-        return <MyPolls />;
       default:
         return <div className="p-8">Select a menu item</div>;
     }
@@ -80,7 +75,7 @@ export default function MyCorner() {
         <title>My Corner | Personal Dashboard - Route2Hire QA & SDET Platform</title>
         <meta
           name="description"
-          content="Access your personal dashboard on Route2Hire. Manage your QA, SDET, Test Automation interviews, referrals, salary data, resume templates, and polls in one place for software testing professionals."
+          content="Access your personal dashboard on Route2Hire. Manage your QA, SDET and Test Automation interview experiences, referrals, salary data and resume templates in one place for software testing professionals."
         />
         <meta
           name="keywords"

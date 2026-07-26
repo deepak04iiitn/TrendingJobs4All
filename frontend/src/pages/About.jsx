@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Breadcrumb from '../components/Breadcrumb';
 import RelatedLinks from '../components/RelatedLinks';
-import { Target, Zap, Shield, ArrowRight, Sparkles, Star, Briefcase, Users, Code, MessageCircle, TrendingUp, FileEdit, Puzzle, Trophy, BarChart3, BookOpen, Map } from 'lucide-react';
+import { Target, Zap, Shield, ArrowRight, Sparkles, Star, Briefcase, Users, Code, MessageCircle, TrendingUp, FileEdit, Puzzle, Trophy, BookOpen, Map } from 'lucide-react';
 
 export default function About() {
 
@@ -56,13 +56,6 @@ export default function About() {
       description: "Create professional resumes with our QA/SDET-focused templates and resume builder. Get your resume reviewed by the community.",
       gradient: "from-pink-500 to-pink-600",
       bgGradient: "from-pink-50 to-pink-100"
-    },
-    {
-      icon: BarChart3,
-      title: "Community Polls",
-      description: "Create and participate in polls to gather insights from the QA/SDET community. Track your poll analytics and engage with peers.",
-      gradient: "from-cyan-500 to-cyan-600",
-      bgGradient: "from-cyan-50 to-cyan-100"
     },
     {
       icon: BookOpen,

@@ -1,45 +1,69 @@
-# Route2Hire Brand Color Palette
+# Route2Hire Brand System (Warm Beige Cream)
 
 ## Design Philosophy
 
-Route2Hire is a career platform focused on helping users discover opportunities, prepare for interviews, and accelerate their professional growth. The visual identity should communicate:
+Route2Hire’s visual identity is **warm parchment, refined cream, and stylish typography** — editorial and human, not loud or corporate. The product should feel like a calm, premium career companion for QA and SDET professionals: inviting, confident, and memorable.
 
-* **Trust** — Users should feel confident relying on the platform for their career journey.
-* **Growth** — The interface should reinforce progress, success, and continuous learning.
-* **Professionalism** — Clean, modern, and distraction-free design.
-* **Approachability** — Friendly and welcoming without feeling overly corporate.
-
-The overall theme is centered around **White, Emerald, and Navy**, creating a balance between reliability and optimism while differentiating Route2Hire from traditional blue-heavy job portals.
+This system deliberately avoids cold blues and energetic oranges. Warmth comes from **beige and cream surfaces**; personality comes from **expressive display type** paired with a clean UI sans.
 
 ---
 
 # Core Color Palette
 
-| Purpose               | Color        | Hex       |
-| --------------------- | ------------ | --------- |
-| Background            | White        | `#FFFFFF` |
-| Alternate Sections    | Slate 50     | `#F8FAFC` |
-| Cards & Surfaces      | White        | `#FFFFFF` |
-| Primary CTA           | Emerald 600  | `#16A34A` |
-| Primary CTA Hover     | Emerald 700  | `#15803D` |
-| Secondary Brand Color | Navy 800     | `#1E3A8A` |
-| Accent                | Sky Blue 500 | `#0EA5E9` |
-| Headings              | Slate 900    | `#0F172A` |
-| Body Text             | Slate 700    | `#334155` |
-| Muted Text            | Slate 500    | `#64748B` |
-| Borders & Dividers    | Slate 200    | `#E2E8F0` |
+| Purpose            | Color          | Hex       |
+| ------------------ | -------------- | --------- |
+| Background         | Parchment      | `#F7F3EC` |
+| Alternate Sections | Deep Cream     | `#EFE8DC` |
+| Cards & Surfaces   | Warm White     | `#FFFDF8` |
+| Primary Brand      | Espresso Ink   | `#2C241B` |
+| Primary Hover      | Deep Ink       | `#1A1510` |
+| Secondary Brand    | Warm Taupe     | `#6B5A48` |
+| Accent             | Soft Bronze    | `#C4A574` |
+| Headings           | Warm Near-Black| `#1C1917` |
+| Body Text         | Warm Stone     | `#57534E` |
+| Muted Text        | Warm Gray      | `#78716C` |
+| Borders & Dividers | Linen          | `#E5DCCE` |
 
 ---
 
 # Semantic Colors
 
-These colors should be used consistently across the platform to provide clear visual feedback.
+Keep semantic feedback independent of the brand palette.
 
 | Purpose | Hex       |
 | ------- | --------- |
 | Success | `#22C55E` |
-| Warning | `#F59E0B` |
+| Warning | `#D97706` |
 | Error   | `#EF4444` |
+
+---
+
+# Typography
+
+### Display (headings, hero, brand moments)
+
+* **Font:** Fraunces (serif, soft optical size)
+* **Color:** `#1C1917`
+* **Feel:** Editorial, confident, stylish
+* Use for page titles, section headings, and logo wordmarks
+
+### UI / Body
+
+* **Font:** DM Sans
+* **Color:** `#57534E`
+* **Feel:** Clean, modern, highly readable
+* Use for navigation, body copy, forms, and labels
+
+### Muted
+
+* **Color:** `#78716C`
+* Metadata, captions, helper text, empty states
+
+### Rules
+
+* Do **not** default to Inter, Roboto, Arial, or system stacks for branded surfaces.
+* Prefer generous tracking on small uppercase labels; tighter tracking on large display headlines.
+* Brand mark: `Route` + bronze `2` + `Hire` — display weight for the wordmark.
 
 ---
 
@@ -47,193 +71,79 @@ These colors should be used consistently across the platform to provide clear vi
 
 ## Backgrounds
 
-* Use **White (`#FFFFFF`)** as the primary page background.
-* Separate major sections using **Slate 50 (`#F8FAFC`)** to create subtle visual hierarchy.
-* Avoid dark backgrounds in the default light theme.
-
----
+* Primary page canvas: **Parchment `#F7F3EC`**
+* Alternate bands: **Deep Cream `#EFE8DC`**
+* Elevated surfaces (cards, nav island, menus): **Warm White `#FFFDF8`**
+* Avoid cold grays (`#F8FAFC`, slate washes) on marketing and shell surfaces
 
 ## Primary Actions
 
-Use **Emerald (`#16A34A`)** for:
+Use **Espresso Ink `#2C241B`** for:
 
 * Primary buttons
-* Important CTAs
-* Sign Up
-* Apply Now
-* Start Practice
-* Continue Learning
-* Upgrade actions
+* Sign In / Sign Up
+* Apply / Start / Continue CTAs
 
-Hover state:
+Hover: **`#1A1510`**  
+Label text on primary buttons: warm white `#FFFDF8`
 
-* **`#15803D`**
+Ink reads as premium and calm on cream — momentum without orange urgency.
 
-The primary green should remain exclusive to meaningful actions so it consistently signals progress and encourages interaction.
+## Secondary & Accent
 
----
-
-## Secondary Brand Color
-
-Use **Navy (`#1E3A8A`)** for:
-
-* Navigation
-* Active tabs
-* Important icons
-* Selected states
-* Hero illustrations (where appropriate)
-
-Navy establishes trust and professionalism without overwhelming the interface.
-
----
-
-## Accent Color
-
-Use **Sky Blue (`#0EA5E9`)** sparingly for:
-
-* Links
-* Interactive highlights
-* Charts and graphs
-* Progress indicators
-* Focus states
-* Informational UI elements
-
-The accent color should complement the primary palette rather than compete with it.
-
----
-
-## Typography
-
-### Headings
-
-* Color: **`#0F172A`**
-* High contrast
-* Bold and confident
-
-### Body Text
-
-* Color: **`#334155`**
-* Comfortable for long-form reading
-* Optimized for accessibility
-
-### Muted Text
-
-* Color: **`#64748B`**
-* Metadata
-* Captions
-* Secondary descriptions
-* Empty states
-
----
+* **Taupe `#6B5A48`:** icons, secondary buttons, active nav text
+* **Bronze `#C4A574`:** active indicators, premium/highlight moments, brand “2”, charts — use sparingly
 
 ## Cards
 
-Cards should remain clean and elevated.
-
-* Background: `#FFFFFF`
-* Border: `#E2E8F0`
-* Soft shadow with low opacity
-* Rounded corners
-* Generous whitespace
-
-The goal is clarity over decoration.
-
----
+* Background: `#FFFDF8`
+* Border: `#E5DCCE`
+* Soft warm shadow (low opacity brown, not black-blue)
+* Rounded corners, generous padding
 
 ## Borders & Dividers
 
-Use **`#E2E8F0`** consistently for:
+Use **`#E5DCCE`** for inputs, menus, tables, dividers, and modals.
 
-* Card outlines
-* Input fields
-* Tables
-* Section dividers
-* Dropdowns
-* Modals
+## Focus States
 
-Borders should subtly define structure without drawing unnecessary attention.
+Use a visible bronze or ink ring for keyboard focus (never remove focus styles).
 
 ---
 
 # Design Principles
 
-### 1. White-First Layout
+### 1. Cream-first calm
 
-The interface should feel open, bright, and uncluttered.
+The first impression should feel warm paper and soft light — never clinical white or neon startup energy.
 
-* White dominates the layout.
-* Alternate section backgrounds provide gentle separation.
-* Avoid excessive colored backgrounds.
+### 2. Type is the brand
 
----
+Headlines in Fraunces should carry personality. UI chrome stays quiet so typography can lead.
 
-### 2. Green Indicates Progress
+### 3. Ink for action
 
-Emerald should always communicate positive action or growth.
+Espresso primary actions feel decisive and adult. Reserve bronze for celebration and attention, not every button.
 
-Examples include:
+### 4. Restraint over decoration
 
-* Completing a profile
-* Interview preparation
-* Resume improvements
-* Successful submissions
-* Practice milestones
-* Achievement badges
+No glowing orbs, purple gradients, or orange rims. Atmosphere comes from parchment gradients, linen borders, and type scale.
 
----
+### 5. Modern yet human
 
-### 3. Navy Builds Trust
-
-Reserve navy for structural and brand-defining elements such as:
-
-* Navigation
-* Headers
-* Important labels
-* Brand identity
-
-This reinforces credibility without overpowering the UI.
-
----
-
-### 4. Blue Enhances Interaction
-
-Sky blue should act as a supporting accent for:
-
-* Hover effects
-* Interactive states
-* Charts
-* Analytics
-* External links
-* Informational callouts
-
-It should never replace the primary emerald CTA.
-
----
-
-### 5. Minimal Yet Purposeful
-
-Every color should have a clear purpose.
-
-* White creates breathing room.
-* Emerald drives action.
-* Navy establishes trust.
-* Sky blue adds energy.
-* Gray supports readability and structure.
-
-Avoid introducing unnecessary accent colors that dilute the visual identity.
+Professional without corporate blue; stylish without trend-chasing terracotta posters. Route2Hire should feel like a warm studio, not a job board template.
 
 ---
 
 # Overall Brand Feel
 
-The Route2Hire interface should feel:
+Route2Hire should feel:
 
-* Clean and modern
-* Professional yet approachable
-* Career-focused
-* Growth-oriented
-* Trustworthy
-* Calm and uncluttered
-* Premium without appearing overly corporate
+* Warm and parchment-like
+* Editorial and stylish
+* Calm and confident
+* Approachable for QA/SDET careers
+* Premium without cold luxury
+* Distinct from blue SaaS and orange “startup” clones
 
-Every screen should reinforce the feeling that Route2Hire is a reliable companion throughout a user's career journey—from discovering opportunities to preparing for interviews and securing their next role.
+Every shell surface (header, footer, home) should reinforce cream + ink + bronze and Fraunces/DM Sans pairing.

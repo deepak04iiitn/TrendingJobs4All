@@ -7,6 +7,7 @@ Disallow: /profile
 Disallow: /dashboard
 Disallow: /admin/
 Disallow: /my-jobs
+Disallow: /mypolls
 
 # Sitemaps and AI crawler hints
 Sitemap: https://route2hire.com/sitemap.xml

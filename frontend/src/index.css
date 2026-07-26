@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --r2h-bg: #f7f3ec;
+  --r2h-cream: #efe8dc;
+  --r2h-surface: #fffdf8;
+  --r2h-ink: #2c241b;
+  --r2h-ink-hover: #1a1510;
+  --r2h-taupe: #6b5a48;
+  --r2h-bronze: #c4a574;
+  --r2h-heading: #1c1917;
+  --r2h-body: #57534e;
+  --r2h-muted: #78716c;
+  --r2h-border: #e5dcce;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body);
+    color: var(--r2h-body);
+    background-color: var(--r2h-bg);
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    color: var(--r2h-heading);
+  }
+}
+
 /* Blog Content Styles - Applied to content rendered via dangerouslySetInnerHTML */
 .prose ul,
 .prose ol {
