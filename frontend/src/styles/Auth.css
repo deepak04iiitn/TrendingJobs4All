@@ -1,0 +1,142 @@
+/* Auth — Editorial entry (cream theme, no gradients) */
+
+html:has(.auth-page) {
+  scroll-behavior: smooth;
+}
+
+.auth-page {
+  font-family: var(--font-body);
+  color: #57534e;
+}
+
+.auth-page h1,
+.auth-page h2,
+.auth-page .font-display {
+  font-family: var(--font-display);
+  color: #1c1917;
+}
+
+.auth-page a,
+.auth-page button {
+  transition:
+    color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+
+.auth-card {
+  transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-card:hover {
+  box-shadow: 0 28px 56px -28px rgba(44, 36, 27, 0.2);
+}
+
+.auth-benefit {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.35s ease;
+}
+
+.auth-benefit:hover {
+  transform: translateX(4px);
+  border-color: #d9cfc0;
+  box-shadow: 0 12px 24px -18px rgba(44, 36, 27, 0.12);
+}
+
+.auth-logo {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-logo:hover {
+  transform: scale(1.04);
+}
+
+.auth-input {
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.auth-input:hover {
+  border-color: #d9cfc0;
+}
+
+.auth-input:focus {
+  border-color: #c4a574;
+  background-color: #fffdf8;
+  box-shadow: 0 0 0 3px rgba(196, 165, 116, 0.2);
+}
+
+.auth-submit {
+  transition:
+    background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -14px rgba(44, 36, 27, 0.4);
+}
+
+.auth-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.auth-oauth {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-oauth:hover {
+  background-color: #f7f3ec;
+  border-color: #c4a574;
+  transform: translateY(-1px);
+}
+
+.auth-link {
+  color: #6b5a48;
+  font-weight: 600;
+}
+
+.auth-link:hover {
+  color: #2c241b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.auth-page) {
+    scroll-behavior: auto;
+  }
+
+  .auth-page a,
+  .auth-page button,
+  .auth-card,
+  .auth-benefit,
+  .auth-logo,
+  .auth-input,
+  .auth-submit,
+  .auth-oauth {
+    transition: none;
+  }
+
+  .auth-card:hover,
+  .auth-benefit:hover,
+  .auth-logo:hover,
+  .auth-submit:hover:not(:disabled),
+  .auth-oauth:hover {
+    transform: none;
+  }
+}
