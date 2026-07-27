@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 import OAuth from '../components/OAuth';
+import {
+  AuthSeo,
+  AuthShell,
+  AuthField,
+  SIGN_UP,
+  SIGN_UP_SEO,
+} from '../components/auth';
+import { easeOut } from '../components/home/motion.jsx';
+import { focusRing } from '../theme/tokens';
+import '../styles/Auth.css';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({});
@@ -9,6 +20,10 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const reduceMotion = useReducedMotion();
+
+  const redirectParam = new URLSearchParams(location.search).get('redirect') || '';
+  const signInHref = `/sign-in?redirect=${encodeURIComponent(redirectParam)}`;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
@@ -31,8 +46,10 @@ export default function SignUp() {
 
       const data = await res.json();
       if (data.success === false) {
+        setLoading(false);
         return setErrorMessage(data.message);
       }
+
       setLoading(false);
       if (res.ok) {
         const params = new URLSearchParams(location.search);
@@ -47,165 +64,93 @@ export default function SignUp() {
 
   return (
     <>
-      {/* ✅ Helmet for SEO */}
-      <Helmet>
-        <title>Sign Up | Join Route2Hire QA & SDET Community</title>
-        <meta
-          name="description"
-          content="Join Route2Hire community for QA, SDET, Test Automation professionals. Get access to curated jobs, interview prep, salary insights, and career resources for software testing roles."
-        />
-        <meta
-          name="keywords"
-          content="Sign up, Register, Join Route2Hire, QA community, SDET community, Test Automation community, Software Testing community, QA platform registration"
-        />
-        <meta property="og:title" content="Sign Up | Join Route2Hire QA & SDET Community" />
-        <meta
-          property="og:description"
-          content="Join the Route2Hire community for QA, SDET, and Test Automation professionals. Access jobs, interview prep, and career resources."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://route2hire.com/sign-up" />
-        <meta property="og:image" content="https://route2hire.com/assets/Route2Hire.png" />
-        <link rel="canonical" href="https://route2hire.com/sign-up" />
-      </Helmet>
+      <AuthSeo seo={SIGN_UP_SEO} />
 
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8 mt-20">
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="flex flex-col md:flex-row">
-          {/* Left side - Hero Section */}
-          <div className="md:w-1/2 bg-gradient-to-br from-purple-600 to-pink-500 p-12 text-white flex flex-col justify-center">
-            <Link to="/" className="flex justify-center">
-              <img
-                src="/assets/Route2Hire.png"
-                alt="CareerConnect Logo"
-                className="h-32 w-32 object-contain mb-8 hover:scale-105 transition-transform"
-              />
-            </Link>
-            <h2 className="text-3xl font-bold text-center mb-4">
-              EXPLORE • APPLY • SUCCEED
-            </h2>
-            <p className="text-lg text-center text-white/90 font-light italic mb-8">
-              "Building Routes to Connect Careers and Opportunities – Welcome to Route2Hire!"
-            </p>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4 bg-white/10 p-4 rounded-lg">
-                <div className="bg-white/20 p-2 rounded-full">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
-                  </svg>
-                </div>
-                <span>Access to Premium Job Listings</span>
-              </div>
-              <div className="flex items-center space-x-4 bg-white/10 p-4 rounded-lg">
-                <div className="bg-white/20 p-2 rounded-full">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <span>Quick Apply Features</span>
-              </div>
-              <div className="flex items-center space-x-4 bg-white/10 p-4 rounded-lg">
-                <div className="bg-white/20 p-2 rounded-full">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <span>Verified Employers</span>
-              </div>
-            </div>
-          </div>
+      <AuthShell content={SIGN_UP}>
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.1, ease: easeOut }}
+        >
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-[#1C1917] sm:text-3xl">
+            {SIGN_UP.formTitle}
+          </h2>
+          <p className="mt-2 text-sm text-[#78716C]">
+            Free account for QA, SDET and Test Automation professionals.
+          </p>
 
-          {/* Right side - Form Section */}
-          <div className="md:w-1/2 p-12">
-            <div className="max-w-md mx-auto">
-              <h2 className="text-3xl font-bold text-gray-800 mb-8">Create Account</h2>
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    id="username"
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                    placeholder="Enter your username"
-                  />
-                </div>
+          <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+            <AuthField
+              id="username"
+              label="Username"
+              type="text"
+              placeholder="Choose a username"
+              onChange={handleChange}
+              autoComplete="username"
+            />
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                    placeholder="name@company.com"
-                  />
-                </div>
+            <AuthField
+              id="email"
+              label="Email"
+              type="email"
+              placeholder="you@company.com"
+              onChange={handleChange}
+              autoComplete="email"
+            />
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none"
-                    placeholder="••••••••"
-                  />
-                </div>
+            <AuthField
+              id="password"
+              label="Password"
+              type="password"
+              placeholder="Create a password"
+              onChange={handleChange}
+              autoComplete="new-password"
+            />
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-70 flex items-center justify-center"
-                >
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Loading...
-                    </>
-                  ) : (
-                    'Sign Up'
-                  )}
-                </button>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                  </div>
-                </div>
-
-                <OAuth />
-              </form>
-
-              {errorMessage && (
-                <div className="mt-4 bg-red-50 text-red-600 p-4 rounded-lg text-sm">
-                  {errorMessage}
-                </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`auth-submit mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-[#2C241B] px-6 py-3 text-sm font-semibold text-[#FFFDF8] ${focusRing}`}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  Creating account...
+                </>
+              ) : (
+                SIGN_UP.submit
               )}
+            </button>
 
-              <p className="mt-8 text-center text-sm text-gray-600">
-                Have an account?{' '}
-                <Link to={`/sign-in?redirect=${encodeURIComponent(new URLSearchParams(location.search).get('redirect') || '')}`} className="font-medium text-purple-600 hover:text-purple-500">
-                  Sign In
-                </Link>
-              </p>
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center" aria-hidden>
+                <div className="w-full border-t border-[#E5DCCE]" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase tracking-[0.14em]">
+                <span className="bg-[#FFFDF8] px-3 text-[#78716C]">Or continue with</span>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-      </div>
+
+            <OAuth />
+          </form>
+
+          {errorMessage && (
+            <div
+              className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+              role="alert"
+            >
+              {errorMessage}
+            </div>
+          )}
+
+          <p className="mt-8 text-center text-sm text-[#57534E]">
+            {SIGN_UP.switchLabel}{' '}
+            <Link to={signInHref} className={`auth-link ${focusRing}`}>
+              {SIGN_UP.switchCta}
+            </Link>
+          </p>
+        </motion.div>
+      </AuthShell>
     </>
   );
 }
