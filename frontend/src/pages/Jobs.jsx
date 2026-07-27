@@ -1,27 +1,29 @@
-import React from 'react'
 import { Helmet } from 'react-helmet-async';
-import Breadcrumb from '../components/Breadcrumb';
-import JobTable from '../components/JobTable'
-import RelatedLinks from '../components/RelatedLinks'
+import { motion, useReducedMotion } from 'framer-motion';
+import JobTable from '../components/JobTable';
+import RelatedLinks from '../components/RelatedLinks';
+import { easeOut } from '../components/home/motion.jsx';
+import '../styles/Jobs.css';
 
 export default function Jobs() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <>
-      {/* ✅ Helmet for SEO */}
       <Helmet>
         <title>QA, SDET & Test Automation Jobs | Route2Hire</title>
         <meta
           name="description"
-          content="Browse latest QA, SDET, Test Automation, and Software Testing jobs on Route2Hire. Find curated opportunities from top companies for Quality Assurance and Test Engineering professionals."
+          content="Browse curated QA, SDET, Test Automation and Software Testing jobs on Route2Hire. Filter by experience, category and date to find role-ready openings from top companies."
         />
         <meta
           name="keywords"
-          content="QA jobs, SDET careers, Test Automation jobs, Software Testing positions, Quality Assurance roles, Test Engineering jobs, QA engineer positions, Automation testing careers"
+          content="QA jobs, SDET jobs, Test Automation jobs, Software Testing jobs, Quality Assurance careers, Test Engineering roles, automation testing openings"
         />
         <meta property="og:title" content="QA, SDET & Test Automation Jobs | Route2Hire" />
         <meta
           property="og:description"
-          content="Discover the latest QA, SDET, and Test Automation job opportunities. Browse curated software testing positions from top companies on Route2Hire platform."
+          content="Explore curated QA, SDET and Test Automation openings with filters for experience, category and posting date."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://route2hire.com/jobs" />
@@ -29,36 +31,34 @@ export default function Jobs() {
         <link rel="canonical" href="https://route2hire.com/jobs" />
       </Helmet>
 
-      <div>
-      {/* Job Table Section */}
-      <section id="jobs" className="py-12 sm:py-20">
-          <div className="container mx-auto px-4 sm:px-6">
-            {/* Breadcrumb Navigation */}
-            <div className="mb-8 pt-20">
-              <Breadcrumb 
-                items={[
-                  { label: 'Jobs', path: '/jobs' }
-                ]}
-              />
-            </div>
-            
-            <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 sm:mb-6">Premium Opportunities</h2>
-              <p className="text-lg sm:text-xl text-white/70 max-w-3xl mx-auto">
-                Discover hand-curated, high-paying positions from top companies worldwide
-              </p>
-            </div>
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden">
-              <JobTable />
-            </div>
-            
-            {/* Related Resources Section */}
-            <div className="mt-12">
-              <RelatedLinks type="job" />
-            </div>
+      <div className="jobs-page min-h-screen pb-16 pt-28 sm:pb-20 sm:pt-32">
+        <section id="jobs" className="mx-auto max-w-6xl px-4 sm:px-6">
+          <motion.header
+            initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: easeOut }}
+            className="mb-10 max-w-3xl sm:mb-12"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B5A48]">
+              Job board
+            </p>
+            <h1 className="font-display mt-3 text-[clamp(2rem,5vw,3.25rem)] font-semibold leading-tight tracking-tight text-[#1C1917]">
+              Curated QA, SDET and Test Automation jobs
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#57534E] sm:text-lg">
+              Browse software testing roles and filter by keyword, experience, category or date -
+              then open the full JD when you are ready to apply.
+            </p>
+            <div className="jobs-divider mt-6" aria-hidden />
+          </motion.header>
+
+          <JobTable />
+
+          <div className="jobs-related mt-14">
+            <RelatedLinks type="job" />
           </div>
         </section>
       </div>
     </>
-  )
+  );
 }
