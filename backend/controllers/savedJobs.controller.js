@@ -97,28 +97,62 @@ export const saveJob = async (req, res) => {
     }
 };
 
-// Get all saved jobs for a user
+// Get saved jobs for a user (server-side pagination)
 export const getSavedJobs = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        // Validate ObjectId format
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ message: 'Invalid userId format' });
         }
 
         const userObjectId = new mongoose.Types.ObjectId(userId);
 
-        const savedJobs = await SavedJob.find({ userId: userObjectId })
-            .sort({ time: -1 }) // Sort by time in descending order (newest first)
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 10));
+        const search = String(req.query.search || '').trim();
+
+        const query = { userId: userObjectId };
+
+        // Optional exact job lookup (e.g. Full JD "is saved?" check)
+        const jobIdFilter = String(req.query.jobId || '').trim();
+        if (jobIdFilter && mongoose.Types.ObjectId.isValid(jobIdFilter)) {
+            query.jobId = new mongoose.Types.ObjectId(jobIdFilter);
+        }
+
+        if (search) {
+            const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escaped, 'i');
+            query.$or = [
+                { title: regex },
+                { company: regex },
+                { location: regex },
+            ];
+        }
+
+        const total = await SavedJob.countDocuments(query);
+        const totalPages = Math.max(1, Math.ceil(total / limit));
+        const safePage = Math.min(page, totalPages);
+        const skip = (safePage - 1) * limit;
+
+        const items = await SavedJob.find(query)
+            .sort({ time: -1 })
+            .skip(skip)
+            .limit(limit)
             .exec();
 
-        res.json(savedJobs);
+        res.json({
+            items,
+            total,
+            page: safePage,
+            limit,
+            totalPages,
+        });
     } catch (err) {
         console.error('Error fetching saved jobs:', err);
-        res.status(500).json({ 
-            message: 'Failed to fetch saved jobs', 
-            error: err.message 
+        res.status(500).json({
+            message: 'Failed to fetch saved jobs',
+            error: err.message,
         });
     }
 };
@@ -140,10 +174,10 @@ export const deleteSavedJob = async (req, res) => {
         const userObjectId = new mongoose.Types.ObjectId(userId);
         const jobObjectId = new mongoose.Types.ObjectId(jobId);
 
-        // Find and delete by userId and the saved job's _id (not the original jobId)
-        const deletedJob = await SavedJob.findOneAndDelete({ 
-            userId: userObjectId, 
-            _id: jobObjectId 
+        // Accept either the SavedJob document _id or the original jobId
+        const deletedJob = await SavedJob.findOneAndDelete({
+            userId: userObjectId,
+            $or: [{ _id: jobObjectId }, { jobId: jobObjectId }],
         });
 
         if (!deletedJob) {

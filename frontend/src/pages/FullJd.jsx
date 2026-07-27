@@ -153,9 +153,11 @@ export default function FullJd() {
 
   const checkIfJobIsSaved = async (jobId) => {
     try {
-      const { data } = await axios.get(`/backend/saved-jobs/${userId}`);
-      const saved = data.some((savedJob) => savedJob.jobId === jobId);
-      setIsSaved(saved);
+      const { data } = await axios.get(
+        `/backend/saved-jobs/${userId}?jobId=${jobId}&page=1&limit=1`
+      );
+      const items = Array.isArray(data) ? data : data.items || [];
+      setIsSaved(items.length > 0);
     } catch (err) {
       console.error('Error checking saved jobs:', err);
     }
