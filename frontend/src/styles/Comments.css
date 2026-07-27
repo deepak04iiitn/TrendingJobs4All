@@ -1,0 +1,299 @@
+/* Job comments — cream theme */
+
+.jd-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.jd-comments__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #78716c;
+}
+
+.jd-comments__identity img {
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid #e5dcce;
+}
+
+.jd-comments__identity a {
+  font-weight: 600;
+  color: #6b5a48;
+}
+
+.jd-comments__identity a:hover {
+  color: #2c241b;
+}
+
+.jd-comments__composer {
+  border: 1px solid #e5dcce;
+  border-radius: 1rem;
+  background: #f7f3ec;
+  padding: 0.9rem;
+}
+
+.jd-comments__textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 5.5rem;
+  border: 1px solid #e5dcce;
+  border-radius: 0.75rem;
+  background: #fffdf8;
+  color: #1c1917;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.jd-comments__textarea:focus {
+  border-color: #c4a574;
+  box-shadow: 0 0 0 3px rgba(196, 165, 116, 0.14);
+}
+
+.jd-comments__textarea::placeholder {
+  color: #78716c;
+}
+
+.jd-comments__composer-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.jd-comments__count {
+  font-size: 0.75rem;
+  color: #78716c;
+}
+
+.jd-comments__submit {
+  border-radius: 999px;
+  background: #2c241b;
+  color: #fffdf8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+}
+
+.jd-comments__submit:hover:not(:disabled) {
+  background: #1a1510;
+}
+
+.jd-comments__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.jd-comments__error {
+  margin-top: 0.75rem;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  background: #fef2f2;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+.jd-comments__list-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid #e5dcce;
+}
+
+.jd-comments__list-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.jd-comments__badge {
+  display: inline-flex;
+  min-width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #efe8dc;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #6b5a48;
+}
+
+.jd-comments__empty {
+  font-size: 0.9rem;
+  color: #78716c;
+}
+
+.jd-comment {
+  display: flex;
+  gap: 0.85rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5dcce;
+}
+
+.jd-comment:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.jd-comment__avatar {
+  height: 2.5rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid #e5dcce;
+  background: #efe8dc;
+  object-fit: cover;
+}
+
+.jd-comment__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  margin-bottom: 0.35rem;
+}
+
+.jd-comment__user {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1c1917;
+}
+
+.jd-comment__time {
+  font-size: 0.75rem;
+  color: #78716c;
+}
+
+.jd-comment__body {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #57534e;
+}
+
+.jd-comment__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+}
+
+.jd-comment__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #78716c;
+}
+
+.jd-comment__action:hover {
+  color: #2c241b;
+}
+
+.jd-comment__action.is-liked {
+  color: #6b5a48;
+}
+
+.jd-comment__action.is-danger:hover {
+  color: #b91c1c;
+}
+
+.jd-comment__edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.jd-comment__btn {
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+}
+
+.jd-comment__btn--primary {
+  background: #2c241b;
+  color: #fffdf8;
+}
+
+.jd-comment__btn--primary:hover {
+  background: #1a1510;
+}
+
+.jd-comment__btn--ghost {
+  border: 1px solid #e5dcce;
+  background: #fffdf8;
+  color: #57534e;
+}
+
+.jd-comment__btn--ghost:hover {
+  background: #efe8dc;
+}
+
+.jd-comment-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  border: none;
+  background: rgba(44, 36, 27, 0.35);
+  cursor: pointer;
+}
+
+.jd-comment-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 81;
+  width: min(100% - 2rem, 22rem);
+  transform: translate(-50%, -50%);
+  border: 1px solid #e5dcce;
+  border-radius: 1.25rem;
+  background: #fffdf8;
+  padding: 1.35rem;
+  box-shadow: 0 28px 56px -28px rgba(44, 36, 27, 0.35);
+  text-align: center;
+}
+
+.jd-comment-modal h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.jd-comment-modal p {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #57534e;
+}
+
+.jd-comment-modal__actions {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
+}
+
+.jd-comment-modal__actions button {
+  flex: 1;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.65rem 0.85rem;
+}
