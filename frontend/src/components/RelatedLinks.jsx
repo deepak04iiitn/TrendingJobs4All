@@ -12,7 +12,6 @@ export default function RelatedLinks({ type = 'general' }) {
         { path: '/interviewExp', label: 'Interview Experiences' },
         { path: '/interview-questions', label: 'Interview Questions' },
         { path: '/salaryStructures', label: 'Salary Insights' },
-        { path: '/referrals', label: 'Referrals' },
         { path: '/resume-builder', label: 'Resume Builder' },
         { path: '/qa-sdet-dsa-sheet', label: 'DSA Sheet' },
       ],
@@ -24,7 +23,6 @@ export default function RelatedLinks({ type = 'general' }) {
         { path: '/jobs', label: 'Jobs' },
         { path: '/salaryStructures', label: 'Salary Insights' },
         { path: '/resume-builder', label: 'Resume Builder' },
-        { path: '/referrals', label: 'Referrals' },
       ],
     },
     salary: {
@@ -32,17 +30,6 @@ export default function RelatedLinks({ type = 'general' }) {
       links: [
         { path: '/jobs', label: 'Jobs' },
         { path: '/interviewExp', label: 'Interview Experiences' },
-        { path: '/referrals', label: 'Referrals' },
-        { path: '/interview-questions', label: 'Interview Questions' },
-        { path: '/resumeTemplates', label: 'Resume Templates' },
-      ],
-    },
-    referral: {
-      title: 'More resources',
-      links: [
-        { path: '/jobs', label: 'Jobs' },
-        { path: '/interviewExp', label: 'Interview Experiences' },
-        { path: '/salaryStructures', label: 'Salary Insights' },
         { path: '/interview-questions', label: 'Interview Questions' },
         { path: '/resume-builder', label: 'Resume Builder' },
       ],
@@ -53,7 +40,6 @@ export default function RelatedLinks({ type = 'general' }) {
         { path: '/jobs', label: 'Jobs' },
         { path: '/interviewExp', label: 'Interview Experiences' },
         { path: '/salaryStructures', label: 'Salary Insights' },
-        { path: '/referrals', label: 'Referrals' },
         { path: '/interview-questions', label: 'Interview Questions' },
         { path: '/resume-builder', label: 'Resume Builder' },
       ],

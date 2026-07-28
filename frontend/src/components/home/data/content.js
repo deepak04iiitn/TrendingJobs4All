@@ -1,12 +1,12 @@
 ﻿export const SEO = {
   title: 'Route2Hire | QA, SDET & Test Automation Jobs, Interviews & Prep',
   description:
-    'Route2Hire is the career platform for QA, SDET and Test Automation engineers - curated software testing jobs, real interview experiences, a QA/SDET DSA sheet, salary insights, referrals, resume tools and roadmaps.',
+    'Route2Hire is the career platform for QA, SDET and Test Automation engineers - curated software testing jobs, real interview experiences, a QA/SDET DSA sheet, salary insights, resume builder and roadmaps.',
   keywords:
-    'QA jobs, SDET jobs, Test Automation jobs, software testing careers, QA interview questions, SDET interview experiences, QA DSA sheet, automation testing salary, QA referrals, SDET resume, test engineer roadmap',
+    'QA jobs, SDET jobs, Test Automation jobs, software testing careers, QA interview questions, SDET interview experiences, QA DSA sheet, automation testing salary, SDET resume, test engineer roadmap',
   ogTitle: 'Route2Hire | QA, SDET & Test Automation Careers',
   ogDescription:
-    'Find curated QA and SDET jobs, study real interview experiences, practice the QA/SDET DSA sheet, compare salaries and get referrals - all on one platform built for testers.',
+    'Find curated QA and SDET jobs, study real interview experiences, practice the QA/SDET DSA sheet and compare salaries - all on one platform built for testers.',
   canonical: 'https://route2hire.com',
   ogImage: 'https://route2hire.com/assets/Route2Hire.png',
 };
@@ -15,7 +15,7 @@ export const COVER = {
   brand: 'Route2Hire',
   headline: 'Built only for QA & SDET careers.',
   support:
-    'Curated software testing jobs, real interview experiences, QA/SDET DSA practice, salary insights and referrals - on one platform for testers.',
+    'Curated software testing jobs, real interview experiences, QA/SDET DSA practice and salary insights - on one platform for testers.',
   primaryCta: { label: 'Explore QA/SDET jobs', path: '/jobs' },
   secondaryCta: { label: 'Open DSA Sheet', path: '/qa-sdet-dsa-sheet' },
 };
@@ -26,10 +26,10 @@ export const WORD_FIELD = [
   { label: 'Interviews', path: '/interviewExp', blurb: 'Round-by-round QA & SDET interview experiences', weight: 'lg', x: 52, y: 12, rotate: 3 },
   { label: 'DSA', path: '/qa-sdet-dsa-sheet', blurb: 'DSA practice sheet built for testing interviews', weight: 'xl', x: 28, y: 42, rotate: -2 },
   { label: 'Salary', path: '/salaryStructures', blurb: 'QA & SDET compensation bands, role by role', weight: 'md', x: 68, y: 38, rotate: 5 },
-  { label: 'Referrals', path: '/referrals', blurb: 'Employee referrals from testers already inside', weight: 'md', x: 12, y: 68, rotate: 2 },
-  { label: 'Resume', path: '/resume-builder', blurb: 'QA/SDET resume templates and guided builder', weight: 'sm', x: 48, y: 62, rotate: -6 },
-  { label: 'Roadmaps', path: '/roadmaps', blurb: 'Manual testing to SDET and automation architect', weight: 'sm', x: 74, y: 72, rotate: 4 },
-  { label: 'Questions', path: '/interview-questions', blurb: 'Topic-wise QA/SDET questions with model answers', weight: 'md', x: 38, y: 82, rotate: -1 },
+  { label: 'Resume', path: '/resume-builder', blurb: 'Guided QA/SDET resume builder', weight: 'sm', x: 12, y: 68, rotate: 2 },
+  { label: 'Roadmaps', path: '/roadmaps', blurb: 'Manual testing to SDET and automation architect', weight: 'sm', x: 48, y: 62, rotate: -6 },
+  { label: 'Questions', path: '/interview-questions', blurb: 'Topic-wise QA/SDET questions with model answers', weight: 'md', x: 74, y: 72, rotate: 4 },
+  { label: 'Blogs', path: '/blogs', blurb: 'Playbooks for automation, CI and interview strategy', weight: 'sm', x: 38, y: 82, rotate: -1 },
 ];
 
 /** Stacked parchment sheets - flip through the platform */
@@ -62,9 +62,9 @@ export const PAPER_STACK = [
     id: 'offer',
     label: 'Chapter IV',
     title: 'Negotiate and walk in prepared',
-    body: 'Community-sourced salary structures, employee referrals and QA/SDET resume templates that recruiters and ATS actually parse.',
+    body: 'Community-sourced salary structures and a guided QA/SDET resume builder that recruiters and ATS actually parse.',
     cta: { label: 'Create free account', path: '/sign-up' },
-    marks: ['Mid-senior salary bands', 'Peer referrals', 'QA/SDET resume templates'],
+    marks: ['Mid-senior salary bands', 'Resume builder', 'Negotiation context'],
   },
 ];
 
@@ -105,17 +105,10 @@ export const FEATURES = [
     path: '/salaryStructures',
   },
   {
-    id: 'referrals',
-    title: 'Referrals',
-    description:
-      'Employee referrals from QA and SDET engineers already working at the companies you want to join, so your resume reaches a human.',
-    path: '/referrals',
-  },
-  {
     id: 'resume',
-    title: 'Resume Builder & Templates',
+    title: 'Resume Builder',
     description:
-      'ATS-friendly QA and SDET resume templates plus a guided builder that highlights the automation frameworks and tools recruiters scan for.',
+      'A guided ATS-friendly resume builder that highlights the automation frameworks and tools recruiters scan for.',
     path: '/resume-builder',
   },
   {
@@ -137,7 +130,7 @@ export const FEATURES = [
 export const FAQS = [
   {
     q: 'What is Route2Hire?',
-    a: 'Route2Hire is a career platform built for QA, SDET and Test Automation professionals. It brings curated software testing jobs, real interview experiences, a QA/SDET DSA sheet, salary insights, referrals, resume tools and career roadmaps together in one place.',
+    a: 'Route2Hire is a career platform built for QA, SDET and Test Automation professionals. It brings curated software testing jobs, real interview experiences, a QA/SDET DSA sheet, salary insights, a resume builder and career roadmaps together in one place.',
   },
   {
     q: 'Is Route2Hire only for QA and SDET roles?',
@@ -149,7 +142,7 @@ export const FAQS = [
   },
   {
     q: 'How do I find QA and SDET jobs on Route2Hire?',
-    a: 'Browse the job board for daily curated Quality Assurance, SDET and Test Automation openings, filter by role, experience and skills, then apply directly or request a referral from someone already inside the company.',
+    a: 'Browse the job board for daily curated Quality Assurance, SDET and Test Automation openings, filter by role, experience and skills, then apply directly.',
   },
   {
     q: 'How do I get QA job alerts?',
@@ -183,7 +176,7 @@ export const COMMUNITY = {
 export const CLOSING = {
   title: 'Your next testing role starts here.',
   support:
-    'QA and SDET jobs, interview experiences, DSA practice, salary insights and referrals - free to start.',
+    'QA and SDET jobs, interview experiences, DSA practice and salary insights - free to start.',
   cta: { label: 'Create free account', path: '/sign-up' },
 };
 
@@ -205,7 +198,6 @@ export function buildJsonLd(siteUrl) {
       'Test Automation',
       'Interview preparation',
       'Salary insights',
-      'Employee referrals',
     ],
   };
 }

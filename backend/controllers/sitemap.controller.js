@@ -1,6 +1,5 @@
 import InterviewExperience from '../models/interview.model.js';
 import Salary from '../models/salary.model.js';
-import Referral from '../models/referral.model.js';
 import InterviewQuestion from '../models/interviewQuestion.model.js';
 import Blog from '../models/blog.model.js';
 import mongoose from 'mongoose';
@@ -45,8 +44,6 @@ const generateSitemapXML = (urls) => {
     { url: '/mypolls', priority: '0.60' },
     { url: '/interview-experiences', priority: '0.80' }, // Canonical URL (removed /interviewExp duplicate)
     { url: '/salary-structures', priority: '0.80' }, // Canonical URL (prefer kebab-case)
-    { url: '/referrals', priority: '0.80' },
-    { url: '/resume-templates', priority: '0.70' }, // Canonical URL (prefer kebab-case)
     { url: '/roadmaps', priority: '0.60' },
     { url: '/myCorner', priority: '0.60' },
     { url: '/BuyMeACoffee', priority: '0.50' },
@@ -105,14 +102,12 @@ export const generateSitemap = async (req, res) => {
     const [
       interviewExperiences,
       salaryRecords,
-      referrals,
       interviewQuestions,
       jobs,
       blogs
     ] = await Promise.all([
       InterviewExperience.find({}, '_id company position updatedAt').lean().limit(10000), // Include fields for slug
       Salary.find({}, '_id company position updatedAt').lean().limit(10000),
-      Referral.find({}, '_id company positions updatedAt').lean().limit(10000),
       InterviewQuestion.find({}, '_id topic updatedAt').lean().limit(10000),
       mongoose.connection.db.collection('naukri').find(
         { 
@@ -145,19 +140,6 @@ export const generateSitemap = async (req, res) => {
         url: `/salary/${salary._id}`,
         priority: '0.70',
         lastmod: salary.updatedAt ? new Date(salary.updatedAt).toISOString().split('T')[0] : null
-      });
-    });
-
-    // Add referral URLs
-    referrals.forEach(referral => {
-      const primaryPosition = Array.isArray(referral.positions) && referral.positions.length > 0 
-        ? referral.positions[0].position 
-        : 'role';
-      const slug = createSlug(`${referral.company || 'company'}-${primaryPosition}`);
-      dynamicUrls.push({
-        url: `/referral/${slug}/${referral._id}`,
-        priority: '0.70',
-        lastmod: referral.updatedAt ? new Date(referral.updatedAt).toISOString().split('T')[0] : null
       });
     });
 
@@ -230,14 +212,12 @@ export const getSitemapStats = async (req, res) => {
     const [
       interviewCount,
       salaryCount,
-      referralCount,
       questionCount,
       jobCount,
       blogCount
     ] = await Promise.all([
       InterviewExperience.countDocuments(),
       Salary.countDocuments(),
-      Referral.countDocuments(),
       InterviewQuestion.countDocuments(),
       mongoose.connection.db.collection('naukri').countDocuments({
         apply_link: { $exists: true, $ne: null, $ne: '' },
@@ -249,8 +229,8 @@ export const getSitemapStats = async (req, res) => {
       Blog.countDocuments({ published: true })
     ]);
 
-    const totalDynamicUrls = interviewCount + salaryCount + referralCount + questionCount + jobCount + blogCount;
-    const staticUrlCount = 27; // Count of static URLs (removed duplicates, using canonical URLs only)
+    const totalDynamicUrls = interviewCount + salaryCount + questionCount + jobCount + blogCount;
+    const staticUrlCount = 25; // Count of static URLs (removed referrals/resume-templates)
     const totalUrls = staticUrlCount + totalDynamicUrls;
 
     res.json({
@@ -260,7 +240,6 @@ export const getSitemapStats = async (req, res) => {
         dynamicUrls: {
           interviewExperiences: interviewCount,
           salaryRecords: salaryCount,
-          referrals: referralCount,
           interviewQuestions: questionCount,
           jobs: jobCount,
           blogs: blogCount,

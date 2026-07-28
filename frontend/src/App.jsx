@@ -12,9 +12,6 @@ import FullJd from './pages/FullJd';
 import MyJobs from './pages/MyJobs';
 import InterviewExp from './pages/InterviewExp';
 import SalaryStructures from './pages/SalaryStructures';
-import Referrals from './pages/Referrals';
-import ResumeReviews from './pages/ResumeReviews';
-import ResumeTemplates from './pages/ResumeTemplates';
 import MyCorner from './pages/MyCorner';
 import PremiumSubscription from './pages/PremiumSubscription';
 import PrivateRoute from './components/PrivateRoute';
@@ -27,7 +24,6 @@ import CookiePolicy from './pages/CookiePolicy';
 import Jobs from './pages/Jobs';
 import InterviewDetailPage from './pages/InterviewDetailPage';
 import SalaryDetailPage from './pages/SalaryDetailPage';
-import ReferralDetailPage from './pages/ReferralDetailPage';
 import ResumeBuilder from './pages/ResumeBuilder';
 import InterviewQuestions from './pages/InterviewQuestions';
 import AdminInterviewQuestions from './pages/AdminInterviewQuestions';
@@ -149,13 +145,6 @@ export default function App() {
                 <Route path="/salaryStructures/:slug/:salaryId" element={<SalaryStructures />} />
                 <Route path="/salaryStructures/:salaryId" element={<SalaryStructures />} />
                 <Route path="/salary/:id" element={<SalaryDetailPage />} />
-                <Route path="/referrals" element={<Referrals />} />
-                <Route path="/referral/:slug/:id" element={<ReferralDetailPage />} />
-                <Route path="/referral/:id" element={<ReferralDetailPage />} />
-                <Route path='/resumeTemplates' element={<ResumeTemplates />} />
-                <Route path='/resume-templates' element={<ResumeTemplates />} />
-                <Route path='/resumeTemplates/:slug/:templateId' element={<ResumeTemplates />} />
-                <Route path='/resumeTemplates/:templateId' element={<ResumeTemplates />} />
                 <Route path='/myCorner' element={<MyCorner />} />
                 
                 {/* Admin-only Routes */}

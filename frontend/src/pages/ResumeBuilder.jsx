@@ -278,7 +278,7 @@ const ResumeBuilder = () => {
                 />
                 <meta
                     name="keywords"
-                    content="Resume builder, QA resume, SDET resume, Test Automation resume, Software Testing resume, QA resume templates, Professional resume builder, ATS-friendly resume, QA career resume"
+                    content="Resume builder, QA resume, SDET resume, Test Automation resume, Software Testing resume, Professional resume builder, ATS-friendly resume, QA career resume"
                 />
                 <meta property="og:title" content="Resume Builder | QA, SDET & Test Automation Professionals - Route2Hire" />
                 <meta

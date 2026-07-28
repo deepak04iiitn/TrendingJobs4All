@@ -1,6 +1,5 @@
 import InterviewExperience from '../models/interview.model.js';
 import Salary from '../models/salary.model.js';
-import Referral from '../models/referral.model.js';
 import InterviewQuestion from '../models/interviewQuestion.model.js';
 import Blog from '../models/blog.model.js';
 import User from '../models/user.model.js';
@@ -36,7 +35,7 @@ const generateLLMSText = (dynamicContent) => {
     {
       url: '/',
       title: 'Tech Career Hub',
-      description: 'Connect tech professionals with curated jobs, referrals, interview prep, and salary insights to accelerate career growth.'
+      description: 'Connect tech professionals with curated jobs, interview prep, and salary insights to accelerate career growth.'
     },
     {
       url: '/sign-in',
@@ -87,16 +86,6 @@ const generateLLMSText = (dynamicContent) => {
       url: '/salaryStructures',
       title: 'Salary Insights',
       description: 'Provide and share salary data to promote pay transparency and informed career decisions.'
-    },
-    {
-      url: '/referrals',
-      title: 'Job Referral Platform',
-      description: 'Facilitate job referrals and networking to help professionals access career opportunities and share referrals.'
-    },
-    {
-      url: '/resumeTemplates',
-      title: 'Resume Templates',
-      description: 'Provide and share tailored resume templates to enhance job applications for various roles and experience levels.'
     },
     {
       url: '/resume-builder',
@@ -182,19 +171,6 @@ const generateLLMSText = (dynamicContent) => {
     });
   }
 
-  if (dynamicContent.referrals.length > 0) {
-    content += `\n## Job Referrals & Networking\n\n`;
-    dynamicContent.referrals.slice(0, 20).forEach(referral => {
-      const company = referral.company || 'Unknown Company';
-      const positions = referral.positions && referral.positions.length > 0 
-        ? referral.positions.map(p => p.position).join(', ')
-        : 'Various positions';
-      const primary = referral.positions && referral.positions.length > 0 ? referral.positions[0].position : 'role';
-      const slug = createSlug(`${company}-${primary}`);
-      content += `- [${company} Job Referrals](${baseUrl}/referral/${slug}/${referral._id}): Job referral opportunities at ${company} for positions: ${positions}.\n`;
-    });
-  }
-
   if (dynamicContent.interviewQuestions.length > 0) {
     content += `\n## Interview Questions & Preparation\n\n`;
     dynamicContent.interviewQuestions.slice(0, 20).forEach(question => {
@@ -230,8 +206,7 @@ const generateLLMSText = (dynamicContent) => {
   content += `- **Job Listings**: Curated high-quality job opportunities in tech and QA roles\n`;
   content += `- **Interview Preparation**: Real interview experiences and question banks\n`;
   content += `- **Salary Transparency**: Anonymous salary data for informed career decisions\n`;
-  content += `- **Referral Network**: Connect with professionals for job referrals\n`;
-  content += `- **Career Resources**: Resume templates, interview tips, and career guidance\n`;
+  content += `- **Career Resources**: Resume builder, interview tips, and career guidance\n`;
   content += `- **Professional Blogs**: Expert articles on technology, development, QA, and SDET careers\n`;
   content += `- **Community Features**: Polls, discussions, and professional networking\n\n`;
   content += `Our platform helps professionals make informed career decisions, prepare for interviews, and connect with opportunities that match their skills and aspirations.\n\n`;
@@ -255,14 +230,12 @@ export const generateLLMS = async (req, res) => {
     const [
       interviewExperiences,
       salaryRecords,
-      referrals,
       interviewQuestions,
       jobs,
       blogs
     ] = await Promise.all([
       InterviewExperience.find({}, '_id company position fullName').lean().limit(20),
       Salary.find({}, '_id company position ctc').lean().limit(20),
-      Referral.find({}, '_id company positions').lean().limit(20),
       InterviewQuestion.find({}, '_id topic').lean().limit(20),
       mongoose.connection.db.collection('naukri').find(
         { 
@@ -280,7 +253,6 @@ export const generateLLMS = async (req, res) => {
     const dynamicContent = {
       interviewExperiences,
       salaryRecords,
-      referrals,
       interviewQuestions,
       jobs,
       blogs
@@ -325,14 +297,12 @@ export const getLLMSStats = async (req, res) => {
     const [
       interviewCount,
       salaryCount,
-      referralCount,
       questionCount,
       jobCount,
       blogCount
     ] = await Promise.all([
       InterviewExperience.countDocuments(),
       Salary.countDocuments(),
-      Referral.countDocuments(),
       InterviewQuestion.countDocuments(),
       mongoose.connection.db.collection('naukri').countDocuments({
         apply_link: { $exists: true, $ne: null, $ne: '' },
@@ -344,8 +314,8 @@ export const getLLMSStats = async (req, res) => {
       Blog.countDocuments({ published: true })
     ]);
 
-    const totalDynamicItems = interviewCount + salaryCount + referralCount + questionCount + jobCount + blogCount;
-    const staticItemCount = 23; // Count of static items (updated to include /blogs)
+    const totalDynamicItems = interviewCount + salaryCount + questionCount + jobCount + blogCount;
+    const staticItemCount = 21; // Count of static items (removed referrals/resume templates)
     const totalItems = staticItemCount + totalDynamicItems;
 
     res.json({
@@ -355,7 +325,6 @@ export const getLLMSStats = async (req, res) => {
         dynamicItems: {
           interviewExperiences: interviewCount,
           salaryRecords: salaryCount,
-          referrals: referralCount,
           interviewQuestions: questionCount,
           jobs: jobCount,
           blogs: blogCount,

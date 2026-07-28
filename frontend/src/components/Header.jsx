@@ -7,7 +7,6 @@ import {
   ChevronDown,
   User,
   BookOpen,
-  BriefcaseIcon,
   TrendingUp,
   LogOut,
   Menu,
@@ -15,7 +14,6 @@ import {
   Puzzle,
   LayoutDashboard,
   MessageCircle,
-  FileEdit,
   Code,
   ArrowUpRight,
   Map,
@@ -44,7 +42,6 @@ const FEATURE_GROUPS = [
   {
     title: 'Discover',
     items: [
-      { path: '/referrals', icon: BriefcaseIcon, label: 'Referrals', desc: 'Get referred by peers' },
       { path: '/salaryStructures', icon: TrendingUp, label: 'Salary Insights', desc: 'Compensation data' },
       { path: '/blogs', icon: BookOpen, label: 'Blogs', desc: 'Read and create articles' },
     ],
@@ -52,7 +49,6 @@ const FEATURE_GROUPS = [
   {
     title: 'Build',
     items: [
-      { path: '/resumeTemplates', icon: FileEdit, label: 'Resume Templates', desc: 'Professional templates' },
       { path: '/resume-builder', icon: User, label: 'Resume Builder', desc: 'Create your resume' },
     ],
   },

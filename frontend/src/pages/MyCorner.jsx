@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   FileText,
-  Users,
   DollarSign,
-  FileEdit,
-  Settings,
   Menu,
   X,
   ChevronRight
@@ -14,10 +11,7 @@ import Breadcrumb from '../components/Breadcrumb';
 import RelatedLinks from '../components/RelatedLinks';
 import { useSelector } from 'react-redux';
 import MyInterviews from '../components/MyInterviews';
-import MyReferrals from '../components/MyReferrals';
 import MySalary from '../components/MySalary';
-import MyResumeTemplates from '../components/MyResumeTemplates';
-import ResumeBuilder from './ResumeBuilder';
 
 export default function MyCorner() {
   const { currentUser } = useSelector((state) => state.user);
@@ -39,9 +33,7 @@ export default function MyCorner() {
 
   const menuItems = [
     { id: 'interview', icon: FileText, label: 'Interview Exp.' },
-    { id: 'referral', icon: Users, label: 'Referrals' },
     { id: 'salary', icon: DollarSign, label: 'Salary Structures' },
-    { id: 'resume', icon: FileEdit, label: 'Resume Templates' },
   ];
 
   const handleMenuItemClick = (itemId) => {
@@ -55,14 +47,8 @@ export default function MyCorner() {
     switch (activeItem) {
       case 'interview':
         return <MyInterviews />;
-      case 'referral':
-        return <MyReferrals />;
       case 'salary':
         return <MySalary />;
-      case 'resume':
-        return <MyResumeTemplates />;
-      case 'resumeBuilder':
-        return <ResumeBuilder />;
       default:
         return <div className="p-8">Select a menu item</div>;
     }
@@ -70,12 +56,11 @@ export default function MyCorner() {
 
   return (
     <>
-      {/* ✅ Helmet for SEO */}
       <Helmet>
         <title>My Corner | Personal Dashboard - Route2Hire QA & SDET Platform</title>
         <meta
           name="description"
-          content="Access your personal dashboard on Route2Hire. Manage your QA, SDET and Test Automation interview experiences, referrals, salary data and resume templates in one place for software testing professionals."
+          content="Access your personal dashboard on Route2Hire. Manage your QA, SDET and Test Automation interview experiences and salary data in one place for software testing professionals."
         />
         <meta
           name="keywords"
@@ -84,7 +69,7 @@ export default function MyCorner() {
         <meta property="og:title" content="My Corner | Personal Dashboard - Route2Hire QA & SDET Platform" />
         <meta
           property="og:description"
-          content="Access your personal dashboard for QA, SDET, and Test Automation career management. Manage interviews, referrals, and career resources."
+          content="Access your personal dashboard for QA, SDET, and Test Automation career management. Manage interviews and career resources."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://route2hire.com/mycorner" />
@@ -94,7 +79,6 @@ export default function MyCorner() {
 
       <div className="flex h-screen overflow-hidden">
 
-      {/* Mobile Header Bar - Fixed at top */}
       <div className="absolute top-16 left-0 right-0 h-16 bg-white shadow-md z-40 md:hidden">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -107,7 +91,6 @@ export default function MyCorner() {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
@@ -115,14 +98,12 @@ export default function MyCorner() {
         />
       )}
 
-      {/* Sidebar */}
       <div 
         className={`fixed md:relative h-screen bg-white shadow-xl transition-all duration-300 ease-in-out z-50
           ${isCollapsed ? 'w-20' : 'w-64'}
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
           flex-shrink-0 pt-16 md:pt-0`}
       >
-        {/* Toggle Button - Only visible on desktop */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="absolute -right-3 top-8 bg-blue-600 p-1.5 rounded-full text-white hover:bg-blue-700 transition-colors hidden md:block"
@@ -130,7 +111,6 @@ export default function MyCorner() {
           {isCollapsed ? <ChevronRight size={16} /> : <X size={16} />}
         </button>
 
-        {/* Header - Only visible on desktop */}
         <div className="p-4 items-center space-x-4 hidden md:flex">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
             <Menu className="text-white" size={24} />
@@ -140,7 +120,6 @@ export default function MyCorner() {
           )}
         </div>
 
-        {/* Menu Items */}
         <nav className="mt-8 px-4">
           {menuItems.map((item) => (
             <button
@@ -159,7 +138,6 @@ export default function MyCorner() {
           ))}
         </nav>
 
-        {/* User Profile Section */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-4'}`}>
             <div className="relative w-10 h-10">
@@ -180,9 +158,7 @@ export default function MyCorner() {
         </div>
       </div>
 
-      {/* Main Content Area - Adjust top padding and height for mobile */}
       <div className="flex-1 overflow-auto bg-gray-50 w-full pt-16 md:pt-0 h-[calc(100vh-64px)] md:h-full relative">
-        {/* Breadcrumb Navigation */}
         <div className="absolute top-4 left-4 z-10 hidden md:block">
           <Breadcrumb 
             items={[
@@ -192,7 +168,6 @@ export default function MyCorner() {
         </div>
         {getActiveComponent()}
         
-        {/* Related Links Section */}
         <div className="px-4 pb-8 mt-8">
           <RelatedLinks type="general" />
         </div>

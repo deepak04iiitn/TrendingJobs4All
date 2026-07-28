@@ -71,7 +71,7 @@ export default function AboutIntro() {
                 'Interview Experiences',
                 'Interview Question Bank',
                 'QA/SDET DSA Sheet',
-                'Salary + Referrals + Resume',
+                'Salary + Resume builder',
               ].map((item, i) => (
                 <motion.li
                   key={item}

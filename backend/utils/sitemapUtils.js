@@ -46,7 +46,6 @@ export const validateSitemapUrl = (url) => {
   const validPatterns = [
     /^\/interview-experience\/[a-f0-9]{24}$/i, // MongoDB ObjectId
     /^\/salary\/[a-f0-9]{24}$/i,
-    /^\/referral\/[a-f0-9]{24}$/i,
     /^\/interview-questions\/[a-z0-9-]+$/i, // Slug format
     /^\/fulljd\/[a-z0-9-]+\/[a-f0-9]{24}$/i, // Job URL with slug and ID
   ];
@@ -78,7 +77,6 @@ export const calculatePriority = (contentType, additionalData = {}) => {
     'jobs': 0.90,
     'interview-experiences': 0.80,
     'salary-records': 0.80,
-    'referrals': 0.80,
     'interview-questions': 0.80,
     'static-pages': 0.70,
     'user-content': 0.60,
