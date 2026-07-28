@@ -1,283 +1,242 @@
-import { Alert, Button, Textarea , Modal } from 'flowbite-react';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link , useNavigate } from 'react-router-dom';
-import { HiOutlineExclamationCircle } from 'react-icons/hi';
+import { Link, useNavigate } from 'react-router-dom';
+import { AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import SalaryComment from './SalaryComment';
+import { focusRing } from '../theme/tokens';
 
-export default function SalaryCommentSection({salId}) {
+export default function SalaryCommentSection({ salId }) {
+  const { currentUser } = useSelector((state) => state.user);
+  const [comment, setComment] = useState('');
+  const [commentError, setCommentError] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
 
-    const {currentUser} = useSelector((state) => state.user);
-    const [comment , setComment] = useState('');
-    const [commentError , setCommentError] = useState(null);
-    const [comments , setComments] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [commentToDelete, setCommentToDelete] = useState(null);
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const handleSubmit = async(e) => {
-
-        e.preventDefault();
-
-        if(comment.length > 200)
-        {
-            return;
-        }
-
-        try {
-
-            const res = await fetch('/backend/salaryComments/create' , {
-                method : 'POST',
-                headers : {
-                    'Content-Type' : 'application/json',
-                },
-    
-                body : JSON.stringify({ content : comment , salId , userId : currentUser._id }),
-            });
-    
-            const data = await res.json();
-    
-            if(res.ok)
-            {
-                setComment('');
-                setCommentError(null);
-                setComments([data , ...comments]);
-            }
-
-        } catch (error) {
-            setCommentError(error.message);
-        }
+    if (comment.length > 200) {
+      return;
     }
 
-    useEffect(() => {
+    try {
+      const res = await fetch('/backend/salaryComments/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: comment, salId, userId: currentUser._id }),
+      });
 
-        const getComments = async () => {
+      const data = await res.json();
 
-            try {
+      if (res.ok) {
+        setComment('');
+        setCommentError(null);
+        setComments([data, ...comments]);
+      }
+    } catch (error) {
+      setCommentError(error.message);
+    }
+  };
 
-                const res = await fetch(`/backend/salaryComments/getComments/${salId}`);
+  useEffect(() => {
+    const getComments = async () => {
+      try {
+        const res = await fetch(`/backend/salaryComments/getComments/${salId}`);
 
-                if(res.ok)
-                {
-                    const data = await res.json();
-                    setComments(data);
-                }
-
-            } catch (error) {
-                console.log(error);
-            }
-
+        if (res.ok) {
+          const data = await res.json();
+          setComments(data);
         }
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
-        getComments();
+    getComments();
+  }, [salId]);
 
-    } , [salId])                      
+  const handleLike = async (commentId) => {
+    try {
+      if (!currentUser) {
+        navigate('/sign-in');
+        return;
+      }
 
+      const res = await fetch(`/backend/salaryComments/likeComment/${commentId}`, {
+        method: 'PUT',
+      });
 
-    const handleLike = async (commentId) => {
+      if (res.ok) {
+        const data = await res.json();
 
-        try {
-
-          if (!currentUser) 
-          {
-            navigate('/sign-in');
-            return;
-          }
-
-          const res = await fetch(`/backend/salaryComments/likeComment/${commentId}`, {
-            method: 'PUT',
-          });
-
-          if (res.ok) 
-        {
-            const data = await res.json();
-
-            setComments(
-              comments.map((comment) =>
-                comment._id === commentId
-                  ? {
-                      ...comment,
-                      likes: data.likes,
-                      numberOfLikes: data.likes.length,
-                    }
-                  : comment
-              )
-            );
-        }
-
-        } catch (error) {
-          console.log(error.message);
-        }
-      };
-
-
-      const handleEdit = async (comment, editedContent) => {
         setComments(
-          comments.map((c) =>
-            c._id === comment._id ? { ...c, content: editedContent } : c
+          comments.map((item) =>
+            item._id === commentId
+              ? {
+                  ...item,
+                  likes: data.likes,
+                  numberOfLikes: data.likes.length,
+                }
+              : item
           )
         );
-      };
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
+  const handleEdit = async (commentItem, editedContent) => {
+    setComments(
+      comments.map((c) => (c._id === commentItem._id ? { ...c, content: editedContent } : c))
+    );
+  };
 
-      const handleDelete = async (commentId) => {
+  const handleDelete = async (commentId) => {
+    setShowModal(false);
 
-        setShowModal(false);
+    try {
+      if (!currentUser) {
+        navigate('/sign-in');
+        return;
+      }
 
-        try {
+      const res = await fetch(`/backend/salaryComments/deleteComment/${commentId}`, {
+        method: 'DELETE',
+      });
 
-          if (!currentUser) 
-          {
-            navigate('/sign-in');
-            return;
-          }
-
-          const res = await fetch(`/backend/salaryComments/deleteComment/${commentId}`, {
-            method: 'DELETE',
-          });
-
-          if (res.ok) 
-          {
-            const data = await res.json();
-            setComments(comments.filter((comment) => comment._id !== commentId));
-          }
-
-        } catch (error) {
-          console.log(error.message);
-        }
-      };
-    
+      if (res.ok) {
+        setComments(comments.filter((item) => item._id !== commentId));
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <div>
-        {currentUser ? (
-
-        <div className='flex items-center gap-1 my-5 text-gray-500 text-sm'>
-
+      {currentUser ? (
+        <div className="mb-4 flex items-center gap-2 text-sm text-[#78716C]">
           <p>Signed in as:</p>
-
-          <img
-            className='h-5 w-5 object-cover rounded-full'
-            src={currentUser.profilePicture}
-            alt=''
-          />
-
+          <img className="h-5 w-5 rounded-full object-cover" src={currentUser.profilePicture} alt="" />
           <Link
-            to={'/dashboard?tab=profile'}
-            className='text-xs text-cyan-600 hover:underline'
+            to="/dashboard?tab=profile"
+            className={`text-xs font-semibold text-[#2C241B] hover:underline ${focusRing}`}
           >
             @{currentUser.username}
           </Link>
-
         </div>
       ) : (
-
-        <div className='text-sm text-teal-500 my-5 flex gap-1'>
-
+        <div className="mb-4 flex gap-1.5 text-sm text-[#78716C]">
           You must be signed in to comment.
-
-          <Link className='text-blue-500 hover:underline' to={'/sign-in'}>
-            Sign In
+          <Link to="/sign-in" className={`font-semibold text-[#2C241B] hover:underline ${focusRing}`}>
+            Sign in
           </Link>
-
         </div>
       )}
 
       {currentUser && (
-            <form className='border border-teal-500 rounded-md p-3' onSubmit={handleSubmit}>
+        <form className="rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] p-4" onSubmit={handleSubmit}>
+          <textarea
+            placeholder="Add a comment..."
+            rows={3}
+            maxLength={200}
+            onChange={(e) => setComment(e.target.value)}
+            value={comment}
+            className={`w-full resize-none rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3.5 py-2.5 text-sm text-[#2C241B] outline-none transition placeholder:text-[#78716C] focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/30 ${focusRing}`}
+          />
 
-                <Textarea 
-                    placeholder='Add a comment...'
-                    rows='3'
-                    maxLength='200' 
-                    onChange={(e) => setComment(e.target.value)}
-                    value={comment}
-                />
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs text-[#78716C]">{200 - comment.length} characters remaining</p>
+            <button
+              type="submit"
+              className={`rounded-xl border border-[#2C241B] bg-[#2C241B] px-4 py-2 text-sm font-semibold text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
+            >
+              Submit
+            </button>
+          </div>
 
-                <div className='flex justify-between items-center mt-5'>
-
-                    <p className='text-gray-500 text-sm'>{200 - comment.length} characters remaining</p>
-
-                    <Button outline gradientDuoTone='purpleToBlue' type='submit'>Submit</Button>
-
-                </div>
-
-                {commentError && (
-                    <Alert color='failure' className='mt-5'>
-                        {commentError}
-                    </Alert>
-                )}
-
-            </form>
+          {commentError && (
+            <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm text-rose-700">
+              {commentError}
+            </div>
+          )}
+        </form>
       )}
 
       {comments.length === 0 ? (
-            <p className='text-sm my-5'>No comments yet!</p>
+        <p className="my-5 text-sm text-[#78716C]">No comments yet.</p>
       ) : (
-            <>                                                                                   {/* we cannot add 2 things here , that's why we add an empty fragment */}
-                <div className='text-sm my-5 flex items-center gap-1'>
-                    <p>Comments</p>
+        <>
+          <div className="my-5 flex items-center gap-2 text-sm text-[#57534E]">
+            <p>Comments</p>
+            <span className="rounded-full border border-[#E5DCCE] bg-[#F7F3EC] px-2 py-0.5 text-xs font-semibold text-[#6B5A48]">
+              {comments.length}
+            </span>
+          </div>
 
-                    <div className='border border-gray-600 py-1 px-2 rounded-sm'>
-                        <p>{comments.length}</p>
-                    </div>
-                </div>
-
-                {
-                    comments.map(comment => (
-                        <SalaryComment 
-                            key={comment._id}
-                            comment = {comment} 
-                            onLike = {handleLike}                        // passing the function as prop
-                                                                         // now we can use this function in comment
-                            onEdit={handleEdit}
-                            onDelete={(commentId) => {
-                                setShowModal(true);
-                                setCommentToDelete(commentId);
-                            }}
-                        />
-                    ))
-                }
-
-            </>
+          {comments.map((item) => (
+            <SalaryComment
+              key={item._id}
+              comment={item}
+              onLike={handleLike}
+              onEdit={handleEdit}
+              onDelete={(commentId) => {
+                setShowModal(true);
+                setCommentToDelete(commentId);
+              }}
+            />
+          ))}
+        </>
       )}
 
-    <Modal
-        show={showModal}
-        onClose={() => setShowModal(false)}
-        popup
-        size='md'
-      >
-        <Modal.Header />
-        <Modal.Body>
-
-          <div className='text-center'>
-
-            <HiOutlineExclamationCircle className='h-14 w-14 text-gray-400 dark:text-gray-200 mb-4 mx-auto' />
-
-            <h3 className='mb-5 text-lg text-gray-500 dark:text-gray-400'>
-              Are you sure you want to delete this comment?
-            </h3>
-
-            <div className='flex justify-center gap-4'>
-
-              <Button
-                color='failure'
-                onClick={() => handleDelete(commentToDelete)}
-              >
-                Yes, I'm sure
-              </Button>
-
-              <Button color='gray' onClick={() => setShowModal(false)}>
-                No, cancel
-              </Button>
-
-            </div>
-          </div>
-        </Modal.Body>
-    </Modal>
-
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#2C241B]/45 p-4 backdrop-blur-[2px]"
+            onClick={() => setShowModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] p-6 text-center shadow-[0_20px_45px_rgba(44,36,27,0.2)]"
+            >
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+                <AlertTriangle className="h-6 w-6" aria-hidden />
+              </div>
+              <h3 className="font-display mt-4 text-lg text-[#1C1917]">Delete this comment?</h3>
+              <p className="mt-1 text-sm text-[#78716C]">This action cannot be undone.</p>
+              <div className="mt-5 flex justify-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => handleDelete(commentToDelete)}
+                  className={`rounded-xl border border-rose-500 bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-600 ${focusRing}`}
+                >
+                  Yes, delete it
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className={`rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-4 py-2 text-sm font-medium text-[#6B5A48] transition hover:bg-[#F7F3EC] ${focusRing}`}
+                >
+                  No, cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  )
+  );
 }
