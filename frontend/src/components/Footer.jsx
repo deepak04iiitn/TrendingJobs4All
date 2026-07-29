@@ -10,9 +10,7 @@ const FOOTER_COLUMNS = [
       { href: '/jobs', label: 'Job Listings' },
       { href: '/interviewExp', label: 'Interview Experiences' },
       { href: '/interview-questions', label: 'Question Bank' },
-      { href: '/referrals', label: 'Referrals' },
       { href: '/salaryStructures', label: 'Salary Insights' },
-      { href: '/resumeTemplates', label: 'Resume Templates' },
       { href: '/resume-builder', label: 'Resume Builder' },
     ],
   },
@@ -87,7 +85,7 @@ export default function Footer() {
             </Link>
             <p className="mt-5 max-w-sm text-[1.05rem] leading-relaxed text-[#57534E]">
               The one-stop platform for QA & SDET careers — jobs, interview prep, DSA practice,
-              salary intel, and referrals.
+              and salary intel.
             </p>
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#78716C]">
               <span className="inline-flex items-center gap-2">

@@ -62,15 +62,15 @@ export default function SocialIconFab() {
       ref={componentRef}
       className="pointer-events-none fixed right-0 top-1/2 z-[2147483646] -translate-y-1/2"
     >
-      <div className="pointer-events-auto flex flex-col items-stretch overflow-hidden rounded-l-2xl border border-r-0 border-[#E5DCCE] bg-[#FFFDF8]/95 shadow-[-12px_0_36px_-18px_rgba(44,36,27,0.3)] backdrop-blur-md">
+      <div className="pointer-events-auto flex flex-col items-stretch overflow-hidden rounded-l-xl border border-r-0 border-[#E5DCCE] bg-[#FFFDF8]/95 shadow-[-10px_0_28px_-16px_rgba(44,36,27,0.3)] backdrop-blur-md">
         <button
           type="button"
           onClick={() => setIsExpanded((v) => !v)}
           aria-label={isExpanded ? 'Close community menu' : 'Join our community'}
           aria-expanded={isExpanded}
-          className={`flex h-12 w-12 items-center justify-center bg-[#2C241B] text-[#FFFDF8] transition hover:bg-[#1A1510] sm:h-14 sm:w-14 ${focusRing}`}
+          className={`flex h-9 w-9 items-center justify-center bg-[#2C241B] text-[#FFFDF8] transition hover:bg-[#1A1510] sm:h-10 sm:w-10 ${focusRing}`}
         >
-          <Users size={20} aria-hidden />
+          <Users size={15} aria-hidden />
         </button>
 
         <AnimatePresence initial={false}>
@@ -97,9 +97,9 @@ export default function SocialIconFab() {
                       initial={reduceMotion ? false : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05 + i * 0.05, duration: 0.25, ease: easeOut }}
-                      className={`flex h-12 w-12 items-center justify-center text-[#2C241B] transition hover:bg-[#EFE8DC] hover:text-[#1A1510] sm:h-14 sm:w-14 ${focusRing}`}
+                      className={`flex h-9 w-9 items-center justify-center text-[#2C241B] transition hover:bg-[#EFE8DC] hover:text-[#1A1510] sm:h-10 sm:w-10 ${focusRing}`}
                     >
-                      <Icon size={18} aria-hidden />
+                      <Icon size={14} aria-hidden />
                     </motion.a>
                   );
                 })}

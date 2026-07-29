@@ -1,7 +1,7 @@
 export const SEO = {
   title: 'About Route2Hire | QA, SDET & Test Automation Career Platform',
   description:
-    'Route2Hire is the career platform built for QA, SDET and Test Automation professionals. Curated software testing jobs, interview prep, DSA practice, salary insights, referrals and a 3.5K+ tester community.',
+    'Route2Hire is the career platform built for QA, SDET and Test Automation professionals. Curated software testing jobs, interview prep, DSA practice, salary insights and a 3.5K+ tester community.',
   keywords:
     'Route2Hire about, QA career platform, SDET jobs platform, test automation careers, software testing community, QA interview prep, SDET DSA sheet',
   ogTitle: 'About Route2Hire | Built for QA & SDET Careers',
@@ -15,7 +15,7 @@ export const INTRO = {
   eyebrow: 'About Route2Hire',
   headline: 'A QA and SDET career platform, end to end.',
   lede:
-    'Route2Hire helps software testing professionals move faster with curated QA/SDET jobs, interview preparation resources, role-specific DSA practice, salary insights, referrals and a strong peer community.',
+    'Route2Hire helps software testing professionals move faster with curated QA/SDET jobs, interview preparation resources, role-specific DSA practice, salary insights and a strong peer community.',
   primaryCta: { label: 'Explore QA/SDET jobs', path: '/jobs' },
   secondaryCta: { label: 'Contact us', path: '/contactUs' },
 };
@@ -26,8 +26,8 @@ export const SNAPSHOT = {
     '2500+ curated QA, SDET and Test Automation opportunities.',
     'Company-wise interview experiences and topic-wise interview questions.',
     'A QA/SDET DSA sheet with progress tracking and leaderboard.',
-    'Salary structures and referral support from real practitioners.',
-    'Resume tools and roadmaps tailored to software testing roles.',
+    'Salary structures shared by real practitioners.',
+    'Resume builder and roadmaps tailored to software testing roles.',
   ],
 };
 
@@ -66,9 +66,9 @@ export const FEATURE_MATRIX = [
   {
     id: 'growth',
     title: 'Career Growth Toolkit',
-    focus: 'Salary insights, referrals, QA resume builder',
+    focus: 'Salary insights, QA resume builder',
     description:
-      'Compensation intelligence, referral support, ATS-ready resume tools and roadmaps for long-term growth.',
+      'Compensation intelligence, ATS-ready resume tools and roadmaps for long-term growth.',
     path: '/salaryStructures',
   },
 ];
@@ -87,7 +87,7 @@ export const PRINCIPLES = [
   {
     id: 'community',
     title: 'Community as force multiplier',
-    text: 'Peer-shared interview notes, salary structures and referrals create faster, better career decisions.',
+    text: 'Peer-shared interview notes and salary structures create faster, better career decisions.',
   },
 ];
 
@@ -96,7 +96,7 @@ export const TOOLKIT_PHASES = [
     id: 'discover',
     phase: '01',
     title: 'Discover',
-    lede: 'Find QA and SDET roles worth applying to, with compensation context and peer referrals.',
+    lede: 'Find QA and SDET roles worth applying to, with compensation context.',
     items: [
       {
         id: 'jobs',
@@ -109,12 +109,6 @@ export const TOOLKIT_PHASES = [
         title: 'Salary Insights',
         subtitle: 'Compensation benchmarks by role',
         path: '/salaryStructures',
-      },
-      {
-        id: 'referrals',
-        title: 'Referrals',
-        subtitle: 'Peer introductions from the community',
-        path: '/referrals',
       },
     ],
   },
@@ -153,7 +147,7 @@ export const TOOLKIT_PHASES = [
       {
         id: 'resume',
         title: 'Resume Builder',
-        subtitle: 'ATS-ready templates for testers',
+        subtitle: 'ATS-ready profiles for testers',
         path: '/resume-builder',
       },
       {

@@ -1,5 +1,24 @@
 import React, { useState } from 'react';
 import { X, SlidersHorizontal, RotateCcw, Check, Search, Building, User, Award, ArrowUpDown, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { focusRing } from '../theme/tokens';
+
+const verdictOptions = [
+  { value: '', label: 'All results' },
+  { value: 'selected', label: 'Selected' },
+  { value: 'rejected', label: 'Rejected' },
+];
+
+const sortOptions = [
+  { value: 'rating-desc', label: 'Highest rating first', desc: 'Hardest interviews first' },
+  { value: 'rating-asc', label: 'Lowest rating first', desc: 'Easier interviews first' },
+  { value: 'likes-desc', label: 'Most liked first', desc: 'Popular experiences first' },
+  { value: 'likes-asc', label: 'Least liked first', desc: 'Hidden gems' },
+  { value: 'dislikes-desc', label: 'Most disliked first', desc: 'Controversial experiences' },
+  { value: 'dislikes-asc', label: 'Least disliked first', desc: 'Well-received experiences' },
+];
+
+const fieldClass = `w-full rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] px-4 py-3 text-sm text-[#2C241B] outline-none transition placeholder:text-[#78716C] focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/30 ${focusRing}`;
 
 const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClear }) => {
   const [localFilters, setLocalFilters] = useState(filters);
@@ -16,7 +35,7 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
       positionSearch: '',
       yoeSearch: '',
       verdictFilter: '',
-      sortConfig: 'rating-desc'
+      sortConfig: 'rating-desc',
     };
     setLocalFilters(clearedFilters);
     onClear(clearedFilters);
@@ -25,234 +44,207 @@ const InterviewFilterModal = ({ isOpen, onClose, filters, onSaveAndApply, onClea
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 z-50">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl w-full max-w-2xl shadow-2xl border border-white/50 overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#2C241B]/45 p-4 backdrop-blur-[2px]"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.96, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.96, opacity: 0, y: 20 }}
+        transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] shadow-[0_20px_45px_rgba(44,36,27,0.2)]"
+      >
         {/* Header */}
-        <div className="relative px-8 py-6 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
-          </div>
-          
-          <div className="relative flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                <SlidersHorizontal className="w-6 h-6 text-white" />
-              </div>
+        <div className="border-b border-[#E5DCCE] bg-[#F7F3EC] px-6 py-5 sm:px-7">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] text-[#C4A574]">
+                <SlidersHorizontal className="h-5 w-5" aria-hidden />
+              </span>
               <div>
-                <h2 className="text-2xl font-bold text-white">Refine Your Search</h2>
-                <p className="text-white/80 text-sm">Find the perfect interview experiences</p>
+                <h2 className="font-display text-xl font-semibold text-[#1C1917]">Refine your search</h2>
+                <p className="text-xs text-[#78716C] sm:text-sm">Find the interview experiences that matter to you</p>
               </div>
             </div>
             <button
+              type="button"
               onClick={onClose}
-              className="w-10 h-10 text-white hover:bg-white/20 rounded-2xl transition-all duration-300 flex items-center justify-center group"
+              aria-label="Close filters"
+              className={`shrink-0 rounded-lg border border-[#E5DCCE] bg-[#FFFDF8] p-2 text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
             >
-              <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-gray-50/80 backdrop-blur-sm">
-          <button
-            onClick={() => setActiveTab('search')}
-            className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-300 relative ${
-              activeTab === 'search'
-                ? 'text-indigo-600 bg-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Search className="w-4 h-4" />
-              Search & Filter
-            </div>
-            {activeTab === 'search' && (
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"></div>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('sort')}
-            className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-300 relative ${
-              activeTab === 'sort'
-                ? 'text-indigo-600 bg-white shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <ArrowUpDown className="w-4 h-4" />
-              Sort Options
-            </div>
-            {activeTab === 'sort' && (
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full"></div>
-            )}
-          </button>
+        <div className="flex border-b border-[#E5DCCE]">
+          {[
+            { key: 'search', label: 'Search & filter', Icon: Search },
+            { key: 'sort', label: 'Sort options', Icon: ArrowUpDown },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex flex-1 items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold transition ${focusRing} ${
+                activeTab === tab.key ? 'bg-[#2C241B] text-[#FFFDF8]' : 'bg-[#FFFDF8] text-[#6B5A48] hover:bg-[#F7F3EC]'
+              }`}
+            >
+              <tab.Icon className="h-4 w-4" aria-hidden />
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Content */}
-        <div className="p-8 max-h-[60vh] overflow-y-auto">
+        <div className="max-h-[60vh] overflow-y-auto p-6 sm:p-7">
           {activeTab === 'search' ? (
-            <div className="space-y-8">
-              {/* Company Search */}
-              <div className="space-y-3">
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <Building className="w-4 h-4 text-indigo-600" />
-                  Company Name
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-[#2C241B]">
+                  <Building className="h-4 w-4 text-[#C4A574]" aria-hidden />
+                  Company name
                 </label>
-                <div className="relative group">
-                  <input
-                    type="text"
-                    value={localFilters.companySearch}
-                    onChange={(e) => setLocalFilters({ ...localFilters, companySearch: e.target.value })}
-                    className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
-                    placeholder="e.g., Google, Microsoft, Amazon..."
-                  />
-                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
-                    <Search className="w-4 h-4" />
-                  </div>
-                </div>
+                <input
+                  type="text"
+                  value={localFilters.companySearch}
+                  onChange={(e) => setLocalFilters({ ...localFilters, companySearch: e.target.value })}
+                  className={fieldClass}
+                  placeholder="e.g., Google, Microsoft, Amazon..."
+                />
               </div>
 
-              {/* Position Search */}
-              <div className="space-y-3">
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <User className="w-4 h-4 text-purple-600" />
-                  Position Title
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-[#2C241B]">
+                  <User className="h-4 w-4 text-[#C4A574]" aria-hidden />
+                  Position title
                 </label>
                 <input
                   type="text"
                   value={localFilters.positionSearch}
                   onChange={(e) => setLocalFilters({ ...localFilters, positionSearch: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
-                  placeholder="e.g., Software Engineer, Product Manager..."
+                  className={fieldClass}
+                  placeholder="e.g., SDET, QA Engineer, Test Lead..."
                 />
               </div>
 
-              {/* YOE */}
-              <div className="space-y-3">
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <Award className="w-4 h-4 text-emerald-600" />
-                  Years of Experience
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-[#2C241B]">
+                  <Award className="h-4 w-4 text-[#C4A574]" aria-hidden />
+                  Years of experience
                 </label>
                 <input
                   type="number"
                   value={localFilters.yoeSearch}
                   onChange={(e) => setLocalFilters({ ...localFilters, yoeSearch: e.target.value })}
-                  className="w-full px-5 py-4 bg-gray-50/80 border-2 border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300 text-gray-700 placeholder-gray-400"
+                  className={fieldClass}
                   placeholder="Enter years of experience..."
                 />
               </div>
 
-              {/* Verdict Filter */}
-              <div className="space-y-4">
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <Sparkles className="w-4 h-4 text-pink-600" />
-                  Interview Outcome
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-semibold text-[#2C241B]">
+                  <Sparkles className="h-4 w-4 text-[#C4A574]" aria-hidden />
+                  Interview outcome
                 </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { value: '', label: 'All Results', color: 'gray' },
-                    { value: 'selected', label: 'Selected', color: 'emerald' },
-                    { value: 'rejected', label: 'Rejected', color: 'rose' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setLocalFilters({ ...localFilters, verdictFilter: option.value })}
-                      className={`relative px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 border-2 ${
-                        localFilters.verdictFilter === option.value
-                          ? `bg-${option.color}-500 text-white border-${option.color}-500 shadow-lg shadow-${option.color}-500/30`
-                          : `bg-${option.color}-50 text-${option.color}-700 border-${option.color}-100 hover:bg-${option.color}-100 hover:border-${option.color}-200`
-                      }`}
-                    >
-                      {option.label}
-                      {localFilters.verdictFilter === option.value && (
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                          <Check className="w-3 h-3 text-gray-600" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-3 gap-2.5">
+                  {verdictOptions.map((option) => {
+                    const isActive = localFilters.verdictFilter === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setLocalFilters({ ...localFilters, verdictFilter: option.value })}
+                        className={`relative rounded-xl border px-3 py-2.5 text-sm font-medium transition ${focusRing} ${
+                          isActive
+                            ? 'border-[#2C241B] bg-[#2C241B] text-[#FFFDF8]'
+                            : 'border-[#E5DCCE] bg-[#F7F3EC] text-[#6B5A48] hover:bg-[#EFE8DC]'
+                        }`}
+                      >
+                        {option.label}
+                        {isActive && (
+                          <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#C4A574] text-[#2C241B]">
+                            <Check className="h-3 w-3" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
-              <div className="text-center mb-8">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Choose Your Sorting Preference</h3>
-                <p className="text-sm text-gray-600">Organize results to find what matters most to you</p>
+            <div className="space-y-5">
+              <div className="text-center">
+                <h3 className="font-display text-lg font-semibold text-[#1C1917]">Choose your sorting preference</h3>
+                <p className="mt-1 text-sm text-[#78716C]">Organize results to find what matters most to you</p>
               </div>
-              
-              <div className="space-y-3">
-                {[
-                  { value: 'rating-desc', label: 'Highest Rating First', icon: '⭐', desc: 'Best experiences first' },
-                  { value: 'rating-asc', label: 'Lowest Rating First', icon: '📈', desc: 'Learning opportunities' },
-                  { value: 'likes-desc', label: 'Most Liked First', icon: '👍', desc: 'Popular experiences first' },
-                  { value: 'likes-asc', label: 'Least Liked First', icon: '📊', desc: 'Hidden gems' },
-                  { value: 'dislikes-desc', label: 'Most Disliked First', icon: '👎', desc: 'Controversial experiences' },
-                  { value: 'dislikes-asc', label: 'Least Disliked First', icon: '💫', desc: 'Well-received experiences' }
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setLocalFilters({ ...localFilters, sortConfig: option.value })}
-                    className={`w-full p-5 rounded-2xl text-left transition-all duration-300 border-2 group ${
-                      localFilters.sortConfig === option.value
-                        ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/30'
-                        : 'bg-gray-50/80 text-gray-700 border-gray-100 hover:bg-gray-100 hover:border-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`text-2xl ${localFilters.sortConfig === option.value ? 'grayscale-0' : 'grayscale'}`}>
-                          {option.icon}
-                        </div>
-                        <div>
-                          <div className="font-semibold">{option.label}</div>
-                          <div className={`text-sm ${localFilters.sortConfig === option.value ? 'text-white/80' : 'text-gray-500'}`}>
-                            {option.desc}
-                          </div>
-                        </div>
+
+              <div className="space-y-2.5">
+                {sortOptions.map((option) => {
+                  const isActive = localFilters.sortConfig === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setLocalFilters({ ...localFilters, sortConfig: option.value })}
+                      className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left transition ${focusRing} ${
+                        isActive ? 'border-[#2C241B] bg-[#2C241B] text-[#FFFDF8]' : 'border-[#E5DCCE] bg-[#F7F3EC] text-[#2C241B] hover:bg-[#EFE8DC]'
+                      }`}
+                    >
+                      <div>
+                        <p className="text-sm font-semibold">{option.label}</p>
+                        <p className={`text-xs ${isActive ? 'text-[#EFE8DC]' : 'text-[#78716C]'}`}>{option.desc}</p>
                       </div>
-                      {localFilters.sortConfig === option.value && (
-                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                          <Check className="w-5 h-5 text-white" />
-                        </div>
+                      {isActive && (
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#C4A574] text-[#2C241B]">
+                          <Check className="h-3.5 w-3.5" />
+                        </span>
                       )}
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-6 bg-gray-50/80 backdrop-blur-sm border-t border-gray-100 flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 border-t border-[#E5DCCE] bg-[#F7F3EC] px-6 py-5 sm:px-7">
           <button
+            type="button"
             onClick={handleClear}
-            className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-white rounded-2xl transition-all duration-300 border border-gray-200 hover:border-gray-300"
+            className={`inline-flex items-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-4 py-2.5 text-sm font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
           >
-            <RotateCcw className="w-4 h-4" />
-            <span className="font-medium">Reset All</span>
+            <RotateCcw className="h-4 w-4" aria-hidden />
+            Reset all
           </button>
-          
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2.5">
             <button
+              type="button"
               onClick={onClose}
-              className="px-6 py-3 text-gray-600 hover:text-gray-800 hover:bg-white rounded-2xl transition-all duration-300 border border-gray-200 hover:border-gray-300 font-medium"
+              className={`rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-5 py-2.5 text-sm font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSaveAndApply}
-              className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
+              className={`rounded-xl border border-[#2C241B] bg-[#2C241B] px-5 py-2.5 text-sm font-semibold text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
             >
-              Apply Filters
+              Apply filters
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

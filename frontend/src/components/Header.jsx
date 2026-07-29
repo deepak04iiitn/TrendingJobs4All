@@ -7,7 +7,6 @@ import {
   ChevronDown,
   User,
   BookOpen,
-  BriefcaseIcon,
   TrendingUp,
   LogOut,
   Menu,
@@ -15,7 +14,6 @@ import {
   Puzzle,
   LayoutDashboard,
   MessageCircle,
-  FileEdit,
   Code,
   ArrowUpRight,
   Map,
@@ -44,15 +42,13 @@ const FEATURE_GROUPS = [
   {
     title: 'Discover',
     items: [
-      { path: '/referrals', icon: BriefcaseIcon, label: 'Referrals', desc: 'Get referred by peers' },
       { path: '/salaryStructures', icon: TrendingUp, label: 'Salary Insights', desc: 'Compensation data' },
-      { path: '/blogs', icon: BookOpen, label: 'Blogs', desc: 'Read and create articles' },
+      { path: '/blogs', icon: BookOpen, label: 'Blogs', desc: 'Career articles and interview insights' },
     ],
   },
   {
     title: 'Build',
     items: [
-      { path: '/resumeTemplates', icon: FileEdit, label: 'Resume Templates', desc: 'Professional templates' },
       { path: '/resume-builder', icon: User, label: 'Resume Builder', desc: 'Create your resume' },
     ],
   },
@@ -251,7 +247,7 @@ export default function Header() {
         >
           <div className="flex items-center justify-between border-b border-[#E5DCCE] bg-[#EFE8DC] px-5 py-3.5">
             <div>
-              <p className="font-display text-sm font-semibold text-[#1C1917]">Toolkit</p>
+              <p className="font-display text-sm font-semibold text-[#1C1917]">Features</p>
               <p className="mt-0.5 text-xs text-[#78716C]">Everything for QA & SDET careers</p>
             </div>
           </div>
@@ -345,7 +341,7 @@ export default function Header() {
             {[
               { action: () => handleProfileNavigation('/profile'), icon: User, label: 'My Profile', desc: 'Manage your account' },
               ...(currentUser?.isUserAdmin
-                ? [{ action: () => handleProfileNavigation('/dashboard'), icon: LayoutDashboard, label: 'Admin Dashboard', desc: 'System overview' }]
+                ? [{ action: () => handleProfileNavigation('/admin'), icon: LayoutDashboard, label: 'Admin Dashboard', desc: 'System overview' }]
                 : []),
               { action: () => handleProfileNavigation('/myCorner'), icon: BookOpen, label: 'My Corner', desc: 'Personal workspace' },
             ].map(({ action, icon: Icon, label, desc }) => (
@@ -432,7 +428,7 @@ export default function Header() {
                 </div>
                 <div className="mx-4 my-3 h-px bg-[#E5DCCE]" />
                 <div className="px-4 pb-2">
-                  <p className="mb-2 font-display text-sm font-semibold text-[#1C1917]">Toolkit</p>
+                  <p className="mb-2 font-display text-sm font-semibold text-[#1C1917]">Features</p>
                   {FEATURE_GROUPS.map((group) => (
                     <div key={group.title} className="mb-4">
                       <p className="mb-1.5 px-2 text-[11px] font-medium uppercase tracking-wider text-[#78716C]">
@@ -496,7 +492,7 @@ export default function Header() {
                     {currentUser?.isUserAdmin && (
                       <button
                         type="button"
-                        onClick={() => handleProfileNavigation('/dashboard')}
+                        onClick={() => handleProfileNavigation('/admin')}
                         className={`col-span-2 flex items-center justify-center gap-2 rounded-xl bg-[#2C241B] py-2.5 text-sm font-medium text-[#FFFDF8] hover:bg-[#1A1510] ${focusRing}`}
                       >
                         <LayoutDashboard size={14} /> Admin Dashboard
@@ -602,7 +598,7 @@ export default function Header() {
                           : 'text-[#57534E] hover:text-[#2C241B]'
                       }`}
                     >
-                      Toolkit
+                      Features
                       <motion.span animate={{ rotate: isFeaturesOpen ? 180 : 0 }} className="inline-flex">
                         <ChevronDown size={15} />
                       </motion.span>

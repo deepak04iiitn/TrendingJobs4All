@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../utils/verifyUser.js';
+import { verifyToken, verifyAdmin } from '../utils/verifyUser.js';
 import {
   getRoadmaps,
   getRoadmapByRole,
@@ -22,7 +22,7 @@ router.get('/progress/:userId/:role', verifyToken, getUserProgress);
 router.put('/progress/:userId/:role/subskill', verifyToken, updateSubskillProgress);
 
 // Admin only routes
-router.post('/admin/create', verifyToken, createOrUpdateRoadmap);
-router.delete('/admin/:roadmapId', verifyToken, deleteRoadmap);
+router.post('/admin/create', verifyToken, verifyAdmin, createOrUpdateRoadmap);
+router.delete('/admin/:roadmapId', verifyToken, verifyAdmin, deleteRoadmap);
 
 export default router;

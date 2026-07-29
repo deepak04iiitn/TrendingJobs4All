@@ -30,7 +30,7 @@ export default function TermsOfService() {
     },
     {
       title: "Description of Service",
-      content: "Route2Hire is a career platform that connects job seekers with employment opportunities. We provide job listings, interview experiences, salary insights, resume templates, and career resources to help professionals advance their careers.",
+      content: "Route2Hire is a career platform that connects job seekers with employment opportunities. We provide job listings, interview experiences, salary insights, a resume builder, and career resources to help professionals advance their careers.",
       icon: FileText
     },
     {

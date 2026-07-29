@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { BrowserRouter , Routes , Route } from 'react-router-dom';
+import { BrowserRouter , Routes , Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import Home from './pages/Home';
 import About from './pages/About';
 import SignIn from './pages/SignIn';
@@ -12,14 +12,21 @@ import FullJd from './pages/FullJd';
 import MyJobs from './pages/MyJobs';
 import InterviewExp from './pages/InterviewExp';
 import SalaryStructures from './pages/SalaryStructures';
-import Referrals from './pages/Referrals';
-import ResumeReviews from './pages/ResumeReviews';
-import ResumeTemplates from './pages/ResumeTemplates';
 import MyCorner from './pages/MyCorner';
 import PremiumSubscription from './pages/PremiumSubscription';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
-import Dashboard from './pages/Dashboard';
+import AdminShell from './pages/admin/AdminShell';
+import AdminOverview from './pages/admin/AdminOverview';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminComments from './pages/admin/AdminComments';
+import AdminInterviewExperiences from './pages/admin/AdminInterviewExperiences';
+import AdminSalaryStructures from './pages/admin/AdminSalaryStructures';
+import AdminFeedback from './pages/admin/AdminFeedback';
+import AdminDsa from './pages/admin/AdminDsa';
+import AdminBlogsHub from './pages/admin/AdminBlogsHub';
+import AdminInterviewQuestionsHub from './pages/admin/AdminInterviewQuestionsHub';
+import AdminRoadmaps from './pages/admin/AdminRoadmaps';
 import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -27,18 +34,17 @@ import CookiePolicy from './pages/CookiePolicy';
 import Jobs from './pages/Jobs';
 import InterviewDetailPage from './pages/InterviewDetailPage';
 import SalaryDetailPage from './pages/SalaryDetailPage';
-import ReferralDetailPage from './pages/ReferralDetailPage';
 import ResumeBuilder from './pages/ResumeBuilder';
 import InterviewQuestions from './pages/InterviewQuestions';
-import AdminInterviewQuestions from './pages/AdminInterviewQuestions';
 import Newsletter from './pages/Newsletter';
 import SocialIconFab from './components/SocialIconFab';
 import { useDispatch, useSelector } from 'react-redux';
 import { signoutSuccess, initializeSessionExpiry } from './redux/user/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import AdminBlogs from './pages/AdminBlogs';
-import Blogs from './pages/Blogs';
+import BlogListingPage from './pages/BlogListingPage';
+import BlogDetailPage from './pages/BlogDetailPage';
+import BlogLegacyRedirect from './pages/BlogLegacyRedirect';
 import DSAProblemTracker from './pages/DSAProblemTracker';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -122,17 +128,25 @@ function SessionManager() {
   return null;
 }
 
+// Legacy bookmark support: /admin-blogs/edit/:id used to be its own standalone page.
+function AdminBlogsEditRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/admin/blogs/edit/${id}`} replace />;
+}
 
-export default function App() {
+function Layout() {
+  const location = useLocation();
+  // The admin dashboard renders its own full-height shell and doesn't need the
+  // public site chrome (floating nav + promo strip) eating into its vertical space.
+  const isAdminArea = location.pathname.startsWith('/admin');
+
   return (
-    <HelmetProvider>
-        <BrowserRouter>
-          <div className="flex flex-col min-h-screen">
-            <SessionManager />
-            <Header />
-            <FlashStrip />
-            <div className="flex-grow">
-              <Routes>
+    <div className="flex flex-col min-h-screen">
+      <SessionManager />
+      {!isAdminArea && <Header />}
+      {!isAdminArea && <FlashStrip />}
+      <div className="flex-grow">
+        <Routes>
                 <Route path='/' element={<Home />} />
                 <Route path='/about' element={<About />} />
                 <Route path='/sign-in' element={<SignIn />} />
@@ -149,22 +163,28 @@ export default function App() {
                 <Route path="/salaryStructures/:slug/:salaryId" element={<SalaryStructures />} />
                 <Route path="/salaryStructures/:salaryId" element={<SalaryStructures />} />
                 <Route path="/salary/:id" element={<SalaryDetailPage />} />
-                <Route path="/referrals" element={<Referrals />} />
-                <Route path="/referral/:slug/:id" element={<ReferralDetailPage />} />
-                <Route path="/referral/:id" element={<ReferralDetailPage />} />
-                <Route path='/resumeTemplates' element={<ResumeTemplates />} />
-                <Route path='/resume-templates' element={<ResumeTemplates />} />
-                <Route path='/resumeTemplates/:slug/:templateId' element={<ResumeTemplates />} />
-                <Route path='/resumeTemplates/:templateId' element={<ResumeTemplates />} />
                 <Route path='/myCorner' element={<MyCorner />} />
                 
                 {/* Admin-only Routes */}
+                <Route path='/dashboard' element={<Navigate to='/admin' replace />} />
                 <Route element={<AdminRoute />}>
-                  <Route path='/dashboard' element={<Dashboard />} />
-                  <Route path='/admin/interview-questions' element={<AdminInterviewQuestions />} />
-                  <Route path='/admin-blogs' element={<AdminBlogs />} />
-                  <Route path='/admin-blogs/:action' element={<AdminBlogs />} />
-                  <Route path='/admin-blogs/:action/:id' element={<AdminBlogs />} />
+                  <Route path='/admin' element={<AdminShell />}>
+                    <Route index element={<AdminOverview />} />
+                    <Route path='users' element={<AdminUsers />} />
+                    <Route path='comments' element={<AdminComments />} />
+                    <Route path='interviews' element={<AdminInterviewExperiences />} />
+                    <Route path='salaries' element={<AdminSalaryStructures />} />
+                    <Route path='feedback' element={<AdminFeedback />} />
+                    <Route path='dsa' element={<AdminDsa />} />
+                    <Route path='blogs' element={<AdminBlogsHub />} />
+                    <Route path='blogs/create' element={<AdminBlogsHub />} />
+                    <Route path='blogs/edit/:id' element={<AdminBlogsHub />} />
+                    <Route path='interview-questions' element={<AdminInterviewQuestionsHub />} />
+                    <Route path='roadmaps' element={<AdminRoadmaps />} />
+                  </Route>
+                  <Route path='/admin-blogs' element={<Navigate to='/admin/blogs' replace />} />
+                  <Route path='/admin-blogs/create' element={<Navigate to='/admin/blogs/create' replace />} />
+                  <Route path='/admin-blogs/edit/:id' element={<AdminBlogsEditRedirect />} />
                 </Route>
                 
                 <Route path='/BuyMeACoffee' element={<PremiumSubscription />} />
@@ -185,9 +205,10 @@ export default function App() {
                 <Route path='/interview-questions/:topicSlug/:questionId' element={<InterviewQuestions />} />
                 
                 {/* Blog Routes */}
-                <Route path='/blogs' element={<Blogs />} />
-                <Route path='/blogs/category/:category' element={<Blogs />} />
-                <Route path='/blogs/:slug/:id' element={<Blogs />} />
+                <Route path='/blogs' element={<BlogListingPage />} />
+                <Route path='/blogs/category/:category' element={<BlogListingPage />} />
+                <Route path='/blogs/:slug/:id' element={<BlogLegacyRedirect />} />
+                <Route path='/blogs/:slug' element={<BlogDetailPage />} />
                 
                 {/* DSA Problem Tracker Route */}
                 <Route path='/qa-sdet-dsa-sheet' element={<DSAProblemTracker />} />
@@ -200,13 +221,21 @@ export default function App() {
 
                 <Route path="/connect-with-route2hire" element={<Community />} />
 
-              </Routes>
-            </div>
-            <Footer />
-            <SocialIconFab />
-            <ToastContainer position="bottom-right" autoClose={2500} hideProgressBar={false} newestOnTop theme="colored" closeOnClick pauseOnFocusLoss={false} draggable pauseOnHover />
-          </div>
-        </BrowserRouter>
+        </Routes>
+      </div>
+      {!isAdminArea && <Footer />}
+      {!isAdminArea && <SocialIconFab />}
+      <ToastContainer position="bottom-right" autoClose={2500} hideProgressBar={false} newestOnTop theme="colored" closeOnClick pauseOnFocusLoss={false} draggable pauseOnHover />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <HelmetProvider>
+      <BrowserRouter>
+        <Layout />
+      </BrowserRouter>
     </HelmetProvider>
   );
 }

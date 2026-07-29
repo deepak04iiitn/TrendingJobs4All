@@ -2,9 +2,7 @@ import { errorHandler } from "../utils/error.js"
 import bcryptjs from 'bcryptjs'
 import User from "../models/user.model.js";
 import InterviewExperience from "../models/interview.model.js";
-import Referral from "../models/referral.model.js";
 import Salary from "../models/salary.model.js";
-import Template from "../models/template.model.js";
 
 
 const updateUserActivityStatus = async (userId) => {
@@ -186,22 +184,6 @@ export const getUserInterviews = async (req, res, next) => {
   }
 }
 
-export const getUserReferrals = async (req, res, next) => {
-  if (req.user.id === req.params.refId) {
-      try {
-          // Update user's activity status
-          await updateUserActivityStatus(req.user.id);
-          
-          const referrals = await Referral.find({ userRef: req.params.refId });
-          res.status(200).json(referrals);
-      } catch (error) {
-          next(error);
-      }
-  } else {
-      return next(errorHandler(401, 'You can only view your own referrals!'));
-  }
-}
-
 export const getUserSalary = async (req, res, next) => {
   if (req.user.id === req.params.salId) {
       try {
@@ -215,22 +197,6 @@ export const getUserSalary = async (req, res, next) => {
       }
   } else {
       return next(errorHandler(401, 'You can only view your own salary structure!'));
-  }
-}
-
-export const getUserResume = async (req, res, next) => {
-  if (req.user.id === req.params.resId) {
-      try {
-          // Update user's activity status
-          await updateUserActivityStatus(req.user.id);
-          
-          const resume = await Template.find({ userRef: req.params.resId });
-          res.status(200).json(resume);
-      } catch (error) {
-          next(error);
-      }
-  } else {
-      return next(errorHandler(401, 'You can only view your own resume template!'));
   }
 }
 
@@ -248,7 +214,7 @@ export const getusers = async(req, res, next) => {
       const sortDirection = req.query.sort === 'asc' ? 1 : -1;
 
       // Optional filter by a specific calendar date (YYYY-MM-DD)
-      const { date } = req.query;
+      const { date, search } = req.query;
       const filter = {};
       let startOfDay = null;
       let endOfDay = null;
@@ -261,6 +227,12 @@ export const getusers = async(req, res, next) => {
               endOfDay = end;
               filter.createdAt = { $gte: start, $lt: end };
           }
+      }
+
+      // Optional search by username or email
+      if (search && search.trim()) {
+          const regex = new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+          filter.$or = [{ username: regex }, { email: regex }];
       }
 
       const users = await User.find(filter)

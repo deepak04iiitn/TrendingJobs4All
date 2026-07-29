@@ -54,7 +54,7 @@ export const createExperience = async(req, res, next) => {
 
 export const getExperiences = async(req, res, next) => {
     try {
-        const { sortConfig = 'createdAt-desc' } = req.query;
+        const { sortConfig = 'createdAt-desc', search, page, limit } = req.query;
         let sortOptions = {};
 
         switch (sortConfig) {
@@ -80,7 +80,28 @@ export const getExperiences = async(req, res, next) => {
                 sortOptions = { createdAt: -1 };
         }
 
-        const experiences = await InterviewExperience.find().sort(sortOptions);
+        const filter = {};
+        if (search && search.trim()) {
+            const regex = new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            filter.$or = [{ company: regex }, { position: regex }];
+        }
+
+        // Admin/paginated shape only when page or limit is explicitly requested,
+        // so the public interview-experiences page (which expects a bare array) is unaffected.
+        if (page || limit) {
+            const pageNum = Math.max(1, parseInt(page) || 1);
+            const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
+            const skip = (pageNum - 1) * limitNum;
+
+            const [items, total] = await Promise.all([
+                InterviewExperience.find(filter).sort(sortOptions).skip(skip).limit(limitNum),
+                InterviewExperience.countDocuments(filter),
+            ]);
+
+            return res.status(200).json({ items, total, page: pageNum, limit: limitNum });
+        }
+
+        const experiences = await InterviewExperience.find(filter).sort(sortOptions);
         res.status(200).json(experiences);
     } catch (error) {
         next(error);

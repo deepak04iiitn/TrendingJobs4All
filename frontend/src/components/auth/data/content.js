@@ -44,7 +44,7 @@ export const SIGN_UP = {
   eyebrow: 'Join Route2Hire',
   title: 'Create your free QA/SDET account',
   lede:
-    'Join software testing professionals using Route2Hire for jobs, interview prep, salary insights, referrals and structured career growth.',
+    'Join software testing professionals using Route2Hire for jobs, interview prep, salary insights and structured career growth.',
   benefits: [
     { id: 'jobs', text: 'Daily curated QA and SDET job listings' },
     { id: 'community', text: '3.5K+ tester community on Telegram and WhatsApp' },

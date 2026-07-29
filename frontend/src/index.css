@@ -34,6 +34,34 @@
   }
 }
 
+/* Thin, brand-colored scrollbar for compact scrollable panels (e.g. the interview experiences rail) */
+.r2h-scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--r2h-border) transparent;
+}
+.r2h-scroll-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.r2h-scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.r2h-scroll-thin::-webkit-scrollbar-thumb {
+  background-color: var(--r2h-border);
+  border-radius: 999px;
+}
+.r2h-scroll-thin::-webkit-scrollbar-thumb:hover {
+  background-color: var(--r2h-bronze);
+}
+
+/* Fully hides the scrollbar while keeping the element scrollable (e.g. the admin sidebar nav) */
+.r2h-scroll-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.r2h-scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 /* Blog Content Styles - Applied to content rendered via dangerouslySetInnerHTML */
 .prose ul,
 .prose ol {

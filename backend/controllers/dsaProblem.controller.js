@@ -370,6 +370,10 @@ export const getRecentActivity = async (req, res, next) => {
 // ADMIN: Get per-user DSA progress stats
 export const getAdminUsersDSAStats = async (req, res, next) => {
     try {
+        const { search } = req.query;
+        const pageNum = Math.max(1, parseInt(req.query.page) || 1);
+        const limitNum = Math.min(100, Math.max(1, parseInt(req.query.limit) || 12));
+
         // Aggregate completed and favorite counts per user
         const perUser = await DSAProblem.aggregate([
             {
@@ -420,7 +424,18 @@ export const getAdminUsersDSAStats = async (req, res, next) => {
             .filter(Boolean)
             .sort((a, b) => b.completedCount - a.completedCount);
 
-        res.json({ success: true, items: rows, totalProblems });
+        const filteredRows = search && search.trim()
+            ? rows.filter((r) => {
+                const q = search.trim().toLowerCase();
+                return r.username?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q);
+            })
+            : rows;
+
+        const total = filteredRows.length;
+        const start = (pageNum - 1) * limitNum;
+        const items = filteredRows.slice(start, start + limitNum);
+
+        res.json({ success: true, items, total, page: pageNum, limit: limitNum, totalProblems });
     } catch (error) {
         next(error);
     }
