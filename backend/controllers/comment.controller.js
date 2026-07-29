@@ -140,12 +140,19 @@ export const deleteComment = async (req, res, next) => {
         const limit = parseInt(req.query.limit) || 8;
         const sortDirection = req.query.sort === 'asc' ? 1 : -1;
 
-        const comments = await Comment.find()
+        const filter = {};
+        const { search } = req.query;
+        if (search && search.trim()) {
+            const regex = new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            filter.content = regex;
+        }
+
+        const comments = await Comment.find(filter)
             .sort({ createdAt: sortDirection })
             .skip(startIndex)
             .limit(limit);
 
-        const totalComments = await Comment.countDocuments();
+        const totalComments = await Comment.countDocuments(filter);
 
         const now = new Date();
         const oneMonthAgo = new Date(

@@ -214,7 +214,7 @@ export const getusers = async(req, res, next) => {
       const sortDirection = req.query.sort === 'asc' ? 1 : -1;
 
       // Optional filter by a specific calendar date (YYYY-MM-DD)
-      const { date } = req.query;
+      const { date, search } = req.query;
       const filter = {};
       let startOfDay = null;
       let endOfDay = null;
@@ -227,6 +227,12 @@ export const getusers = async(req, res, next) => {
               endOfDay = end;
               filter.createdAt = { $gte: start, $lt: end };
           }
+      }
+
+      // Optional search by username or email
+      if (search && search.trim()) {
+          const regex = new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+          filter.$or = [{ username: regex }, { email: regex }];
       }
 
       const users = await User.find(filter)

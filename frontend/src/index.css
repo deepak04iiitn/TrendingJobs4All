@@ -53,6 +53,15 @@
   background-color: var(--r2h-bronze);
 }
 
+/* Fully hides the scrollbar while keeping the element scrollable (e.g. the admin sidebar nav) */
+.r2h-scroll-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.r2h-scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 /* Blog Content Styles - Applied to content rendered via dangerouslySetInnerHTML */
 .prose ul,
 .prose ol {

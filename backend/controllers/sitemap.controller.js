@@ -119,7 +119,7 @@ export const generateSitemap = async (req, res) => {
         },
         { projection: { _id: 1, time: 1 } }
       ).limit(10000).toArray(), // Limit to prevent huge sitemaps
-      Blog.find({ published: true }, '_id slug updatedAt').lean().limit(10000)
+      Blog.find({ status: 'published' }, 'slug updatedAt').lean().limit(10000)
     ]);
 
     const dynamicUrls = [];
@@ -167,7 +167,7 @@ export const generateSitemap = async (req, res) => {
     // Add blog URLs
     blogs.forEach(blog => {
       dynamicUrls.push({
-        url: `/blogs/${blog.slug}/${blog._id}`,
+        url: `/blogs/${blog.slug}`,
         priority: '0.80',
         lastmod: blog.updatedAt ? new Date(blog.updatedAt).toISOString().split('T')[0] : null
       });
@@ -226,7 +226,7 @@ export const getSitemapStats = async (req, res) => {
         apply_link: { $not: { $regex: /invalid-url|\/404\/|\/404$|not.found|not.available/i } },
         apply_link: { $regex: /^https?:\/\/.+\..+/i }
       }),
-      Blog.countDocuments({ published: true })
+      Blog.countDocuments({ status: 'published' })
     ]);
 
     const totalDynamicUrls = interviewCount + salaryCount + questionCount + jobCount + blogCount;

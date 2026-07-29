@@ -197,7 +197,7 @@ const generateLLMSText = (dynamicContent) => {
       const title = blog.title || 'Blog Article';
       const category = blog.category || 'General';
       const excerpt = blog.excerpt || 'Professional insights and industry knowledge.';
-      content += `- [${title}](${baseUrl}/blogs/${blog.slug}/${blog._id}): ${excerpt} - Category: ${category}.\n`;
+      content += `- [${title}](${baseUrl}/blogs/${blog.slug}): ${excerpt} - Category: ${category}.\n`;
     });
   }
 
@@ -247,7 +247,7 @@ export const generateLLMS = async (req, res) => {
         },
         { projection: { _id: 1, job_title: 1, company: 1, location: 1 } }
       ).limit(30).toArray(),
-      Blog.find({ published: true }, '_id title slug excerpt category').lean().limit(20)
+      Blog.find({ status: 'published' }, 'title slug excerpt category').lean().limit(20)
     ]);
 
     const dynamicContent = {
@@ -311,7 +311,7 @@ export const getLLMSStats = async (req, res) => {
         apply_link: { $not: { $regex: /invalid-url|\/404\/|\/404$|not.found|not.available/i } },
         apply_link: { $regex: /^https?:\/\/.+\..+/i }
       }),
-      Blog.countDocuments({ published: true })
+      Blog.countDocuments({ status: 'published' })
     ]);
 
     const totalDynamicItems = interviewCount + salaryCount + questionCount + jobCount + blogCount;
