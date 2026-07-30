@@ -23,11 +23,12 @@ const truncateDescription = (description, wordLimit) => {
     return 'No description available';
   }
 
-  const words = description.split(' ');
+  const cleaned = description.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\s+/g, ' ').trim();
+  const words = cleaned.split(' ');
   if (words.length > wordLimit) {
     return words.slice(0, wordLimit).join(' ') + '...';
   }
-  return description;
+  return cleaned;
 };
 
 const formatDate = (dateString) => {

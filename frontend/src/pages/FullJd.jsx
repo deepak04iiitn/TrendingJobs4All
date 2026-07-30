@@ -172,11 +172,27 @@ export default function FullJd() {
       .padStart(2, '0')}/${date.getFullYear()}`;
   };
 
+  const formatInlineMarkdown = (line, lineKey) => {
+    const parts = line.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      const bold = part.match(/^\*\*([^*]+)\*\*$/);
+      if (bold) {
+        const label = bold[1].replace(/:\s*$/, '');
+        return (
+          <strong key={`${lineKey}-${i}`} className="font-semibold text-[#1C1917]">
+            {label}:
+          </strong>
+        );
+      }
+      return part ? <span key={`${lineKey}-${i}`}>{part}</span> : null;
+    });
+  };
+
   const formatJobDescription = (description) => {
     if (!description) return 'No description available.';
     return description.split('\n').map((line, index) => (
       <span key={index}>
-        {line}
+        {formatInlineMarkdown(line, index)}
         <br />
       </span>
     ));

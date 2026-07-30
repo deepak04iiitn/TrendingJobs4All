@@ -389,38 +389,50 @@ export default function Header() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
               className="fixed inset-0 z-[90] bg-[#2C241B]/35 backdrop-blur-[2px]"
               onClick={closeMobileMenu}
               aria-hidden
             />
             <motion.aside
-              initial={{ opacity: 0, y: 24, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.98 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-3 bottom-3 top-[4.75rem] z-[100] flex flex-col overflow-hidden rounded-3xl border border-[#E5DCCE] bg-[#F7F3EC] shadow-[0_24px_60px_-20px_rgba(44,36,27,0.3)]"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed inset-y-0 left-0 z-[100] flex w-full max-w-[20.5rem] flex-col border-r border-[#E5DCCE] bg-[#F7F3EC] shadow-[24px_0_60px_-28px_rgba(44,36,27,0.35)] sm:max-w-[22rem]"
               ref={mobileMenuRef}
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
             >
-              <div className="flex items-center justify-between border-b border-[#E5DCCE] bg-[#EFE8DC] px-5 py-4">
+              <div
+                className="pointer-events-none absolute inset-y-0 right-0 w-[3px] bg-gradient-to-b from-[#C4A574]/20 via-[#C4A574] to-[#C4A574]/20"
+                aria-hidden
+              />
+              <div className="pointer-events-none absolute inset-0" aria-hidden>
+                <div className="absolute -left-10 top-0 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(196,165,116,0.18)_0%,transparent_70%)]" />
+              </div>
+
+              <div className="relative flex items-center justify-between border-b border-[#E5DCCE] px-5 pb-4 pt-5">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B5A48]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B5A48]">
                     Menu
                   </p>
-                  <p className="font-display text-base font-semibold text-[#1C1917]">Explore Route2Hire</p>
+                  <p className="font-display mt-1 text-lg font-semibold tracking-tight text-[#1C1917]">
+                    Explore Route2Hire
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={closeMobileMenu}
-                  className={`rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] p-2 text-[#57534E] hover:text-[#2C241B] ${focusRing}`}
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#E5DCCE] bg-[#FFFDF8] text-[#2C241B] transition hover:border-[#C4A574]/50 hover:bg-[#EFE8DC] ${focusRing}`}
                   aria-label="Close menu"
                 >
                   <X size={18} />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto py-3">
+
+              <div className="relative flex-1 overflow-y-auto py-3">
                 <div className="px-2">
                   <NavLinks isMobile />
                 </div>
@@ -457,8 +469,9 @@ export default function Header() {
                   ))}
                 </div>
               </div>
+
               {currentUser && (
-                <div className="border-t border-[#E5DCCE] bg-[#EFE8DC] p-4">
+                <div className="relative border-t border-[#E5DCCE] bg-[#EFE8DC]/70 p-4">
                   <div className="mb-3 flex items-center gap-3">
                     <img
                       src={currentUser.profilePicture}

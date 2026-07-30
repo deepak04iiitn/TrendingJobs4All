@@ -127,6 +127,11 @@ html:has(.jd-page) {
   line-height: 1.75;
 }
 
+.jd-body strong {
+  font-weight: 600;
+  color: #1c1917;
+}
+
 .jd-body br + br {
   display: block;
   content: '';
