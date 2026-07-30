@@ -1,250 +1,145 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-    CheckCircle2, 
-    Circle, 
-    User, 
-    Target, 
-    GraduationCap, 
-    Code, 
-    FolderOpen, 
-    Briefcase, 
-    Medal,
-    Award,
-    BookOpen, 
-    Globe,
-    Heart, 
-    Crown,
-    ArrowRight
+import { useState } from 'react';
+import {
+  User,
+  Target,
+  GraduationCap,
+  Code,
+  FolderOpen,
+  Briefcase,
+  Medal,
+  Award,
+  BookOpen,
+  Globe,
+  Heart,
+  ArrowRight,
+  Check,
 } from 'lucide-react';
+import { focusRing } from '../../theme/tokens';
 
-const FIELD_ICONS = {
-    'Header': User,
-    'Objective': Target,
-    'Education': GraduationCap,
-    'Technical Skills': Code,
-    'Projects': FolderOpen,
-    'Work Experience': Briefcase,
-    'Positions of Responsibility': Medal,
-    'Certifications': Award,
-    'Achievements': Medal,
-    'Research/Publications': BookOpen,
-    'Languages': Globe,
-    'Hobbies': Heart
+const FIELD_META = {
+  Header: { icon: User, hint: 'Contact details' },
+  Objective: { icon: Target, hint: 'Career summary' },
+  Education: { icon: GraduationCap, hint: 'Degrees' },
+  'Technical Skills': { icon: Code, hint: 'Tools & stacks' },
+  Projects: { icon: FolderOpen, hint: 'Work samples' },
+  'Work Experience': { icon: Briefcase, hint: 'Roles & impact' },
+  'Positions of Responsibility': { icon: Medal, hint: 'Leadership' },
+  Certifications: { icon: Award, hint: 'Credentials' },
+  Achievements: { icon: Medal, hint: 'Highlights' },
+  'Research/Publications': { icon: BookOpen, hint: 'Writing' },
+  Languages: { icon: Globe, hint: 'Spoken langs' },
+  Hobbies: { icon: Heart, hint: 'Interests' },
 };
 
 const FieldSelection = ({ availableFields, onSelect }) => {
-    const [selectedFields, setSelectedFields] = useState([]);
+  const [selectedFields, setSelectedFields] = useState(['Header']);
 
-    const handleFieldToggle = (field) => {
-        if (field === 'Header' && selectedFields.includes('Header') && selectedFields.length === 1) {
-            return;
-        }
+  const handleFieldToggle = (field) => {
+    if (field === 'Header') return;
 
-        setSelectedFields(prev => {
-            if (prev.includes(field)) {
-                return prev.filter(f => f !== field);
-            }
-            if (prev.length < 7) {
-                return [...prev, field];
-            }
-            return prev;
-        });
-    };
+    setSelectedFields((prev) => {
+      if (prev.includes(field)) return prev.filter((f) => f !== field);
+      if (prev.length < 7) return [...prev, field];
+      return prev;
+    });
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (selectedFields.includes('Header') && selectedFields.length >= 1 && selectedFields.length <= 7) {
-            onSelect(selectedFields);
-        } else if (!selectedFields.includes('Header')) {
-            // Using a more elegant notification instead of alert
-            console.warn('Header section is compulsory.');
-        } else if (selectedFields.length === 0) {
-            console.warn('Please select fields for your resume.');
-        } else if (selectedFields.length > 7) {
-            console.warn('You can select a maximum of 7 fields.');
-        }
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (selectedFields.includes('Header') && selectedFields.length <= 7) {
+      onSelect(selectedFields);
+    }
+  };
 
-    const isSubmitDisabled = !selectedFields.includes('Header') || selectedFields.length === 0 || selectedFields.length > 7;
+  const canSubmit =
+    selectedFields.includes('Header') && selectedFields.length >= 1 && selectedFields.length <= 7;
 
-    return (
-        <div className="w-full">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="mb-8"
-            >
-                
-                <p className="text-slate-600 leading-relaxed text-sm mb-6">
-                    Select up to 7 sections to include in your professional resume. 
-                    The Header section is mandatory and contains your contact information.
-                </p>
-                
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border-2 border-slate-200">
-                    <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${selectedFields.length > 0 ? 'bg-blue-500' : 'bg-slate-300'} transition-colors`}></div>
-                        <span className="text-slate-700 font-medium text-sm">
-                            {selectedFields.length}/7 sections selected
-                        </span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-blue-600">
-                        <Crown className="w-4 h-4" />
-                        <span className="text-xs font-medium">Premium Builder</span>
-                    </div>
-                </div>
-            </motion.div>
+  return (
+    <form onSubmit={handleSubmit} className="w-full">
+      <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {availableFields.map((field) => {
+          const meta = FIELD_META[field] || { icon: Briefcase, hint: '' };
+          const Icon = meta.icon;
+          const isSelected = selectedFields.includes(field);
+          const isMandatory = field === 'Header';
+          const isDisabled = !isSelected && selectedFields.length >= 7;
 
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                    {availableFields.map((field, index) => {
-                        const Icon = FIELD_ICONS[field] || Circle;
-                        const isSelected = selectedFields.includes(field);
-                        const isMandatory = field === 'Header';
-                        const isDisabled = !isSelected && selectedFields.length >= 7;
-                        
-                        return (
-                            <motion.div
-                                key={field}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.05, duration: 0.4 }}
-                                whileHover={{ scale: isDisabled ? 1 : 1.01, y: isDisabled ? 0 : -1 }}
-                                whileTap={{ scale: isDisabled ? 1 : 0.99 }}
-                                onClick={() => !isDisabled && handleFieldToggle(field)}
-                                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 group ${
-                                    isSelected
-                                        ? 'border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg shadow-blue-200/50'
-                                        : isDisabled
-                                        ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
-                                        : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-md hover:shadow-blue-100'
-                                }`}
-                            >
-                                <div className="relative flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                        <div className={`p-2 rounded-lg transition-all duration-300 ${
-                                            isSelected 
-                                                ? 'bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg' 
-                                                : isDisabled
-                                                ? 'bg-slate-200'
-                                                : 'bg-slate-100 group-hover:bg-blue-100'
-                                        }`}>
-                                            <Icon className={`w-4 h-4 ${
-                                                isSelected ? 'text-white' : isDisabled ? 'text-slate-400' : 'text-slate-600 group-hover:text-blue-600'
-                                            } transition-colors`} />
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center space-x-2">
-                                                <span className={`font-medium text-sm ${
-                                                    isSelected ? 'text-slate-900' : 'text-slate-700'
-                                                } transition-colors`}>
-                                                    {field}
-                                                </span>
-                                                {isMandatory && (
-                                                    <span className="px-2 py-0.5 text-xs font-medium bg-red-50 text-red-600 rounded-full border border-red-200">
-                                                        Required
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {isMandatory && (
-                                                <p className="text-xs text-slate-500 mt-0.5">
-                                                    Contact information
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex items-center">
-                                        {isSelected ? (
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                            >
-                                                <CheckCircle2 className="w-5 h-5 text-blue-600" />
-                                            </motion.div>
-                                        ) : (
-                                            <Circle className={`w-5 h-5 ${
-                                                isDisabled ? 'text-slate-300' : 'text-slate-400 group-hover:text-blue-500'
-                                            } transition-colors`} />
-                                        )}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4, duration: 0.6 }}
-                    className="flex items-center justify-between"
+          return (
+            <li key={field}>
+              <button
+                type="button"
+                disabled={isDisabled || isMandatory}
+                onClick={() => handleFieldToggle(field)}
+                aria-pressed={isSelected}
+                className={`flex h-full w-full items-start gap-3 rounded-xl border px-3.5 py-3 text-left transition ${focusRing} ${
+                  isSelected
+                    ? 'border-[#2C241B] bg-[#2C241B] text-[#FFFDF8]'
+                    : isDisabled
+                      ? 'cursor-not-allowed border-[#E5DCCE] bg-[#FFFDF8]/50 opacity-45'
+                      : 'border-[#E5DCCE] bg-[#FFFDF8] hover:border-[#C4A574]/70'
+                } ${isMandatory && isSelected ? 'cursor-default' : ''}`}
+              >
+                <span
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                    isSelected
+                      ? 'border-[#C4A574] bg-[#C4A574]/20 text-[#C4A574]'
+                      : 'border-[#E5DCCE] bg-[#F7F3EC]'
+                  }`}
+                  aria-hidden
                 >
-                    <div className="text-slate-600">
-                        {!selectedFields.includes('Header') && (
-                            <p className="text-red-600 font-medium flex items-center text-sm">
-                                <Circle className="w-3 h-3 mr-2" />
-                                Header section is required
-                            </p>
-                        )}
-                        {selectedFields.length > 7 && (
-                            <p className="text-red-600 font-medium flex items-center text-sm">
-                                <Circle className="w-3 h-3 mr-2" />
-                                Maximum 7 sections allowed
-                            </p>
-                        )}
-                        {selectedFields.includes('Header') && selectedFields.length <= 7 && selectedFields.length > 0 && (
-                            <p className="text-emerald-600 font-medium flex items-center text-sm">
-                                <CheckCircle2 className="w-3 h-3 mr-2" />
-                                Ready to build your resume
-                            </p>
-                        )}
-                    </div>
-                    
-                    <motion.button
-                        type="submit"
-                        disabled={isSubmitDisabled}
-                        whileHover={!isSubmitDisabled ? { scale: 1.02, y: -1 } : {}}
-                        whileTap={!isSubmitDisabled ? { scale: 0.98 } : {}}
-                        className={`relative px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center space-x-2 ${
-                            !isSubmitDisabled
-                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40'
-                                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                        }`}
-                    >
-                        {!isSubmitDisabled && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-30"></div>
-                        )}
-                        <span className="relative">Start Building</span>
-                        <ArrowRight className="w-4 h-4 relative" />
-                    </motion.button>
-                </motion.div>
-            </form>
+                  {isSelected && <Check className="h-3 w-3" strokeWidth={3} />}
+                </span>
 
-            {/* Progress indicator */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="mt-6 p-4 bg-slate-50 rounded-xl border-2 border-slate-200"
-            >
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-slate-700">Selection Progress</span>
-                    <span className="text-sm font-bold text-blue-600">{selectedFields.length}/7</span>
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(selectedFields.length / 7) * 100}%` }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                    ></motion.div>
-                </div>
-            </motion.div>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2">
+                    <Icon
+                      className={`h-3.5 w-3.5 shrink-0 ${isSelected ? 'text-[#C4A574]' : 'text-[#6B5A48]'}`}
+                    />
+                    <span
+                      className={`truncate text-sm font-medium ${isSelected ? 'text-[#FFFDF8]' : 'text-[#1C1917]'}`}
+                    >
+                      {field}
+                    </span>
+                  </span>
+                  <span
+                    className={`mt-1 block text-[11px] leading-snug ${isSelected ? 'text-[#E5DCCE]' : 'text-[#78716C]'}`}
+                  >
+                    {isMandatory ? 'Required · ' : ''}
+                    {meta.hint}
+                  </span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Sticky action bar — always reachable without scrolling to bottom */}
+      <div className="sticky bottom-4 z-20 mt-6">
+        <div className="flex flex-col gap-3 rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8]/95 px-4 py-3 shadow-[0_12px_40px_-20px_rgba(44,36,27,0.35)] backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <p className="text-sm text-[#57534E]">
+            <span className="font-semibold tabular-nums text-[#1C1917]">{selectedFields.length}</span>
+            <span className="text-[#78716C]"> / 7 selected</span>
+            {selectedFields.length >= 7 && (
+              <span className="ml-2 text-[#6B5A48]">· Max reached</span>
+            )}
+          </p>
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition ${focusRing} ${
+              canSubmit
+                ? 'bg-[#2C241B] text-[#FFFDF8] hover:bg-[#1A1510]'
+                : 'cursor-not-allowed bg-[#E5DCCE] text-[#78716C]'
+            }`}
+          >
+            Continue to editor
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
-    );
+      </div>
+    </form>
+  );
 };
 
 export default FieldSelection;

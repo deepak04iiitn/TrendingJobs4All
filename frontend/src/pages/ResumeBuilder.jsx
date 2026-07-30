@@ -1,543 +1,705 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FileText,
+  Trash2,
+  Plus,
+  Pencil,
+  ArrowRight,
+  ArrowLeft,
+  Download,
+  LayoutTemplate,
+  Eye,
+  LogIn,
+} from 'lucide-react';
 import ResumeForm from '../components/resume/ResumeForm';
 import ResumePreview from '../components/resume/ResumePreview';
 import FieldSelection from '../components/resume/FieldSelection';
-import Breadcrumb from '../components/Breadcrumb';
 import RelatedLinks from '../components/RelatedLinks';
-import { FileText, Edit2, Trash2, Plus, Briefcase, FileEdit, Crown, FileSignature, LayoutTemplate, Eye, Download, Rocket, Award } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { FaDownload } from 'react-icons/fa';
+import { focusRing } from '../theme/tokens';
 
 const AVAILABLE_FIELDS = [
-    'Header',
-    'Objective',
-    'Education',
-    'Technical Skills',
-    'Projects',
-    'Work Experience',
-    'Positions of Responsibility',
-    'Certifications',
-    'Achievements',
-    'Research/Publications',
-    'Languages',
-    'Hobbies'
+  'Header',
+  'Objective',
+  'Education',
+  'Technical Skills',
+  'Projects',
+  'Work Experience',
+  'Positions of Responsibility',
+  'Certifications',
+  'Achievements',
+  'Research/Publications',
+  'Languages',
+  'Hobbies',
 ];
 
-const ResumeBuilder = () => {
-    const { currentUser } = useSelector((state) => state.user);
-    const [selectedFields, setSelectedFields] = useState([]);
-    const [resumeData, setResumeData] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [showFieldSelection, setShowFieldSelection] = useState(true);
-    const [savedResumes, setSavedResumes] = useState([]);
-    const [activeResumeId, setActiveResumeId] = useState(null);
-
-    useEffect(() => {
-        const fetchResumes = async () => {
-            try {
-                setLoading(true);
-                const res = await axios.get('/backend/resume', {
-                    withCredentials: true
-                });
-                console.log('Fetched resumes:', res.data);
-                setSavedResumes(Array.isArray(res.data) ? res.data : []);
-            } catch (error) {
-                console.error('Error fetching resumes:', error);
-                setSavedResumes([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (currentUser) {
-            fetchResumes();
-        }
-    }, [currentUser]);
-
-    const handleFieldSelection = async (fields) => {
-        if (fields.length === 0) {
-            toast.error('Please select fields for your resume');
-            return;
-        }
-
-        if (!fields.includes('Header')) {
-            toast.error('Header section is compulsory');
-            return;
-        }
-
-        if (fields.length > 7) {
-            toast.error('You can select a maximum of 7 fields');
-            return;
-        }
-
-        setSelectedFields(fields);
-        setShowFieldSelection(false);
-        
-        const initialData = {};
-        fields.forEach(field => {
-            switch (field) {
-                case 'Header':
-                    initialData[field] = {
-                        name: '',
-                        email: '',
-                        phone: '',
-                        location: '',
-                        linkedin: '',
-                        github: ''
-                    };
-                    break;
-                case 'Education':
-                case 'Projects':
-                case 'Work Experience':
-                case 'Positions of Responsibility':
-                case 'Certifications':
-                case 'Research/Publications':
-                    initialData[field] = [];
-                    break;
-                case 'Technical Skills':
-                case 'Achievements':
-                case 'Hobbies':
-                    initialData[field] = [];
-                    break;
-                case 'Languages':
-                    initialData[field] = [];
-                    break;
-                default:
-                    initialData[field] = '';
-            }
-        });
-
-        setResumeData(initialData);
-
-        try {
-            const response = await axios.post('/backend/resume', {
-                selectedFields: fields,
-                resumeData: initialData
-            }, {
-                withCredentials: true
-            });
-            setActiveResumeId(response.data._id);
-            setSavedResumes(prev => [...prev, response.data]);
-        } catch (error) {
-            console.error('Error saving initial resume data:', error);
-            toast.error('Failed to save resume data');
-        }
-    };
-
-    const handleFormChange = async (field, value) => {
-        const newData = { ...resumeData, [field]: value };
-        setResumeData(newData);
-
-        try {
-            await axios.put(`/backend/resume/${activeResumeId}`, {
-                selectedFields,
-                resumeData: newData
-            }, {
-                withCredentials: true
-            });
-        } catch (error) {
-            console.error('Error saving resume:', error);
-            toast.error('Failed to save resume changes');
-        }
-    };
-
-    const handleEditResume = async (resumeId) => {
-        try {
-            const res = await axios.get(`/backend/resume/${resumeId}`, {
-                withCredentials: true
-            });
-            if (res.data) {
-                setSelectedFields(res.data.selectedFields);
-                setResumeData(res.data.resumeData);
-                setActiveResumeId(resumeId);
-                setShowFieldSelection(false);
-            }
-        } catch (error) {
-            console.error('Error fetching resume:', error);
-            toast.error('Failed to load resume');
-        }
-    };
-
-    const handleDeleteResume = async (resumeId) => {
-        try {
-            await axios.delete(`/backend/resume/${resumeId}`, {
-                withCredentials: true
-            });
-            setSavedResumes(prev => prev.filter(resume => resume._id !== resumeId));
-            if (activeResumeId === resumeId) {
-                setShowFieldSelection(true);
-                setSelectedFields([]);
-                setResumeData({});
-                setActiveResumeId(null);
-            }
-            toast.success('Resume deleted successfully');
-        } catch (error) {
-            console.error('Error deleting resume:', error);
-            toast.error('Failed to delete resume');
-        }
-    };
-
-    // Server-side PDF download handler
-    const handleServerPdfDownload = async () => {
-        if (!activeResumeId) return;
-        try {
-            const response = await fetch(`/backend/resume/pdf/${activeResumeId}`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'resume.pdf';
-                a.click();
-                window.URL.revokeObjectURL(url);
-            } else {
-                // handle error
-                alert('Failed to download PDF.');
-            }
-        } catch (err) {
-            alert('Error downloading PDF.');
-        }
-    };
-
-    if (!currentUser) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 flex justify-center items-center relative overflow-hidden">
-                {/* Animated Background Elements */}
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{animationDelay: '2s'}}></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{animationDelay: '4s'}}></div>
-                </div>
-                
-                <motion.div
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="relative z-10 text-center p-12 bg-white/90 backdrop-blur-xl rounded-3xl border-2 border-purple-200/50 shadow-2xl max-w-lg mx-4"
-                >
-                    <div className="relative mb-8">
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl blur-lg opacity-20"></div>
-                        <div className="relative bg-gradient-to-r from-purple-500 to-blue-500 p-4 rounded-2xl shadow-lg">
-                            <Crown className="w-12 h-12 text-white mx-auto" />
-                        </div>
-                    </div>
-                    <h1 className="text-3xl font-bold text-slate-900 mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                        Premium Resume Builder
-                    </h1>
-                    <p className="text-xl text-slate-600 mb-8">Please sign in to access your professional resume builder</p>
-                    <div className="flex items-center justify-center space-x-2 text-purple-600">
-                        <FileEdit className="w-5 h-5 animate-pulse" />
-                        <span className="text-sm font-medium">Craft Your Perfect Resume</span>
-                        <Award className="w-5 h-5 animate-pulse" />
-                    </div>
-                </motion.div>
-            </div>
-        );
-    }
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 flex justify-center items-center">
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="flex flex-col items-center"
-                >
-                    <div className="relative">
-                        <div className="w-20 h-20 border-4 border-purple-200 rounded-full animate-spin"></div>
-                        <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-t-purple-500 rounded-full animate-spin"></div>
-                    </div>
-                    <motion.div
-                        animate={{ opacity: [0.5, 1, 0.5] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="mt-6 text-lg text-purple-600 font-medium"
-                    >
-                        Loading your workspace...
-                    </motion.div>
-                </motion.div>
-            </div>
-        );
-    }
-
-    return (
-        <>
-            {/* ✅ Helmet for SEO */}
-            <Helmet>
-                <title>Resume Builder | QA, SDET & Test Automation Professionals - Route2Hire</title>
-                <meta
-                    name="description"
-                    content="Create professional resumes for QA, SDET, Test Automation, and Software Testing roles with Route2Hire's free resume builder. Download ATS-friendly templates and get expert tips for QA professionals."
-                />
-                <meta
-                    name="keywords"
-                    content="Resume builder, QA resume, SDET resume, Test Automation resume, Software Testing resume, Professional resume builder, ATS-friendly resume, QA career resume"
-                />
-                <meta property="og:title" content="Resume Builder | QA, SDET & Test Automation Professionals - Route2Hire" />
-                <meta
-                    property="og:description"
-                    content="Build professional resumes for QA, SDET, and Test Automation roles. Free resume builder with ATS-friendly templates for software testing professionals."
-                />
-                <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://route2hire.com/resume-builder" />
-                <meta property="og:image" content="https://route2hire.com/assets/Route2Hire.png" />
-                <link rel="canonical" href="https://route2hire.com/resume-builder" />
-            </Helmet>
-
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 relative overflow-hidden">
-            {/* Modern Background Effects */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-20 left-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-                <div className="absolute top-40 right-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{animationDelay: '2s'}}></div>
-                <div className="absolute -bottom-20 left-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style={{animationDelay: '4s'}}></div>
-                {/* Subtle grid pattern */}
-                <div className="absolute inset-0 opacity-5">
-                    <div className="w-full h-full" style={{
-                        backgroundImage: `linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)`,
-                        backgroundSize: '50px 50px'
-                    }}></div>
-                </div>
-            </div>
-
-            <div className="relative z-10 py-8 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    {/* Breadcrumb Navigation */}
-                    <div className="mb-6 mt-20">
-                        <Breadcrumb 
-                            items={[
-                                { label: 'Resume Builder' }
-                            ]}
-                        />
-                    </div>
-                    
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                        className="text-center mb-12"
-                    >
-                        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-sm border border-purple-200 shadow-lg shadow-purple-100/50 mb-6 mt-20">
-                            <Crown className="w-4 h-4 text-purple-600" />
-                            <span className="text-sm font-semibold text-purple-700">Professional Resume Builder</span>
-                        </div>
-                        <div className="flex items-center justify-center space-x-4 mb-8">
-                            <div className="relative group">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-40 transition-opacity"></div>
-                                <div className="relative bg-gradient-to-r from-blue-500 to-indigo-600 p-4 rounded-2xl shadow-lg">
-                                    <Crown className="w-8 h-8 text-white" />
-                                </div>
-                            </div>
-                            <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight">
-                                Resume Builder
-                            </h1>
-                            <div className="relative group">
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-40 transition-opacity"></div>
-                                <div className="relative bg-gradient-to-r from-purple-500 to-pink-600 p-4 rounded-2xl shadow-lg">
-                                    <FileSignature className="w-8 h-8 text-white" />
-                                </div>
-                            </div>
-                        </div>
-                        <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mb-8">
-                            Create professional resumes that stand out. Choose your sections, 
-                            customize with precision, and generate documents that command attention.
-                        </p>
-                        <div className="flex flex-wrap items-center justify-center gap-6">
-                            <div className="flex items-center space-x-2 text-slate-700 group">
-                                <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors border border-blue-200">
-                                    <LayoutTemplate className="w-4 h-4 text-blue-600" />
-                                </div>
-                                <span className="text-sm font-medium">Professional Templates</span>
-                            </div>
-                            <div className="w-px h-6 bg-slate-300"></div>
-                            <div className="flex items-center space-x-2 text-slate-700 group">
-                                <div className="p-2 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors border border-purple-200">
-                                    <Eye className="w-4 h-4 text-purple-600" />
-                                </div>
-                                <span className="text-sm font-medium">Live Preview</span>
-                            </div>
-                            <div className="w-px h-6 bg-slate-300"></div>
-                            <div className="flex items-center space-x-2 text-slate-700 group">
-                                <div className="p-2 bg-emerald-50 rounded-lg group-hover:bg-emerald-100 transition-colors border border-emerald-200">
-                                    <Download className="w-4 h-4 text-emerald-600" />
-                                </div>
-                                <span className="text-sm font-medium">Instant Download</span>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {showFieldSelection ? (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-                        >
-                            {/* Saved Resumes Section */}
-                            <div className="order-1 lg:order-2">
-                                {Array.isArray(savedResumes) && savedResumes.length > 0 ? (
-                                    <motion.div
-                                        whileHover={{ y: -2 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-slate-200 shadow-xl p-6 hover:shadow-2xl hover:border-blue-200 transition-all duration-300"
-                                    >
-                                        <div className="flex items-center justify-between mb-6">
-                                            <h2 className="text-2xl font-bold text-slate-900 flex items-center">
-                                                <div className="relative mr-3">
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl blur-lg opacity-30"></div>
-                                                    <div className="relative bg-gradient-to-r from-blue-500 to-indigo-600 p-2 rounded-xl shadow-lg">
-                                                        <Briefcase className="w-5 h-5 text-white" />
-                                                    </div>
-                                                </div>
-                                                Your Resumes
-                                            </h2>
-                                            <div className="px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-medium">
-                                                {savedResumes.length} Resume{savedResumes.length !== 1 ? 's' : ''}
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {savedResumes.map((resume, index) => (
-                                                <motion.div
-                                                    key={resume._id}
-                                                    initial={{ opacity: 0, x: -20 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: index * 0.1 }}
-                                                    whileHover={{ scale: 1.01, x: 2 }}
-                                                    className="group bg-slate-50 rounded-xl p-4 border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-300"
-                                                >
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <h3 className="font-semibold text-base text-slate-900 group-hover:text-blue-600 transition-colors truncate">
-                                                            {resume.resumeData.Header?.name || 'Untitled Resume'}
-                                                        </h3>
-                                                        <div className="flex space-x-1">
-                                                            <motion.button
-                                                                whileHover={{ scale: 1.05 }}
-                                                                whileTap={{ scale: 0.95 }}
-                                                                onClick={() => handleEditResume(resume._id)}
-                                                                className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all duration-200"
-                                                            >
-                                                                <FileEdit size={16} />
-                                                            </motion.button>
-                                                            <motion.button
-                                                                whileHover={{ scale: 1.05 }}
-                                                                whileTap={{ scale: 0.95 }}
-                                                                onClick={() => handleDeleteResume(resume._id)}
-                                                                className="p-2 text-slate-600 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all duration-200"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </motion.button>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center justify-between text-xs">
-                                                        <div className="flex items-center text-slate-600">
-                                                            <FileText className="w-3 h-3 mr-2" />
-                                                            {resume.selectedFields.length} sections
-                                                        </div>
-                                                        <div className="px-2 py-1 bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200 rounded-full text-blue-700 text-xs font-medium">
-                                                            Premium
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div
-                                        whileHover={{ y: -2 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-slate-200 shadow-xl p-8 text-center"
-                                    >
-                                        <motion.div
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ delay: 0.3, type: "spring" }}
-                                            className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-6 border-2 border-blue-200"
-                                        >
-                                            <FileText className="w-8 h-8 text-blue-600" />
-                                        </motion.div>
-                                        <h2 className="text-2xl font-bold text-slate-900 mb-3">Your Portfolio</h2>
-                                        <p className="text-slate-600 mb-6">No resumes created yet. Start building your first professional resume.</p>
-                                        <div className="flex items-center justify-center space-x-2 text-blue-600">
-                                            <Rocket className="w-4 h-4 animate-pulse" />
-                                            <span className="text-sm font-medium">Ready to get started?</span>
-                                            <Rocket className="w-4 h-4 animate-pulse" />
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </div>
-
-                            {/* Field Selection Section */}
-                            <div className="order-2 lg:order-1">
-                                <motion.div
-                                    whileHover={{ y: -2 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-slate-200 shadow-xl p-6 hover:shadow-2xl hover:border-purple-200 transition-all duration-300"
-                                >
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-slate-900 flex items-center">
-                                            <div className="relative mr-3">
-                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl blur-lg opacity-30"></div>
-                                                <div className="relative bg-gradient-to-r from-purple-500 to-pink-600 p-2 rounded-xl shadow-lg">
-                                                    <Plus className="w-5 h-5 text-white" />
-                                                </div>
-                                            </div>
-                                            Create New Resume
-                                        </h2>
-                                    </div>
-                                    <FieldSelection
-                                        availableFields={AVAILABLE_FIELDS}
-                                        onSelect={handleFieldSelection}
-                                    />
-                                </motion.div>
-                            </div>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.6 }}
-                            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-                        >
-                            <motion.div
-                                whileHover={{ y: -1 }}
-                                transition={{ duration: 0.3 }}
-                                className="bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-slate-200 shadow-xl p-6 hover:shadow-2xl hover:border-purple-200 transition-all duration-300"
-                            >
-                                <ResumeForm
-                                    selectedFields={selectedFields}
-                                    resumeData={resumeData}
-                                    onChange={handleFormChange}
-                                    onReset={() => setShowFieldSelection(true)}
-                                />
-                            </motion.div>
-                            <motion.div
-                                whileHover={{ y: -1 }}
-                                transition={{ duration: 0.3 }}
-                                className="bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-slate-200 shadow-xl p-6 hover:shadow-2xl hover:border-blue-200 transition-all duration-300"
-                            >
-                                <ResumePreview
-                                    selectedFields={selectedFields}
-                                    resumeData={resumeData}
-                                />
-                            </motion.div>
-                        </motion.div>
-                    )}
-                    
-                    {/* Related Links Section */}
-                    <div className="mt-12">
-                        <RelatedLinks type="general" />
-                    </div>
-                </div>
-            </div>
-            </div>
-        </>
-    );
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Route2Hire Resume Builder',
+  url: 'https://route2hire.com/resume-builder',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  description:
+    'Free ATS-friendly resume builder for QA, SDET, and Test Automation professionals. Choose sections, edit live, and download a PDF.',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Route2Hire',
+    url: 'https://route2hire.com',
+  },
 };
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Is the Route2Hire resume builder free?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. You can create ATS-friendly resumes for QA, SDET, and Test Automation roles, preview them live, and download a PDF at no cost with a Route2Hire account.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How many resume sections can I include?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'You can select up to seven sections, including a required Header for contact details. Keeping resumes focused helps ATS systems and recruiters scan your experience faster.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can I tailor my resume for QA and SDET job descriptions?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. When Technical Skills is included, you can paste a job description and use AI skill extraction to surface relevant tools, frameworks, and testing technologies for your resume.',
+      },
+    },
+  ],
+};
+
+function SeoHelmet() {
+  return (
+    <Helmet>
+      <title>Free Resume Builder for QA & SDET | ATS PDF Export — Route2Hire</title>
+      <meta
+        name="description"
+        content="Free ATS-friendly resume builder for QA, SDET, and Test Automation professionals. Choose up to 7 sections, edit with live preview, extract skills from job descriptions, and download a PDF on Route2Hire."
+      />
+      <meta
+        name="keywords"
+        content="QA resume builder, SDET resume, Test Automation resume, ATS resume builder, software testing resume, free resume builder, QA engineer resume PDF, Route2Hire"
+      />
+      <meta property="og:title" content="Free Resume Builder for QA & SDET | Route2Hire" />
+      <meta
+        property="og:description"
+        content="Build an ATS-friendly QA or SDET resume with live preview and free PDF download."
+      />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://route2hire.com/resume-builder" />
+      <meta property="og:image" content="https://route2hire.com/assets/Route2Hire.png" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Free Resume Builder for QA & SDET | Route2Hire" />
+      <meta
+        name="twitter:description"
+        content="Free ATS-friendly resume builder with live preview for QA and SDET professionals."
+      />
+      <link rel="canonical" href="https://route2hire.com/resume-builder" />
+      <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+    </Helmet>
+  );
+}
+
+const ResumeBuilder = () => {
+  const { currentUser } = useSelector((state) => state.user);
+  const [selectedFields, setSelectedFields] = useState([]);
+  const [resumeData, setResumeData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [showFieldSelection, setShowFieldSelection] = useState(true);
+  const [savedResumes, setSavedResumes] = useState([]);
+  const [activeResumeId, setActiveResumeId] = useState(null);
+  /** library = document shelf; outline = section picker only */
+  const [homeView, setHomeView] = useState('library');
+
+  useEffect(() => {
+    const fetchResumes = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get('/backend/resume', { withCredentials: true });
+        const list = Array.isArray(res.data) ? res.data : [];
+        setSavedResumes(list);
+        setHomeView(list.length === 0 ? 'outline' : 'library');
+      } catch (error) {
+        console.error('Error fetching resumes:', error);
+        setSavedResumes([]);
+        setHomeView('outline');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUser) fetchResumes();
+    else setLoading(false);
+  }, [currentUser]);
+
+  const goHomeLibrary = () => {
+    setShowFieldSelection(true);
+    setSelectedFields([]);
+    setResumeData({});
+    setActiveResumeId(null);
+    setHomeView(savedResumes.length === 0 ? 'outline' : 'library');
+  };
+
+  const handleFieldSelection = async (fields) => {
+    if (fields.length === 0) {
+      toast.error('Please select fields for your resume');
+      return;
+    }
+    if (!fields.includes('Header')) {
+      toast.error('Header section is compulsory');
+      return;
+    }
+    if (fields.length > 7) {
+      toast.error('You can select a maximum of 7 fields');
+      return;
+    }
+
+    setSelectedFields(fields);
+    setShowFieldSelection(false);
+
+    const initialData = {};
+    fields.forEach((field) => {
+      switch (field) {
+        case 'Header':
+          initialData[field] = {
+            name: '',
+            email: '',
+            phone: '',
+            location: '',
+            linkedin: '',
+            github: '',
+          };
+          break;
+        case 'Education':
+        case 'Projects':
+        case 'Work Experience':
+        case 'Positions of Responsibility':
+        case 'Certifications':
+        case 'Research/Publications':
+        case 'Technical Skills':
+        case 'Achievements':
+        case 'Hobbies':
+        case 'Languages':
+          initialData[field] = [];
+          break;
+        default:
+          initialData[field] = '';
+      }
+    });
+
+    setResumeData(initialData);
+
+    try {
+      const response = await axios.post(
+        '/backend/resume',
+        { selectedFields: fields, resumeData: initialData },
+        { withCredentials: true },
+      );
+      setActiveResumeId(response.data._id);
+      setSavedResumes((prev) => [...prev, response.data]);
+    } catch (error) {
+      console.error('Error saving initial resume data:', error);
+      toast.error('Failed to save resume data');
+    }
+  };
+
+  const handleFormChange = async (field, value) => {
+    const newData = { ...resumeData, [field]: value };
+    setResumeData(newData);
+
+    try {
+      await axios.put(
+        `/backend/resume/${activeResumeId}`,
+        { selectedFields, resumeData: newData },
+        { withCredentials: true },
+      );
+    } catch (error) {
+      console.error('Error saving resume:', error);
+      toast.error('Failed to save resume changes');
+    }
+  };
+
+  const handleEditResume = async (resumeId) => {
+    try {
+      const res = await axios.get(`/backend/resume/${resumeId}`, { withCredentials: true });
+      if (res.data) {
+        setSelectedFields(res.data.selectedFields);
+        setResumeData(res.data.resumeData);
+        setActiveResumeId(resumeId);
+        setShowFieldSelection(false);
+      }
+    } catch (error) {
+      console.error('Error fetching resume:', error);
+      toast.error('Failed to load resume');
+    }
+  };
+
+  const handleDeleteResume = async (resumeId) => {
+    try {
+      await axios.delete(`/backend/resume/${resumeId}`, { withCredentials: true });
+      const next = savedResumes.filter((resume) => resume._id !== resumeId);
+      setSavedResumes(next);
+      if (activeResumeId === resumeId) {
+        setShowFieldSelection(true);
+        setSelectedFields([]);
+        setResumeData({});
+        setActiveResumeId(null);
+        setHomeView(next.length === 0 ? 'outline' : 'library');
+      }
+      toast.success('Resume deleted successfully');
+    } catch (error) {
+      console.error('Error deleting resume:', error);
+      toast.error('Failed to delete resume');
+    }
+  };
+
+  const displayName =
+    resumeData?.Header?.name ||
+    savedResumes.find((r) => r._id === activeResumeId)?.resumeData?.Header?.name ||
+    'Untitled draft';
+
+  return (
+    <>
+      <SeoHelmet />
+
+      <div className="relative min-h-screen overflow-hidden bg-[#F7F3EC]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 55% 40% at 90% 0%, rgba(196,165,116,0.18), transparent 50%)',
+          }}
+        />
+
+        <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-28 sm:px-6 sm:pt-32">
+          {!currentUser ? (
+            <>
+              <PageIntro />
+              <GuestGate />
+              <ResumeSeoGuide />
+              <div className="mt-10">
+                <RelatedLinks type="resume" />
+              </div>
+            </>
+          ) : loading ? (
+            <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
+              <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#E5DCCE] border-t-[#C4A574]" />
+              <p className="text-sm text-[#6B5A48]">Loading resumes…</p>
+            </div>
+          ) : showFieldSelection ? (
+            <AnimatePresence mode="wait">
+              {homeView === 'library' ? (
+                <motion.div
+                  key="library"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35 }}
+                >
+                  <div className="mb-8 border-b border-[#E5DCCE] pb-8">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 max-w-2xl">
+                        <h1 className="font-display text-[clamp(2rem,4.5vw,2.75rem)] font-semibold tracking-tight text-[#1C1917]">
+                          Free Resume Builder for QA & SDET
+                        </h1>
+                        <p className="mt-3 text-sm leading-relaxed text-[#57534E] sm:text-base">
+                          Create an ATS-friendly resume for Quality Assurance, SDET, and Test
+                          Automation roles. Choose focused sections, edit with a live paper preview,
+                          extract skills from a job description, and download a clean PDF — free on
+                          Route2Hire.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setHomeView('outline')}
+                        className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2C241B] px-5 py-3 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
+                      >
+                        <Plus className="h-4 w-4" />
+                        New resume
+                      </button>
+                    </div>
+
+                    <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-[#6B5A48]">
+                      <li className="inline-flex items-center gap-1.5">
+                        <LayoutTemplate className="h-3.5 w-3.5 text-[#C4A574]" aria-hidden />
+                        Up to 7 resume sections
+                      </li>
+                      <li className="inline-flex items-center gap-1.5">
+                        <Eye className="h-3.5 w-3.5 text-[#C4A574]" aria-hidden />
+                        Live ATS-style preview
+                      </li>
+                      <li className="inline-flex items-center gap-1.5">
+                        <Download className="h-3.5 w-3.5 text-[#C4A574]" aria-hidden />
+                        Instant PDF download
+                      </li>
+                    </ul>
+                  </div>
+
+                  {savedResumes.length === 0 ? (
+                    <EmptyLibrary onCreate={() => setHomeView('outline')} />
+                  ) : (
+                    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {savedResumes.map((resume) => {
+                        const name = resume.resumeData?.Header?.name || 'Untitled resume';
+                        const sections = resume.selectedFields?.length || 0;
+                        return (
+                          <li key={resume._id}>
+                            <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] transition hover:border-[#C4A574]/55 hover:shadow-[0_18px_40px_-28px_rgba(44,36,27,0.4)]">
+                              <button
+                                type="button"
+                                onClick={() => handleEditResume(resume._id)}
+                                className={`relative block aspect-[8.5/7] w-full overflow-hidden bg-[#EFE8DC] p-5 text-left ${focusRing}`}
+                              >
+                                <div className="h-full rounded-sm bg-white p-4 shadow-sm">
+                                  <div className="mx-auto mb-3 h-2 w-1/2 rounded-full bg-[#2C241B]/80" />
+                                  <div className="mx-auto mb-4 h-1 w-2/3 rounded-full bg-[#E5DCCE]" />
+                                  <div className="space-y-1.5">
+                                    <div className="h-1 w-full rounded-full bg-[#EFE8DC]" />
+                                    <div className="h-1 w-[92%] rounded-full bg-[#EFE8DC]" />
+                                    <div className="h-1 w-[78%] rounded-full bg-[#EFE8DC]" />
+                                    <div className="mt-3 h-1 w-1/3 rounded-full bg-[#C4A574]/50" />
+                                    <div className="h-1 w-full rounded-full bg-[#EFE8DC]" />
+                                    <div className="h-1 w-[85%] rounded-full bg-[#EFE8DC]" />
+                                  </div>
+                                </div>
+                              </button>
+                              <div className="flex flex-1 items-start justify-between gap-2 border-t border-[#E5DCCE] px-4 py-3">
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditResume(resume._id)}
+                                  className={`min-w-0 flex-1 text-left ${focusRing} rounded-md`}
+                                >
+                                  <p className="truncate font-medium text-[#1C1917]">{name}</p>
+                                  <p className="mt-0.5 text-[12px] text-[#78716C]">
+                                    {sections} section{sections === 1 ? '' : 's'}
+                                  </p>
+                                </button>
+                                <div className="flex shrink-0 gap-0.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleEditResume(resume._id)}
+                                    className={`rounded-lg p-2 text-[#6B5A48] hover:bg-[#EFE8DC] ${focusRing}`}
+                                    aria-label={`Edit ${name}`}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteResume(resume._id)}
+                                    className={`rounded-lg p-2 text-[#6B5A48] hover:bg-rose-50 hover:text-rose-600 ${focusRing}`}
+                                    aria-label={`Delete ${name}`}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </article>
+                          </li>
+                        );
+                      })}
+
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => setHomeView('outline')}
+                          className={`flex h-full min-h-[220px] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[#E5DCCE] bg-transparent text-[#6B5A48] transition hover:border-[#C4A574] hover:bg-[#FFFDF8]/60 ${focusRing}`}
+                        >
+                          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE8DC]">
+                            <Plus className="h-5 w-5 text-[#2C241B]" />
+                          </span>
+                          <span className="text-sm font-medium">Create new resume</span>
+                        </button>
+                      </li>
+                    </ul>
+                  )}
+
+                  <ResumeSeoGuide />
+                  <div className="mt-10">
+                    <RelatedLinks type="resume" />
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="outline"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35 }}
+                  className="w-full"
+                >
+                  <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="min-w-0">
+                      {savedResumes.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setHomeView('library')}
+                          className={`mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#6B5A48] transition hover:text-[#2C241B] ${focusRing} rounded-md`}
+                        >
+                          <ArrowLeft className="h-4 w-4" />
+                          Back to resumes
+                        </button>
+                      )}
+                      <h1 className="font-display text-[clamp(1.85rem,4vw,2.5rem)] font-semibold tracking-tight text-[#1C1917]">
+                        New resume
+                      </h1>
+                      <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#57534E]">
+                        Pick up to 7 sections. Header stays on — it holds your contact details.
+                      </p>
+                    </div>
+                  </div>
+
+                  <FieldSelection
+                    availableFields={AVAILABLE_FIELDS}
+                    onSelect={handleFieldSelection}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45 }}
+            >
+              <div className="mb-6 flex flex-col gap-4 border-b border-[#E5DCCE] pb-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <button
+                    type="button"
+                    onClick={goHomeLibrary}
+                    className={`mb-2 inline-flex items-center gap-1.5 text-[13px] font-medium text-[#6B5A48] hover:text-[#2C241B] ${focusRing} rounded-md`}
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    All resumes
+                  </button>
+                  <h2 className="font-display truncate text-2xl font-semibold text-[#1C1917]">
+                    {displayName}
+                  </h2>
+                  <p className="mt-1 text-[13px] text-[#78716C]">
+                    {selectedFields.length} sections · autosaves as you type
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowFieldSelection(true);
+                    setSelectedFields([]);
+                    setResumeData({});
+                    setActiveResumeId(null);
+                    setHomeView('outline');
+                  }}
+                  className={`inline-flex items-center gap-1.5 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3.5 py-2 text-xs font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  New resume
+                </button>
+              </div>
+
+              <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.95fr)]">
+                <section className="min-w-0 rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8]/80 p-4 sm:p-6">
+                  <ResumeForm
+                    selectedFields={selectedFields}
+                    resumeData={resumeData}
+                    onChange={handleFormChange}
+                    onReset={() => {
+                      setShowFieldSelection(true);
+                      setHomeView('outline');
+                    }}
+                  />
+                </section>
+                <section className="min-w-0 xl:sticky xl:top-28 xl:self-start">
+                  <div className="rounded-2xl border border-[#E5DCCE] bg-[#EFE8DC]/50 p-4 sm:p-5">
+                    <ResumePreview selectedFields={selectedFields} resumeData={resumeData} />
+                  </div>
+                </section>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+function PageIntro() {
+  return (
+    <header className="mx-auto mb-12 max-w-3xl text-center">
+      <h1 className="font-display text-[clamp(2.25rem,5.5vw,3.5rem)] font-semibold leading-[1.08] tracking-tight text-[#1C1917]">
+        Free Resume Builder for QA & SDET
+      </h1>
+      <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-[#57534E] sm:text-lg">
+        Build an ATS-ready resume for Quality Assurance, SDET, and Test Automation careers. Pick
+        focused sections, refine with a live preview, and download a professional PDF — free with
+        Route2Hire.
+      </p>
+      <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] text-[#6B5A48]">
+        <li className="inline-flex items-center gap-1.5">
+          <LayoutTemplate className="h-3.5 w-3.5 text-[#C4A574]" aria-hidden />
+          Up to 7 sections
+        </li>
+        <li className="inline-flex items-center gap-1.5">
+          <Eye className="h-3.5 w-3.5 text-[#C4A574]" aria-hidden />
+          Live preview
+        </li>
+        <li className="inline-flex items-center gap-1.5">
+          <Download className="h-3.5 w-3.5 text-[#C4A574]" aria-hidden />
+          PDF export
+        </li>
+      </ul>
+    </header>
+  );
+}
+
+function ResumeSeoGuide() {
+  const faqs = [
+    {
+      q: 'Is this resume builder free?',
+      a: 'Yes. Route2Hire’s resume builder is free to use for creating, editing, and downloading ATS-friendly PDFs for QA and SDET applications.',
+    },
+    {
+      q: 'What makes a strong QA or SDET resume?',
+      a: 'Lead with clear contact details, highlight testing tools and automation skills, quantify impact in work experience, and keep the layout simple so applicant tracking systems can parse it reliably.',
+    },
+    {
+      q: 'Can I customize sections for different job applications?',
+      a: 'Yes. Create multiple drafts, choose up to seven sections per resume, and use the optional AI skill extractor with a job description when Technical Skills is included.',
+    },
+  ];
+
+  return (
+    <section className="mt-16 border-t border-[#E5DCCE] pt-12" aria-labelledby="resume-guide-heading">
+      <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+        <div>
+          <h2
+            id="resume-guide-heading"
+            className="font-display text-2xl font-semibold text-[#1C1917] sm:text-3xl"
+          >
+            How to build an ATS-friendly QA resume
+          </h2>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#57534E] sm:text-base">
+            Recruiters and ATS software prefer clean structure over dense design. Use Route2Hire to
+            assemble a focused one-page resume for software testing roles — then iterate as you
+            apply to new SDET and automation openings.
+          </p>
+          <ol className="mt-6 space-y-3 text-sm text-[#57534E]">
+            <li className="flex gap-3">
+              <span className="font-display tabular-nums text-[#C4A574]">01</span>
+              <span>
+                <strong className="font-medium text-[#1C1917]">Start with Header</strong> — name,
+                email, phone, and LinkedIn or portfolio links.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="font-display tabular-nums text-[#C4A574]">02</span>
+              <span>
+                <strong className="font-medium text-[#1C1917]">Add skills & experience</strong> —
+                Selenium, Playwright, API testing, CI tools, and measurable outcomes.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="font-display tabular-nums text-[#C4A574]">03</span>
+              <span>
+                <strong className="font-medium text-[#1C1917]">Preview and export</strong> — review
+                the live paper view, then download a PDF for each application.
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        <div>
+          <h3 className="font-display text-xl font-semibold text-[#1C1917]">FAQ</h3>
+          <dl className="mt-4 space-y-4">
+            {faqs.map((item) => (
+              <div key={item.q} className="border-b border-[#E5DCCE] pb-4 last:border-b-0 last:pb-0">
+                <dt className="text-sm font-medium text-[#1C1917]">{item.q}</dt>
+                <dd className="mt-1.5 text-[13px] leading-relaxed text-[#57534E]">{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function EmptyLibrary({ onCreate }) {
+  return (
+    <div className="mx-auto max-w-md rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] px-6 py-12 text-center">
+      <FileText className="mx-auto h-10 w-10 text-[#C4A574]" />
+      <h2 className="font-display mt-4 text-xl font-semibold text-[#1C1917]">No resumes yet</h2>
+      <p className="mt-2 text-sm text-[#57534E]">
+        Create your first ATS-friendly draft — it only takes a minute to pick sections.
+      </p>
+      <button
+        type="button"
+        onClick={onCreate}
+        className={`mt-6 inline-flex items-center gap-2 rounded-xl bg-[#2C241B] px-5 py-3 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
+      >
+        <Plus className="h-4 w-4" />
+        Create resume
+      </button>
+    </div>
+  );
+}
+
+function GuestGate() {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.08 }}
+      className="mx-auto max-w-xl space-y-8 text-center"
+    >
+      <div className="border-t border-[#E5DCCE] pt-10">
+        <h2 className="font-display text-2xl font-semibold text-[#1C1917] sm:text-3xl">
+          Sign in to open the resume builder
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#57534E] sm:text-base">
+          Your drafts sync to your Route2Hire account so you can refine and re-export whenever you
+          need a fresh PDF for the next QA or SDET application.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            to="/sign-in?redirect=/resume-builder"
+            className={`inline-flex items-center gap-2 rounded-xl bg-[#2C241B] px-5 py-3 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
+          >
+            <LogIn className="h-4 w-4" />
+            Sign in
+          </Link>
+          <Link
+            to="/sign-up?redirect=/resume-builder"
+            className={`inline-flex items-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-5 py-3 text-sm font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+          >
+            Create account
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
 
 export default ResumeBuilder;

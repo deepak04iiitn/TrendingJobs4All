@@ -18,24 +18,22 @@ const FOOTER_COLUMNS = [
     title: 'Company',
     links: [
       { href: '/about', label: 'About Us' },
-      { href: '/newsletter', label: 'Newsletter' },
-      { href: '/contactUs', label: 'Contact Us' },
-      { href: '/BuyMeACoffee', label: 'Premium Subscription' },
+      { href: '/contact-us', label: 'Contact Us' },
       { href: '/myCorner', label: 'My Corner' },
     ],
   },
   {
     title: 'Legal',
     links: [
-      { href: '/privacyPolicy', label: 'Privacy Policy' },
-      { href: '/terms', label: 'Terms of Service' },
-      { href: '/cookies', label: 'Cookie Policy' },
+      { href: '/privacy-policy', label: 'Privacy Policy' },
+      { href: '/terms-of-service', label: 'Terms of Service' },
+      { href: '/cookie-policy', label: 'Cookie Policy' },
       { href: '/sign-up', label: 'Sign Up' },
-      { href: '/contactUs', label: 'Help Center' },
+      { href: '/contact-us', label: 'Help Center' },
     ],
   },
   {
-    title: 'Community',
+    title: 'Account',
     links: [
       { href: '/my-jobs', label: 'My Jobs' },
       { href: '/profile', label: 'My Profile' },

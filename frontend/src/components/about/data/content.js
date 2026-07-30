@@ -17,7 +17,7 @@ export const INTRO = {
   lede:
     'Route2Hire helps software testing professionals move faster with curated QA/SDET jobs, interview preparation resources, role-specific DSA practice, salary insights and a strong peer community.',
   primaryCta: { label: 'Explore QA/SDET jobs', path: '/jobs' },
-  secondaryCta: { label: 'Contact us', path: '/contactUs' },
+  secondaryCta: { label: 'Contact us', path: '/contact-us' },
 };
 
 export const SNAPSHOT = {

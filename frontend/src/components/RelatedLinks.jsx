@@ -34,6 +34,18 @@ export default function RelatedLinks({ type = 'general' }) {
         { path: '/resume-builder', label: 'Resume Builder' },
       ],
     },
+    resume: {
+      title: 'Continue preparing',
+      links: [
+        { path: '/jobs', label: 'QA & SDET Jobs' },
+        { path: '/interviewExp', label: 'Interview Experiences' },
+        { path: '/interview-questions', label: 'Interview Questions' },
+        { path: '/salaryStructures', label: 'Salary Insights' },
+        { path: '/qa-sdet-dsa-sheet', label: 'DSA Sheet' },
+        { path: '/blogs', label: 'Career Blogs' },
+        { path: '/contact-us', label: 'Contact Us' },
+      ],
+    },
     general: {
       title: 'More resources',
       links: [

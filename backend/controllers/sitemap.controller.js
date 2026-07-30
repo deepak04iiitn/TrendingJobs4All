@@ -44,21 +44,17 @@ const generateSitemapXML = (urls) => {
     { url: '/mypolls', priority: '0.60' },
     { url: '/interview-experiences', priority: '0.80' }, // Canonical URL (removed /interviewExp duplicate)
     { url: '/salary-structures', priority: '0.80' }, // Canonical URL (prefer kebab-case)
-    { url: '/roadmaps', priority: '0.60' },
     { url: '/myCorner', priority: '0.60' },
-    { url: '/BuyMeACoffee', priority: '0.50' },
-    { url: '/contactUs', priority: '0.60' },
+    { url: '/contact-us', priority: '0.60' },
     { url: '/privacy-policy', priority: '0.40' }, // Canonical URL (prefer kebab-case)
     { url: '/terms-of-service', priority: '0.40' }, // Canonical URL (prefer kebab-case)
     { url: '/cookie-policy', priority: '0.40' }, // Canonical URL (prefer kebab-case)
-    { url: '/newsletter', priority: '0.50' },
     { url: '/jobs', priority: '0.90' },
     { url: '/resume-builder', priority: '0.70' },
     { url: '/interview-questions', priority: '0.80' },
     { url: '/qa-sdet-dsa-sheet', priority: '0.80' },
     { url: '/dashboard', priority: '0.60' },
     { url: '/admin/interview-questions', priority: '0.50' },
-    { url: '/connect-with-route2hire', priority: '0.75' }, // Canonical URL
     { url: '/blogs', priority: '0.80' }
   ];
 

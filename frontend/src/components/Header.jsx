@@ -26,7 +26,7 @@ const MENU_ITEMS = [
   { path: '/about', label: 'About' },
   { path: '/my-jobs', label: 'My Jobs' },
   { path: '/jobs', label: 'Jobs' },
-  { path: '/contactUs', label: 'Contact' },
+  { path: '/contact-us', label: 'Contact' },
 ];
 
 const FEATURE_GROUPS = [
