@@ -1,54 +1,32 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { CircularProgressbar } from 'react-circular-progressbar';
-import { Camera, LogOut, Trash2, Building, Mail, User, Edit3, Shield, Star } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import Breadcrumb from '../components/Breadcrumb';
-import RelatedLinks from '../components/RelatedLinks';
+import {
+  Camera,
+  LogOut,
+  Trash2,
+  Mail,
+  User,
+  Lock,
+  CornerDownLeft,
+  Briefcase,
+  AlertTriangle,
+} from 'lucide-react';
 import 'react-circular-progressbar/dist/styles.css';
 import { app } from '../firebase.js';
-import { 
-  updateFailure, 
-  updateStart, 
-  updateSuccess, 
-  deleteUserStart, 
-  deleteUserSuccess, 
-  deleteUserFailure, 
-  signoutSuccess 
+import {
+  updateFailure,
+  updateStart,
+  updateSuccess,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+  signoutSuccess,
 } from '../redux/user/userSlice.js';
-
-const Input = ({ label, icon: Icon, ...props }) => (
-  <div className="relative group">
-    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-      <Icon className="h-5 w-5 text-slate-400 group-focus-within:text-violet-400 transition-all duration-300" />
-    </div>
-    <input
-      {...props}
-      className="w-full pl-12 pr-4 py-4 bg-slate-50/50 dark:bg-slate-800/30 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400/50 dark:focus:border-violet-400/50 transition-all duration-300 hover:border-violet-300/50 text-slate-700 dark:text-slate-200 placeholder-slate-400"
-    />
-    <label className="absolute -top-3 left-4 bg-white dark:bg-slate-900 px-3 text-sm font-medium text-slate-600 dark:text-slate-400 tracking-wide">
-      {label}
-    </label>
-  </div>
-);
-
-const Button = ({ children, variant = 'primary', className = '', ...props }) => {
-  const baseStyle = "relative overflow-hidden px-8 py-4 rounded-2xl font-semibold transition-all duration-300 disabled:opacity-50 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg";
-  const variants = {
-    primary: "bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 text-white shadow-violet-500/25 hover:shadow-violet-500/40",
-    secondary: "bg-slate-100/80 dark:bg-slate-800/50 hover:bg-slate-200/80 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50",
-    danger: "bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 hover:from-red-600 hover:via-rose-600 hover:to-pink-600 text-white shadow-red-500/25 hover:shadow-red-500/40",
-  };
-  
-  return (
-    <button className={`${baseStyle} ${variants[variant]} ${className} group`} {...props}>
-      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-      <span className="relative z-10">{children}</span>
-    </button>
-  );
-};
+import { focusRing } from '../theme/tokens';
 
 export default function Profile() {
   const { currentUser, error } = useSelector((state) => state.user);
@@ -65,21 +43,17 @@ export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleImageChange = async(e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if(file) {
+    if (file) {
       setImageFile(file);
       setImageFileUrl(URL.createObjectURL(file));
     }
-  }
+  };
 
   useEffect(() => {
-    if(imageFile) {
-      uploadImage();
-    }
-  }, [imageFile])
+    if (!imageFile) return;
 
-  const uploadImage = async() => {
     setImageFileUploading(true);
     setImageFileUploadError(null);
 
@@ -94,8 +68,8 @@ export default function Profile() {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setImageFileUploadProgress(progress.toFixed(0));
       },
-      (error) => {
-        setImageFileUploadError('Could not upload image (File must be less than 2MB');
+      () => {
+        setImageFileUploadError('Could not upload image (file must be less than 2MB)');
         setImageFileUploadProgress(null);
         setImageFile(null);
         setImageFileUrl(null);
@@ -104,401 +78,352 @@ export default function Profile() {
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setImageFileUrl(downloadURL);
-          setFormData({ ...formData, profilePicture: downloadURL });
+          setFormData((prev) => ({ ...prev, profilePicture: downloadURL }));
           setImageFileUploading(false);
-        })
-      }
-    )
+          setImageFileUploadProgress(null);
+        });
+      },
+    );
+  }, [imageFile]);
+
+  if (!currentUser) {
+    return <Navigate to="/sign-in?redirect=/profile" replace />;
   }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
-  }
+  };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdateUserError(null);
     setUpdateUserSuccess(null);
 
-    if(Object.keys(formData).length === 0) {
-      setUpdateUserError('No changes made!');
+    if (Object.keys(formData).length === 0) {
+      setUpdateUserError('No changes made');
       return;
     }
-
-    if(imageFileUploading) {
-      setUpdateUserError('Please wait for image to upload!');
+    if (imageFileUploading) {
+      setUpdateUserError('Please wait for the image to finish uploading');
       return;
     }
 
     try {
       dispatch(updateStart());
-
       const res = await fetch(`/backend/user/update/${currentUser._id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
 
-      if(!res.ok) {
+      if (!res.ok) {
         dispatch(updateFailure(data.message));
         setUpdateUserError(data.message);
       } else {
         dispatch(updateSuccess(data));
-        setUpdateUserSuccess("User's profile updated successfully!");
+        setUpdateUserSuccess('Profile updated successfully');
+        setFormData({});
       }
-    } catch (error) {
-      dispatch(updateFailure(error.message));
+    } catch (err) {
+      dispatch(updateFailure(err.message));
+      setUpdateUserError(err.message);
     }
-  }
+  };
 
   const handleDeleteUser = async () => {
     setShowModal(false);
-
     try {
       dispatch(deleteUserStart());
-      const res = await fetch(`/backend/user/delete/${currentUser._id}`, {
-        method: 'DELETE',
-      });
-
+      const res = await fetch(`/backend/user/delete/${currentUser._id}`, { method: 'DELETE' });
       const data = await res.json();
-
-      if(!res.ok) {
+      if (!res.ok) {
         dispatch(deleteUserFailure(data.message));
       } else {
         dispatch(deleteUserSuccess(data));
         navigate('/sign-in');
       }
-    } catch (error) {
-      dispatch(deleteUserFailure(error.message));
+    } catch (err) {
+      dispatch(deleteUserFailure(err.message));
     }
-  }
+  };
 
-  const handleSignout = async() => {
+  const handleSignout = async () => {
     try {
-      const res = await fetch('/backend/user/signout', {
-        method: 'POST',
-      })
-
+      const res = await fetch('/backend/user/signout', { method: 'POST' });
       const data = await res.json();
-
-      if(!res.ok) {
-        console.log(data.message);
-      } else {
+      if (res.ok) {
         dispatch(signoutSuccess());
         navigate('/sign-in');
+      } else {
+        console.log(data.message);
       }
-    } catch (error) {
-      console.log(error.message);
+    } catch (err) {
+      console.log(err.message);
     }
-  }
+  };
+
+  const displayName = formData.username || currentUser.username || 'Member';
+  const avatarSrc = imageFileUrl || currentUser.profilePicture;
 
   return (
     <>
-      {/* ✅ Helmet for Dynamic SEO */}
       <Helmet>
-        <title>
-          {currentUser 
-            ? `${currentUser.username || 'User'} Profile | Route2Hire QA & SDET Platform`
-            : "User Profile | Route2Hire QA & SDET Platform"
-          }
-        </title>
+        <title>{`${displayName} · Profile | Route2Hire`}</title>
         <meta
           name="description"
-          content="Manage your Route2Hire profile for QA, SDET, Test Automation, and Software Testing professionals. Update your information, preferences, and career details to enhance your job search experience."
+          content="Manage your Route2Hire account — photo, username, email, and password for your QA & SDET career workspace."
         />
-        <meta
-          name="keywords"
-          content="User profile, QA profile, SDET profile, Test Automation profile, Software Testing profile, Profile management, QA career profile, User settings"
-        />
-        <meta property="og:title" content="User Profile | Route2Hire QA & SDET Platform" />
-        <meta
-          property="og:description"
-          content="Manage your Route2Hire profile for QA, SDET, and Test Automation professionals. Update your career information and preferences."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://route2hire.com/profile" />
-        <meta property="og:image" content="https://route2hire.com/assets/Route2Hire.png" />
+        <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://route2hire.com/profile" />
       </Helmet>
 
-      <div className="mt-20 min-h-screen bg-gradient-to-br from-slate-50 via-violet-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30 py-8 px-4 relative overflow-hidden">
-      {/* Breadcrumb Navigation */}
-      <div className="max-w-2xl mx-auto px-4 mb-6">
-        <Breadcrumb 
-          items={[
-            { label: 'My Profile' }
-          ]}
+      <div className="relative min-h-screen overflow-hidden bg-[#F7F3EC]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 45% at 15% 0%, rgba(196,165,116,0.22), transparent 55%), radial-gradient(ellipse 50% 40% at 95% 30%, rgba(239,232,220,0.9), transparent 50%)',
+          }}
         />
-      </div>
-      
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-violet-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-indigo-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-purple-400/5 to-pink-400/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}} />
-      </div>
 
-      <div className="max-w-2xl mx-auto relative z-10">
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-violet-500/10 dark:shadow-violet-500/5 border border-white/20 dark:border-slate-800/50 p-8 transform transition-all duration-700 hover:shadow-violet-500/20">
-          
-          {/* Header Section */}
-          <div className="relative mb-12 text-center">
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-purple-600/10 to-indigo-600/10 rounded-3xl blur-2xl" />
-            <div className="relative">
-              <div className="inline-flex items-center gap-3 mb-4">
-                <div className="p-2 bg-gradient-to-r from-violet-500 to-purple-500 rounded-xl">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-transparent bg-clip-text">
-                  Profile Settings
-                </h1>
-                <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl">
-                  <Star className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 font-medium">
-                Manage your account and personal information
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Profile Picture Section */}
-            <div className="relative w-48 h-48 mx-auto mb-12">
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 rounded-full animate-spin-slow blur-2xl opacity-30" />
-              <div className="absolute inset-2 bg-gradient-to-r from-violet-400 via-purple-400 to-indigo-400 rounded-full blur-xl opacity-50" />
-              
-              <div 
-                className="relative w-full h-full rounded-full cursor-pointer overflow-hidden group border-4 border-white dark:border-slate-800 shadow-2xl"
-                onClick={() => filePickerRef.current.click()}
-              >
-                {imageFileUploadProgress && (
-                  <div className="absolute inset-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm flex items-center justify-center">
-                    <div className="text-center">
-                      <CircularProgressbar
-                        value={imageFileUploadProgress || 0}
-                        text={`${imageFileUploadProgress}%`}
-                        strokeWidth={6}
-                        styles={{
-                          root: { width: '80px', height: '80px' },
-                          path: { 
-                            stroke: 'url(#gradient)',
-                            strokeLinecap: 'round',
-                            transition: 'stroke-dashoffset 0.5s ease 0s'
-                          },
-                          text: { 
-                            fill: '#8B5CF6', 
-                            fontSize: '18px', 
-                            fontWeight: '600' 
-                          },
-                        }}
-                      />
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 font-medium">Uploading...</p>
+        <div className="relative mx-auto max-w-5xl px-4 pb-20 pt-28 sm:px-6 sm:pt-32">
+          {/* Identity masthead — not a card stack */}
+          <header className="mb-10 border-b border-[#E5DCCE] pb-10">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6B5A48]">
+              Account
+            </p>
+            <div className="mt-5 flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
+                <button
+                  type="button"
+                  onClick={() => filePickerRef.current?.click()}
+                  className={`group relative h-28 w-28 shrink-0 overflow-hidden rounded-full border-2 border-[#E5DCCE] bg-[#FFFDF8] shadow-[0_12px_40px_-20px_rgba(44,36,27,0.35)] sm:h-36 sm:w-36 ${focusRing}`}
+                  aria-label="Change profile photo"
+                >
+                  {imageFileUploadProgress && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#FFFDF8]/90">
+                      <div className="h-16 w-16">
+                        <CircularProgressbar
+                          value={imageFileUploadProgress || 0}
+                          text={`${imageFileUploadProgress}%`}
+                          strokeWidth={6}
+                          styles={{
+                            path: { stroke: '#C4A574' },
+                            text: { fill: '#2C241B', fontSize: '22px', fontWeight: 600 },
+                            trail: { stroke: '#E5DCCE' },
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                <img
-                  src={imageFileUrl || currentUser.profilePicture}
-                  alt="Profile"
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6">
-                  <div className="flex items-center gap-2 text-white font-semibold">
-                    <Camera className="w-5 h-5" />
-                    <span>Change Photo</span>
-                  </div>
-                </div>
-                
-                <div className="absolute -bottom-2 -right-2 p-3 bg-gradient-to-r from-violet-500 to-purple-500 rounded-full shadow-lg transform transition-all duration-300 group-hover:scale-110">
-                  <Edit3 className="w-4 h-4 text-white" />
+                  )}
+                  <img
+                    src={avatarSrc}
+                    alt=""
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 bg-[#2C241B]/75 py-2 text-[11px] font-medium text-[#FFFDF8] opacity-0 transition group-hover:opacity-100">
+                    <Camera className="h-3.5 w-3.5" /> Photo
+                  </span>
+                </button>
+
+                <div className="min-w-0 pb-1">
+                  <h1 className="font-display text-3xl font-semibold leading-[1.15] text-[#1C1917] sm:text-4xl">
+                    {displayName}
+                  </h1>
+                  <p className="mt-2 flex items-center gap-2 text-sm text-[#57534E]">
+                    <Mail className="h-3.5 w-3.5 text-[#C4A574]" aria-hidden />
+                    <span className="truncate">{currentUser.email}</span>
+                  </p>
+                  {currentUser.isUserAdmin && (
+                    <span className="mt-3 inline-flex rounded-full border border-[#C4A574]/40 bg-[#F7F3EC] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#6B5A48]">
+                      Admin
+                    </span>
+                  )}
                 </div>
               </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  to="/myCorner"
+                  className={`inline-flex items-center gap-1.5 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3.5 py-2 text-xs font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+                >
+                  <CornerDownLeft className="h-3.5 w-3.5" />
+                  My Corner
+                </Link>
+                <Link
+                  to="/jobs"
+                  className={`inline-flex items-center gap-1.5 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3.5 py-2 text-xs font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+                >
+                  <Briefcase className="h-3.5 w-3.5" />
+                  Browse jobs
+                </Link>
+              </div>
             </div>
+          </header>
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              ref={filePickerRef}
-              hidden
-            />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            ref={filePickerRef}
+            hidden
+          />
 
-            {/* Form Fields */}
-            <div className="space-y-6">
-              <div className="grid gap-6">
-                <Input
+          <form onSubmit={handleSubmit} className="grid gap-10 lg:grid-cols-[1fr_0.85fr]">
+            {/* Details column */}
+            <section>
+              <h2 className="font-display text-xl font-semibold text-[#1C1917]">Details</h2>
+              <p className="mt-1 text-sm text-[#78716C]">How you appear across Route2Hire.</p>
+
+              <div className="mt-6 space-y-5">
+                <Field
+                  id="username"
                   label="Username"
                   icon={User}
                   type="text"
-                  id="username"
                   defaultValue={currentUser.username}
                   onChange={handleChange}
                 />
-                <Input
-                  label="Email Address"
+                <Field
+                  id="email"
+                  label="Email"
                   icon={Mail}
                   type="email"
-                  id="email"
                   defaultValue={currentUser.email}
                   onChange={handleChange}
                 />
-                <Input
-                  label="New Password"
-                  icon={Building}
-                  type="password"
+              </div>
+            </section>
+
+            {/* Security column */}
+            <section className="lg:border-l lg:border-[#E5DCCE] lg:pl-10">
+              <h2 className="font-display text-xl font-semibold text-[#1C1917]">Security</h2>
+              <p className="mt-1 text-sm text-[#78716C]">Leave blank to keep your current password.</p>
+
+              <div className="mt-6">
+                <Field
                   id="password"
-                  placeholder="Enter new password"
+                  label="New password"
+                  icon={Lock}
+                  type="password"
+                  placeholder="••••••••"
                   onChange={handleChange}
+                  autoComplete="new-password"
                 />
               </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-4 pt-8">
-              <Button type="submit" className="w-full text-lg py-5">
-                Update Profile
-              </Button>
-              
-              <Link to="/jobs" className="block">
-                <Button variant="secondary" className="w-full text-lg py-5">
-                  Browse Jobs
-                </Button>
-              </Link>
-            </div>
+              <button
+                type="submit"
+                disabled={imageFileUploading}
+                className={`mt-8 w-full rounded-xl bg-[#2C241B] px-5 py-3 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510] disabled:opacity-50 ${focusRing}`}
+              >
+                {imageFileUploading ? 'Uploading photo…' : 'Save changes'}
+              </button>
+
+              {(updateUserSuccess || error || updateUserError || imageFileUploadError) && (
+                <div className="mt-4 space-y-2">
+                  {updateUserSuccess && (
+                    <p className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-3 py-2.5 text-sm text-emerald-800">
+                      {updateUserSuccess}
+                    </p>
+                  )}
+                  {(error || updateUserError) && (
+                    <p className="rounded-xl border border-rose-200 bg-rose-50/80 px-3 py-2.5 text-sm text-rose-800">
+                      {error || updateUserError}
+                    </p>
+                  )}
+                  {imageFileUploadError && (
+                    <p className="rounded-xl border border-rose-200 bg-rose-50/80 px-3 py-2.5 text-sm text-rose-800">
+                      {imageFileUploadError}
+                    </p>
+                  )}
+                </div>
+              )}
+            </section>
           </form>
 
-          {/* Bottom Actions */}
-          <div className="flex justify-between items-center mt-12 pt-8 border-t border-slate-200/50 dark:border-slate-700/50">
+          {/* Session + danger — flat strip, not competing cards */}
+          <div className="mt-14 grid gap-4 border-t border-[#E5DCCE] pt-8 sm:grid-cols-2">
             <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-3 text-red-500 hover:text-red-600 font-semibold transition-all duration-300 hover:scale-105 group"
-            >
-              <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded-xl group-hover:bg-red-100 dark:group-hover:bg-red-950/50 transition-colors">
-                <Trash2 className="w-4 h-4" />
-              </div>
-              Delete Account
-            </button>
-            
-            <button
+              type="button"
               onClick={handleSignout}
-              className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-semibold transition-all duration-300 hover:scale-105 group"
+              className={`flex items-center gap-3 rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] px-4 py-4 text-left transition hover:bg-[#F7F3EC] ${focusRing}`}
             >
-              <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                <LogOut className="w-4 h-4" />
-              </div>
-              Sign Out
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F7F3EC] text-[#6B5A48]">
+                <LogOut className="h-4 w-4" />
+              </span>
+              <span>
+                <span className="block text-sm font-medium text-[#1C1917]">Sign out</span>
+                <span className="block text-[12px] text-[#78716C]">End this session on this device</span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className={`flex items-center gap-3 rounded-2xl border border-rose-200/80 bg-[#FFFDF8] px-4 py-4 text-left transition hover:bg-rose-50/50 ${focusRing}`}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                <Trash2 className="h-4 w-4" />
+              </span>
+              <span>
+                <span className="block text-sm font-medium text-rose-700">Delete account</span>
+                <span className="block text-[12px] text-[#78716C]">Permanently remove your data</span>
+              </span>
             </button>
           </div>
-
-          {/* Status Messages */}
-          {(updateUserSuccess || error || updateUserError || imageFileUploadError) && (
-            <div className="mt-8 space-y-4">
-              {updateUserSuccess && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/50 text-emerald-800 font-medium backdrop-blur-sm animate-pulse">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                    {updateUserSuccess}
-                  </div>
-                </div>
-              )}
-              {(error || updateUserError) && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/50 text-red-800 font-medium backdrop-blur-sm animate-pulse">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    {error || updateUserError}
-                  </div>
-                </div>
-              )}
-              {imageFileUploadError && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/50 text-red-800 font-medium backdrop-blur-sm animate-pulse">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    {imageFileUploadError}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Delete Confirmation Modal */}
-          {showModal && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-lg flex items-center justify-center p-4 z-50 animate-fadeIn">
-              <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/20 dark:border-slate-800/50 transform animate-slideUp">
-                <div className="text-center">
-                  <div className="w-20 h-20 mx-auto mb-6 p-4 bg-gradient-to-r from-red-500 to-rose-500 rounded-2xl">
-                    <svg
-                      className="w-full h-full text-white animate-pulse"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-slate-100">Delete Account</h3>
-                  <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-                    Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.
-                  </p>
-                  <div className="flex gap-4 justify-center">
-                    <Button variant="danger" onClick={handleDeleteUser} className="px-8">
-                      Yes, Delete Forever
-                    </Button>
-                    <Button variant="secondary" onClick={() => setShowModal(false)} className="px-8">
-                      Keep Account
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-          from { 
-            opacity: 0; 
-            transform: translateY(20px) scale(0.95); 
-          }
-          to { 
-            opacity: 1; 
-            transform: translateY(0) scale(1); 
-          }
-        }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-slideUp {
-          animation: slideUp 0.4s ease-out;
-        }
-        
-        .animate-spin-slow {
-          animation: spin-slow 8s linear infinite;
-        }
-      `}</style>
-      </div>
+      {showModal && (
+        <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-[#2C241B]/45 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] p-6 shadow-2xl sm:p-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <h3 className="font-display mt-4 text-xl font-semibold text-[#1C1917]">Delete account?</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#57534E]">
+              This permanently deletes your account and related data. This cannot be undone.
+            </p>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className={`rounded-xl border border-[#E5DCCE] px-4 py-2.5 text-sm font-medium text-[#6B5A48] hover:bg-[#F7F3EC] ${focusRing}`}
+              >
+                Keep account
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteUser}
+                className={`rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-700 ${focusRing}`}
+              >
+                Delete forever
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
+  );
+}
+
+function Field({ id, label, icon: Icon, ...props }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B5A48]">
+        {label}
+      </span>
+      <span className="relative block">
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C4A574]" aria-hidden />
+        <input
+          id={id}
+          {...props}
+          className={`w-full rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] py-3 pl-10 pr-3 text-sm text-[#2C241B] outline-none transition placeholder:text-[#78716C] focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/25 ${focusRing}`}
+        />
+      </span>
+    </label>
   );
 }
