@@ -170,35 +170,63 @@ export const getUser = async(req, res, next) => {
 
 export const getUserInterviews = async (req, res, next) => {
   if (req.user.id === req.params.expId) {
-      try {
-          // Update user's activity status
-          await updateUserActivityStatus(req.user.id);
-          
-          const interviews = await InterviewExperience.find({ userRef: req.params.expId });
-          res.status(200).json(interviews);
-      } catch (error) {
-          next(error);
-      }
+    try {
+      await updateUserActivityStatus(req.user.id);
+
+      const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 10));
+      const skip = (page - 1) * limit;
+      const filter = { userRef: req.params.expId };
+
+      const [items, total] = await Promise.all([
+        InterviewExperience.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+        InterviewExperience.countDocuments(filter),
+      ]);
+
+      res.status(200).json({
+        items,
+        total,
+        page,
+        pages: Math.max(1, Math.ceil(total / limit)),
+        limit,
+      });
+    } catch (error) {
+      next(error);
+    }
   } else {
-      return next(errorHandler(401, 'You can only view your own interview experiences!'));
+    return next(errorHandler(401, 'You can only view your own interview experiences!'));
   }
-}
+};
 
 export const getUserSalary = async (req, res, next) => {
   if (req.user.id === req.params.salId) {
-      try {
-          // Update user's activity status
-          await updateUserActivityStatus(req.user.id);
-          
-          const salary = await Salary.find({ userRef: req.params.salId });
-          res.status(200).json(salary);
-      } catch (error) {
-          next(error);
-      }
+    try {
+      await updateUserActivityStatus(req.user.id);
+
+      const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 10));
+      const skip = (page - 1) * limit;
+      const filter = { userRef: req.params.salId };
+
+      const [items, total] = await Promise.all([
+        Salary.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+        Salary.countDocuments(filter),
+      ]);
+
+      res.status(200).json({
+        items,
+        total,
+        page,
+        pages: Math.max(1, Math.ceil(total / limit)),
+        limit,
+      });
+    } catch (error) {
+      next(error);
+    }
   } else {
-      return next(errorHandler(401, 'You can only view your own salary structure!'));
+    return next(errorHandler(401, 'You can only view your own salary structure!'));
   }
-}
+};
 
 export const getusers = async(req, res, next) => {
   if(!req.user.isUserAdmin) {
