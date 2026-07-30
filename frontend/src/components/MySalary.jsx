@@ -1,222 +1,212 @@
-import React, { useState, useEffect } from 'react';
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { Plus, Trash2, Wallet, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { focusRing } from '../theme/tokens';
+
+const PAGE_SIZE = 10;
 
 export default function MySalary() {
-
   const { currentUser } = useSelector((state) => state.user);
   const [salaries, setSalaries] = useState([]);
-  const [visibleSalaries, setVisibleSalaries] = useState(10);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedSalaryId, setSelectedSalaryId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  
-  useEffect(() => {
-    fetchSalaries();
-  }, []);
-
-  const fetchSalaries = async () => {
+  const fetchSalaries = useCallback(async (pageNum = 1) => {
     try {
-      const response = await fetch(`/backend/user/salary/${currentUser._id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch salaries');
-      }
+      setLoading(true);
+      const response = await fetch(
+        `/backend/user/salary/${currentUser._id}?page=${pageNum}&limit=${PAGE_SIZE}`,
+      );
+      if (!response.ok) throw new Error('Failed to fetch salaries');
       const data = await response.json();
-      setSalaries(data);
+      setSalaries(data.items || []);
+      setTotal(data.total || 0);
+      setPages(data.pages || 1);
+      setPage(data.page || pageNum);
     } catch (error) {
       console.error('Error fetching salaries:', error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [currentUser._id]);
 
+  useEffect(() => {
+    fetchSalaries(page);
+  }, [fetchSalaries, page]);
 
   const handleDeleteSalary = async () => {
     try {
-        const response = await fetch(`/backend/salary/delete/${selectedSalaryId}`, {
-            method: 'DELETE',
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete salary');
-        }
-
-        setSalaries(prev => prev.filter(sal => sal._id !== selectedSalaryId));
-
-        setDeleteModalOpen(false);
-
+      const response = await fetch(`/backend/salary/delete/${selectedSalaryId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete salary');
+      setDeleteModalOpen(false);
+      const nextTotal = total - 1;
+      const nextPages = Math.max(1, Math.ceil(nextTotal / PAGE_SIZE));
+      const nextPage = Math.min(page, nextPages);
+      if (nextPage !== page) setPage(nextPage);
+      else fetchSalaries(nextPage);
     } catch (error) {
-        console.error('Error deleting salary:', error);
+      console.error('Error deleting salary:', error);
     }
-};
-
-
-  // Open delete confirmation modal
-  const openDeleteModal = (salaryId) => {
-    setSelectedSalaryId(salaryId);
-    setDeleteModalOpen(true);
   };
 
-  // Show more experiences
-  const handleShowMore = () => {
-    setVisibleSalaries(prev => prev + 10);
-  };
+  if (loading && salaries.length === 0) {
+    return <p className="py-16 text-center text-sm text-[#78716C]">Loading your salary posts...</p>;
+  }
 
-
-  const renderEmptyState = () => (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-md mx-auto text-center bg-white shadow-xl rounded-2xl p-8 transform transition-all duration-500 hover:scale-105">
-        <div className="mb-6">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-24 w-24 mx-auto text-blue-500 opacity-70"
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={1} 
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
-            />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Your Salary Structures Journey Begins Here
-        </h2>
-        <p className="text-gray-600 mb-6">
-          It looks like you haven't shared any salary  structure yet. 
-          Your insights can help others navigate their career paths!
-        </p>
-        <button 
-          className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center mx-auto space-x-2 group"
-          onClick={() => navigate('/salaryStructures')}
-        >
-          <FaPlus className="group-hover:rotate-180 transition-transform" />
-          <span>Share Your First Salary Structure</span>
-        </button>
-        <div className="mt-6 border-t pt-4 text-sm text-gray-500">
-          By sharing, you contribute to a community of learning and growth.
-        </div>
-      </div>
-    </div>
-  );
-
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-
-      {/* Page Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-12 mt-10 mb-8 rounded-lg shadow-lg">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center">
-            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-6">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-10 w-10 text-white"
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-4xl font-extrabold text-white mb-2 tracking-tight">
-                My Salary Structures
-              </h1>
-              <p className="text-white text-opacity-80 text-lg">
-                Track, analyze, and manage your comprehensive salary information and contributions
-              </p>
-            </div>
+  if (!loading && total === 0) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8]">
+        <div
+          aria-hidden
+          className="h-1.5 w-full"
+          style={{ background: 'linear-gradient(90deg, #C4A574, #EFE8DC, #C4A574)' }}
+        />
+        <div className="px-6 py-14 text-center sm:px-10">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F7F3EC] text-[#C4A574]">
+            <Wallet className="h-6 w-6" aria-hidden />
           </div>
-        </div>
-      </div>
-
-      {salaries.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <>
-          {/* Salary Table */}
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto min-w-[600px]">
-                <thead className="bg-gray-100 border-b">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Company</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Position</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">CTC</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">No of Likes</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">No of Dislikes</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {salaries.slice(0, visibleSalaries).map((sal) => (
-                    <tr key={sal._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-4 whitespace-nowrap">{sal.company}</td>
-                      <td className="px-4 py-4 whitespace-nowrap">{sal.position}</td>
-                      <td className="px-4 py-4 whitespace-nowrap">{sal.ctc}</td>
-                      <td className="px-4 py-4 whitespace-nowrap">{sal.numberOfLikes}</td>
-                      <td className="px-4 py-4 whitespace-nowrap">{sal.numberOfDislikes}</td>
-                      <td className="px-4 py-4 whitespace-nowrap space-x-2">
-                        <button 
-                          className="flex items-center px-3 py-1 rounded-full text-sm text-red-500 hover:text-white hover:bg-red-500 transition-all duration-300 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-red-500"
-                          onClick={() => openDeleteModal(sal._id)}
-                        >
-                          <FaTrash className="mr-2" />
-                          <span>Delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      )}
-
-
-      {/* Show More Button */}
-      {visibleSalaries < salaries.length && (
-        <div className="flex justify-center mt-6">
-          <button 
-            onClick={handleShowMore}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          <h3 className="font-display mt-5 text-2xl font-semibold text-[#1C1917]">
+            No salary posts yet
+          </h3>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[#57534E]">
+            Share anonymous compensation data to help QA and SDET professionals negotiate with clarity.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/salary-structures')}
+            className={`mt-7 inline-flex items-center gap-2 rounded-xl bg-[#2C241B] px-5 py-2.5 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
           >
-            Show More Salaries
+            <Plus className="h-4 w-4" aria-hidden />
+            Share a salary
           </button>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p className="mb-4 text-sm text-[#78716C]">
+        <span className="font-medium tabular-nums text-[#2C241B]">{total}</span>{' '}
+        salary post{total === 1 ? '' : 's'}
+        {pages > 1 && (
+          <span className="ml-2 text-[#78716C]">
+            · Page {page} of {pages}
+          </span>
+        )}
+      </p>
+
+      <div className="overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8]">
+        {loading ? (
+          <p className="py-10 text-center text-sm text-[#78716C]">Loading...</p>
+        ) : (
+          <ul className="divide-y divide-[#E5DCCE]">
+            {salaries.map((sal) => (
+              <li
+                key={sal._id}
+                className="flex flex-col gap-3 px-4 py-4 transition hover:bg-[#F7F3EC]/60 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+              >
+                <div className="min-w-0">
+                  <p className="font-display truncate text-base font-medium text-[#1C1917]">
+                    {sal.company}
+                  </p>
+                  <p className="mt-0.5 truncate text-sm text-[#57534E]">{sal.position}</p>
+                  <p className="mt-2 text-[12px] font-medium tabular-nums text-[#C4A574]">
+                    {sal.ctc ? `${sal.ctc}` : 'CTC not listed'}
+                    {sal.location ? (
+                      <span className="ml-2 font-normal text-[#78716C]">· {sal.location}</span>
+                    ) : null}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {sal._id && (
+                    <Link
+                      to={`/salary/${sal._id}`}
+                      className={`inline-flex items-center gap-1 rounded-lg border border-[#E5DCCE] px-3 py-1.5 text-xs font-medium text-[#6B5A48] hover:bg-[#F7F3EC] ${focusRing}`}
+                    >
+                      <ExternalLink className="h-3 w-3" /> View
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedSalaryId(sal._id);
+                      setDeleteModalOpen(true);
+                    }}
+                    className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 ${focusRing}`}
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {pages > 1 && (
+        <nav className="mt-5 flex items-center justify-center gap-2" aria-label="Pagination">
+          <button
+            type="button"
+            disabled={page <= 1 || loading}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className={`inline-flex items-center gap-1 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-sm text-[#6B5A48] transition hover:bg-[#EFE8DC] disabled:opacity-40 ${focusRing}`}
+          >
+            <ChevronLeft className="h-4 w-4" /> Prev
+          </button>
+          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              type="button"
+              disabled={loading}
+              onClick={() => setPage(p)}
+              className={`h-9 min-w-9 rounded-xl px-2.5 text-sm font-medium transition ${focusRing} ${
+                p === page
+                  ? 'bg-[#2C241B] text-[#FFFDF8]'
+                  : 'border border-[#E5DCCE] bg-[#FFFDF8] text-[#6B5A48] hover:bg-[#EFE8DC]'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            type="button"
+            disabled={page >= pages || loading}
+            onClick={() => setPage((p) => Math.min(pages, p + 1))}
+            className={`inline-flex items-center gap-1 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-sm text-[#6B5A48] transition hover:bg-[#EFE8DC] disabled:opacity-40 ${focusRing}`}
+          >
+            Next <ChevronRight className="h-4 w-4" />
+          </button>
+        </nav>
       )}
 
-      {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h2 className="text-xl font-bold mb-4 text-gray-800">
-              Confirm Deletion
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this salary structure? 
-              This action cannot be undone.
+        <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-[#2C241B]/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] p-6 shadow-xl">
+            <h2 className="font-display text-lg font-semibold text-[#1C1917]">Delete salary post?</h2>
+            <p className="mt-2 text-sm text-[#57534E]">
+              This removes your salary submission permanently. This cannot be undone.
             </p>
-            <div className="flex justify-end space-x-3">
-              <button 
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
                 onClick={() => setDeleteModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                className={`rounded-xl border border-[#E5DCCE] px-4 py-2 text-sm text-[#6B5A48] hover:bg-[#F7F3EC] ${focusRing}`}
               >
                 Cancel
               </button>
-              <button 
+              <button
+                type="button"
                 onClick={handleDeleteSalary}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                className={`rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 ${focusRing}`}
               >
                 Delete
               </button>

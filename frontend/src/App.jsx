@@ -139,12 +139,14 @@ function Layout() {
   // The admin dashboard renders its own full-height shell and doesn't need the
   // public site chrome (floating nav + promo strip) eating into its vertical space.
   const isAdminArea = location.pathname.startsWith('/admin');
+  const isMyCorner = location.pathname.toLowerCase().startsWith('/mycorner');
+  const hidePublicChrome = isAdminArea || isMyCorner;
 
   return (
     <div className="flex flex-col min-h-screen">
       <SessionManager />
-      {!isAdminArea && <Header />}
-      {!isAdminArea && <FlashStrip />}
+      {!hidePublicChrome && <Header />}
+      {!hidePublicChrome && <FlashStrip />}
       <div className="flex-grow">
         <Routes>
                 <Route path='/' element={<Home />} />
@@ -223,8 +225,8 @@ function Layout() {
 
         </Routes>
       </div>
-      {!isAdminArea && <Footer />}
-      {!isAdminArea && <SocialIconFab />}
+      {!hidePublicChrome && <Footer />}
+      {!hidePublicChrome && <SocialIconFab />}
       <ToastContainer position="bottom-right" autoClose={2500} hideProgressBar={false} newestOnTop theme="colored" closeOnClick pauseOnFocusLoss={false} draggable pauseOnHover />
     </div>
   );
