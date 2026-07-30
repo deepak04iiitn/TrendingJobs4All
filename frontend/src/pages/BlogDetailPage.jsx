@@ -407,7 +407,7 @@ export default function BlogDetailPage() {
         </div>
 
         <div className="mt-16">
-          <RelatedLinks />
+          <RelatedLinks type="blog" />
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { focusRing } from '../../theme/tokens';
+import RelatedLinks from '../RelatedLinks';
 
 const SIBLINGS = [
   { href: '/privacy-policy', label: 'Privacy' },
@@ -207,6 +208,9 @@ export default function LegalShell({
                   Contact us
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>
+                <div className="mt-10">
+                  <RelatedLinks type="legal" />
+                </div>
               </footer>
             </motion.article>
           </div>

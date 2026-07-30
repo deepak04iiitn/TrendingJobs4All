@@ -21,7 +21,7 @@ export default function CoverHero() {
           initial={reduceMotion ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: easeOut }}
-          className="font-display select-none text-center text-[clamp(2.75rem,8.5vw,6.5rem)] font-semibold leading-[0.95] tracking-[-0.03em] text-[#1C1917]"
+          className="font-display select-none text-center text-[clamp(2.15rem,5.5vw,3.5rem)] font-semibold leading-[0.95] tracking-[-0.03em] text-[#1C1917]"
         >
           Route
           <span className="text-[#C4A574]">2</span>
@@ -32,7 +32,7 @@ export default function CoverHero() {
           initial={reduceMotion ? false : { opacity: 0, scaleX: 0.55 }}
           animate={{ opacity: 1, scaleX: 1 }}
           transition={{ duration: 0.8, delay: 0.18, ease: easeOut }}
-          className="mx-auto mt-8 flex w-full max-w-md items-center gap-3 sm:mt-10 sm:max-w-lg"
+          className="mx-auto mt-5 flex w-full max-w-[14rem] items-center gap-3 sm:mt-6 sm:max-w-[16rem]"
           aria-hidden
         >
           <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#E5DCCE] to-[#C4A574]/70" />

@@ -1,4 +1,5 @@
 import '../styles/About.css';
+import RelatedLinks from '../components/RelatedLinks';
 import {
   AboutSeo,
   AboutIntro,
@@ -20,6 +21,9 @@ export default function About() {
         <AboutValues />
         <AboutBento />
         <AboutInvite />
+        <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+          <RelatedLinks type="about" />
+        </div>
       </div>
     </>
   );

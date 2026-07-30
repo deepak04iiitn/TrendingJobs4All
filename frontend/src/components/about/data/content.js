@@ -53,7 +53,7 @@ export const FEATURE_MATRIX = [
     focus: 'QA interview experiences, SDET interview questions',
     description:
       'Round-by-round experiences plus topic-wise question banks so preparation matches actual interview patterns.',
-    path: '/interviewExp',
+    path: '/interview-experiences',
   },
   {
     id: 'practice',
@@ -68,8 +68,8 @@ export const FEATURE_MATRIX = [
     title: 'Career Growth Toolkit',
     focus: 'Salary insights, QA resume builder',
     description:
-      'Compensation intelligence, ATS-ready resume tools and roadmaps for long-term growth.',
-    path: '/salaryStructures',
+      'Compensation intelligence and ATS-ready resume tools for long-term growth.',
+    path: '/salary-structures',
   },
 ];
 
@@ -108,7 +108,7 @@ export const TOOLKIT_PHASES = [
         id: 'salary',
         title: 'Salary Insights',
         subtitle: 'Compensation benchmarks by role',
-        path: '/salaryStructures',
+        path: '/salary-structures',
       },
     ],
   },
@@ -122,7 +122,7 @@ export const TOOLKIT_PHASES = [
         id: 'interviews',
         title: 'Interview Experiences',
         subtitle: 'Company-wise round breakdowns',
-        path: '/interviewExp',
+        path: '/interview-experiences',
       },
       {
         id: 'questions',
@@ -142,7 +142,7 @@ export const TOOLKIT_PHASES = [
     id: 'grow',
     phase: '03',
     title: 'Grow',
-    lede: 'Build an ATS-ready profile and follow structured roadmaps from Manual QA to SDET.',
+    lede: 'Build an ATS-ready profile and grow with blogs, resumes, and peer insights.',
     items: [
       {
         id: 'resume',
@@ -151,10 +151,10 @@ export const TOOLKIT_PHASES = [
         path: '/resume-builder',
       },
       {
-        id: 'roadmaps',
-        title: 'Career Roadmaps',
-        subtitle: 'Manual QA to SDET growth paths',
-        path: '/roadmaps',
+        id: 'blogs',
+        title: 'Career Blogs',
+        subtitle: 'Playbooks for testers and SDETs',
+        path: '/blogs',
       },
     ],
   },

@@ -68,6 +68,20 @@ export default function AuthAside({ content }) {
             Route<span className="text-[#C4A574]">2</span>Hire
           </span>
         </Link>
+        <nav className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-[13px]" aria-label="Auth page links">
+          <Link to="/jobs" className={`text-[#6B5A48] hover:text-[#2C241B] ${focusRing}`}>
+            Jobs
+          </Link>
+          <Link to="/about" className={`text-[#6B5A48] hover:text-[#2C241B] ${focusRing}`}>
+            About
+          </Link>
+          <Link to="/blogs" className={`text-[#6B5A48] hover:text-[#2C241B] ${focusRing}`}>
+            Blogs
+          </Link>
+          <Link to="/contact-us" className={`text-[#6B5A48] hover:text-[#2C241B] ${focusRing}`}>
+            Contact
+          </Link>
+        </nav>
       </motion.div>
     </aside>
   );

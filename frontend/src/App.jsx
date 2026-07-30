@@ -44,6 +44,7 @@ import BlogListingPage from './pages/BlogListingPage';
 import BlogDetailPage from './pages/BlogDetailPage';
 import BlogLegacyRedirect from './pages/BlogLegacyRedirect';
 import DSAProblemTracker from './pages/DSAProblemTracker';
+import NotFound from './pages/NotFound';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -157,7 +158,9 @@ function Layout() {
                 <Route path="/salaryStructures" element={<SalaryStructures />} />
                 <Route path="/salary-structures" element={<SalaryStructures />} />
                 <Route path="/salaryStructures/:slug/:salaryId" element={<SalaryStructures />} />
+                <Route path="/salary-structures/:slug/:salaryId" element={<SalaryStructures />} />
                 <Route path="/salaryStructures/:salaryId" element={<SalaryStructures />} />
+                <Route path="/salary-structures/:salaryId" element={<SalaryStructures />} />
                 <Route path="/salary/:id" element={<SalaryDetailPage />} />
                 <Route path='/myCorner' element={<MyCorner />} />
                 
@@ -213,6 +216,18 @@ function Layout() {
                 <Route path="/roadmap/*" element={<Navigate to="/" replace />} />
                 <Route path="/roadmaps" element={<Navigate to="/" replace />} />
                 <Route path="/roadmaps/*" element={<Navigate to="/" replace />} />
+
+                {/* Removed / orphan public URLs → home (preserve crawl equity, avoid 404 soft-404s) */}
+                <Route path="/newsletter" element={<Navigate to="/" replace />} />
+                <Route path="/BuyMeACoffee" element={<Navigate to="/" replace />} />
+                <Route path="/premium-subscription" element={<Navigate to="/" replace />} />
+                <Route path="/community" element={<Navigate to="/" replace />} />
+                <Route path="/connect-with-route2hire" element={<Navigate to="/" replace />} />
+                <Route path="/publicpolls" element={<Navigate to="/" replace />} />
+                <Route path="/mypolls" element={<Navigate to="/" replace />} />
+
+                {/* Catch-all: crawlable 404 with internal links */}
+                <Route path="*" element={<NotFound />} />
 
         </Routes>
       </div>

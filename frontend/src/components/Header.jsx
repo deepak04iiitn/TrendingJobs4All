@@ -16,7 +16,6 @@ import {
   MessageCircle,
   Code,
   ArrowUpRight,
-  Map,
 } from 'lucide-react';
 import { signoutSuccess } from '../redux/user/userSlice';
 import { focusRing } from '../theme/tokens';
@@ -33,16 +32,15 @@ const FEATURE_GROUPS = [
   {
     title: 'Prepare',
     items: [
-      { path: '/interviewExp', icon: MessageCircle, label: 'Interview Experiences', desc: 'Company-wise insights' },
+      { path: '/interview-experiences', icon: MessageCircle, label: 'Interview Experiences', desc: 'Company-wise insights' },
       { path: '/interview-questions', icon: Puzzle, label: 'Interview Questions', desc: 'Topic-wise practice' },
       { path: '/qa-sdet-dsa-sheet', icon: Code, label: 'QA/SDET DSA Sheet', desc: 'Track your progress' },
-      { path: '/roadmaps', icon: Map, label: 'Roadmaps', desc: 'Skill paths for roles', comingSoon: true },
     ],
   },
   {
     title: 'Discover',
     items: [
-      { path: '/salaryStructures', icon: TrendingUp, label: 'Salary Insights', desc: 'Compensation data' },
+      { path: '/salary-structures', icon: TrendingUp, label: 'Salary Insights', desc: 'Compensation data' },
       { path: '/blogs', icon: BookOpen, label: 'Blogs', desc: 'Career articles and interview insights' },
     ],
   },

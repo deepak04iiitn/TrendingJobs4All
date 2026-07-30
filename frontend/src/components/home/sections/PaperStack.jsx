@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -6,13 +6,33 @@ import { PAPER_STACK } from '../data/content';
 import { Reveal, easeOut } from '../motion.jsx';
 import { focusRing } from '../../../theme/tokens';
 
+const AUTO_MS = 3000;
+
 export default function PaperStack() {
   const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const total = PAPER_STACK.length;
   const sheet = PAPER_STACK[active];
 
+  useEffect(() => {
+    if (!total || reduceMotion || paused) return undefined;
+    const id = window.setInterval(() => {
+      setActive((i) => (i + 1) % total);
+    }, AUTO_MS);
+    return () => window.clearInterval(id);
+  }, [total, reduceMotion, paused]);
+
   return (
-    <section className="home-paper relative overflow-hidden bg-[#F7F3EC] py-20 sm:py-28">
+    <section
+      className="home-paper relative overflow-hidden bg-[#F7F3EC] py-20 sm:py-28"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setPaused(false);
+      }}
+    >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <Reveal className="mb-12 max-w-xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B5A48]">
@@ -39,6 +59,7 @@ export default function PaperStack() {
                     key={item.id}
                     type="button"
                     onClick={() => setActive(i)}
+                    aria-current={selected ? 'true' : undefined}
                     className={`home-paper__tab group relative flex min-w-[9.5rem] shrink-0 flex-col border-l-2 px-4 py-3 text-left lg:min-w-0 ${
                       selected
                         ? 'border-[#C4A574] bg-[#EFE8DC]/80'
@@ -81,6 +102,7 @@ export default function PaperStack() {
                 exit={reduceMotion ? undefined : { opacity: 0, y: -10, rotate: 0.6 }}
                 transition={{ duration: 0.42, ease: easeOut }}
                 className="relative rounded-sm border border-[#E5DCCE] bg-[#FFFDF8] p-8 shadow-[0_28px_50px_-28px_rgba(44,36,27,0.28)] sm:p-10"
+                aria-live="polite"
               >
                 <div className="home-paper__ruled pointer-events-none absolute inset-0" aria-hidden />
                 <p className="relative text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C4A574]">

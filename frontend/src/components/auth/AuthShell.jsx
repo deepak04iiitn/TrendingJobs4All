@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { easeOut } from '../home/motion.jsx';
 import AuthAside from './AuthAside';
+import RelatedLinks from '../RelatedLinks';
 
 export default function AuthShell({ content, children }) {
   const reduceMotion = useReducedMotion();
@@ -17,6 +18,10 @@ export default function AuthShell({ content, children }) {
           <AuthAside content={content} />
           <div className="auth-form-panel p-8 sm:p-10 lg:p-12">{children}</div>
         </motion.div>
+
+        <div className="mt-10">
+          <RelatedLinks type="auth" />
+        </div>
       </div>
     </div>
   );
