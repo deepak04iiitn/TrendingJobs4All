@@ -131,38 +131,44 @@ export default function FeedbackPanel({ open, onClose, initialType = 'bug' }) {
 
             <div className="relative flex-1 overflow-y-auto px-6 py-6 sm:px-7">
               <div
-                className="mb-7 grid grid-cols-2 gap-1 rounded-2xl border border-[#E5DCCE] bg-[#EFE8DC] p-1"
+                className="mb-7 flex gap-1 border-b border-[#E5DCCE]"
                 role="tablist"
                 aria-label="Feedback type"
               >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={isBug}
-                  onClick={() => setFeedbackType('bug')}
-                  className={`flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition ${focusRing} ${
-                    isBug
-                      ? 'bg-[#FFFDF8] text-[#1C1917] shadow-[0_8px_20px_-12px_rgba(44,36,27,0.25)]'
-                      : 'text-[#78716C] hover:text-[#2C241B]'
-                  }`}
-                >
-                  <Bug size={15} className={isBug ? 'text-[#C4A574]' : ''} aria-hidden />
-                  Bug
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={!isBug}
-                  onClick={() => setFeedbackType('feature')}
-                  className={`flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold transition ${focusRing} ${
-                    !isBug
-                      ? 'bg-[#FFFDF8] text-[#1C1917] shadow-[0_8px_20px_-12px_rgba(44,36,27,0.25)]'
-                      : 'text-[#78716C] hover:text-[#2C241B]'
-                  }`}
-                >
-                  <Lightbulb size={15} className={!isBug ? 'text-[#C4A574]' : ''} aria-hidden />
-                  Feature
-                </button>
+                {[
+                  { id: 'bug', label: 'Bug', Icon: Bug },
+                  { id: 'feature', label: 'Feature', Icon: Lightbulb },
+                ].map(({ id, label, Icon }) => {
+                  const selected = feedbackType === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      onClick={() => setFeedbackType(id)}
+                      className={`relative flex flex-1 items-center justify-center gap-2 px-3 py-3 text-sm transition ${focusRing} ${
+                        selected
+                          ? 'font-semibold text-[#1C1917]'
+                          : 'font-medium text-[#78716C] hover:text-[#2C241B]'
+                      }`}
+                    >
+                      <Icon
+                        size={15}
+                        className={selected ? 'text-[#C4A574]' : 'text-[#A8A29E]'}
+                        aria-hidden
+                      />
+                      {label}
+                      {selected ? (
+                        <motion.span
+                          layoutId="feedback-type-underline"
+                          className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-[#C4A574]"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        />
+                      ) : null}
+                    </button>
+                  );
+                })}
               </div>
 
               <form id="feedback-form" onSubmit={handleSubmit} className="space-y-5">

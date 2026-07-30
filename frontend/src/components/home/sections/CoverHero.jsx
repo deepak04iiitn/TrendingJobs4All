@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowDown, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { COVER } from '../data/content';
 import { easeOut } from '../motion.jsx';
 import { focusRing } from '../../../theme/tokens';
@@ -61,7 +61,7 @@ export default function CoverHero() {
             initial={reduceMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.42, ease: easeOut }}
-            className="mt-7 flex flex-wrap items-center gap-3"
+            className="mt-7 flex flex-wrap items-center gap-5 sm:gap-6"
           >
             <Link
               to={COVER.primaryCta.path}
@@ -77,17 +77,6 @@ export default function CoverHero() {
               {COVER.secondaryCta.label}
             </Link>
           </motion.div>
-
-          <motion.a
-            href="#word-field"
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.75, duration: 0.5, ease: easeOut }}
-            className={`mt-12 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#78716C] hover:text-[#2C241B] ${focusRing}`}
-          >
-            Turn the page
-            <ArrowDown size={14} className="home-cover__arrow" aria-hidden />
-          </motion.a>
         </div>
       </div>
     </section>
