@@ -194,8 +194,8 @@ export default function SalaryDetailPage() {
           <div className="px-8 mb-6">
             <Breadcrumb 
               items={[
-                { label: 'Salary Insights', path: '/salaryStructures' },
-                { label: salary?.company || 'Company', path: `/salaryStructures?company=${encodeURIComponent(salary?.company || '')}` },
+                { label: 'Salary Insights', path: '/salary-structures' },
+                { label: salary?.company || 'Company', path: `/salary-structures?company=${encodeURIComponent(salary?.company || '')}` },
                 { label: salary?.position || 'Salary Details' }
               ]}
             />

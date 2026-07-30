@@ -476,6 +476,9 @@ const ResumeBuilder = () => {
                     availableFields={AVAILABLE_FIELDS}
                     onSelect={handleFieldSelection}
                   />
+                  <div className="mt-10">
+                    <RelatedLinks type="resume" />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -535,6 +538,10 @@ const ResumeBuilder = () => {
                     <ResumePreview selectedFields={selectedFields} resumeData={resumeData} />
                   </div>
                 </section>
+              </div>
+
+              <div className="mt-10">
+                <RelatedLinks type="resume" />
               </div>
             </motion.div>
           )}

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Instagram, Mail, Send, ArrowUpRight, Linkedin } from 'lucide-react';
 import { focusRing } from '../theme/tokens';
+import RelatedLinks from '../components/RelatedLinks';
 
 const INSTAGRAM_URL =
   'https://www.instagram.com/route2hire?igsh=ZGk5NTQyY2RiOGF1';
@@ -207,6 +208,10 @@ export default function ContactUs() {
           <p className="mt-12 text-center text-[12px] text-[#78716C]">
             We value your privacy and use contact details only to respond and support you.
           </p>
+
+          <div className="mt-10">
+            <RelatedLinks type="contact" />
+          </div>
         </div>
       </div>
     </>

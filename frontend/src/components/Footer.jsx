@@ -8,10 +8,12 @@ const FOOTER_COLUMNS = [
     title: 'Prepare',
     links: [
       { href: '/jobs', label: 'Job Listings' },
-      { href: '/interviewExp', label: 'Interview Experiences' },
+      { href: '/interview-experiences', label: 'Interview Experiences' },
       { href: '/interview-questions', label: 'Question Bank' },
-      { href: '/salaryStructures', label: 'Salary Insights' },
+      { href: '/salary-structures', label: 'Salary Insights' },
       { href: '/resume-builder', label: 'Resume Builder' },
+      { href: '/qa-sdet-dsa-sheet', label: 'DSA Sheet' },
+      { href: '/blogs', label: 'Career Blogs' },
     ],
   },
   {
@@ -19,7 +21,7 @@ const FOOTER_COLUMNS = [
     links: [
       { href: '/about', label: 'About Us' },
       { href: '/contact-us', label: 'Contact Us' },
-      { href: '/myCorner', label: 'My Corner' },
+      { href: '/', label: 'Home' },
     ],
   },
   {
@@ -28,13 +30,13 @@ const FOOTER_COLUMNS = [
       { href: '/privacy-policy', label: 'Privacy Policy' },
       { href: '/terms-of-service', label: 'Terms of Service' },
       { href: '/cookie-policy', label: 'Cookie Policy' },
-      { href: '/sign-up', label: 'Sign Up' },
-      { href: '/contact-us', label: 'Help Center' },
     ],
   },
   {
     title: 'Account',
     links: [
+      { href: '/sign-in', label: 'Sign In' },
+      { href: '/sign-up', label: 'Sign Up' },
       { href: '/my-jobs', label: 'My Jobs' },
       { href: '/profile', label: 'My Profile' },
     ],

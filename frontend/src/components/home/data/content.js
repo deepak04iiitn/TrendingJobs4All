@@ -1,9 +1,9 @@
 ﻿export const SEO = {
   title: 'Route2Hire | QA, SDET & Test Automation Jobs, Interviews & Prep',
   description:
-    'Route2Hire is the career platform for QA, SDET and Test Automation engineers - curated software testing jobs, real interview experiences, a QA/SDET DSA sheet, salary insights, resume builder and roadmaps.',
+    'Route2Hire is the career platform for QA, SDET and Test Automation engineers - curated software testing jobs, real interview experiences, a QA/SDET DSA sheet, salary insights, resume builder and career blogs.',
   keywords:
-    'QA jobs, SDET jobs, Test Automation jobs, software testing careers, QA interview questions, SDET interview experiences, QA DSA sheet, automation testing salary, SDET resume, test engineer roadmap',
+    'QA jobs, SDET jobs, Test Automation jobs, software testing careers, QA interview questions, SDET interview experiences, QA DSA sheet, automation testing salary, SDET resume, test engineer blogs',
   ogTitle: 'Route2Hire | QA, SDET & Test Automation Careers',
   ogDescription:
     'Find curated QA and SDET jobs, study real interview experiences, practice the QA/SDET DSA sheet and compare salaries - all on one platform built for testers.',
@@ -23,11 +23,11 @@ export const COVER = {
 /** Kinetic typography map - product as living words */
 export const WORD_FIELD = [
   { label: 'Jobs', path: '/jobs', blurb: 'Curated QA, SDET & automation testing roles', weight: 'xl', x: 8, y: 18, rotate: -4 },
-  { label: 'Interviews', path: '/interviewExp', blurb: 'Round-by-round QA & SDET interview experiences', weight: 'lg', x: 52, y: 12, rotate: 3 },
+  { label: 'Interviews', path: '/interview-experiences', blurb: 'Round-by-round QA & SDET interview experiences', weight: 'lg', x: 52, y: 12, rotate: 3 },
   { label: 'DSA', path: '/qa-sdet-dsa-sheet', blurb: 'DSA practice sheet built for testing interviews', weight: 'xl', x: 28, y: 42, rotate: -2 },
-  { label: 'Salary', path: '/salaryStructures', blurb: 'QA & SDET compensation bands, role by role', weight: 'md', x: 68, y: 38, rotate: 5 },
+  { label: 'Salary', path: '/salary-structures', blurb: 'QA & SDET compensation bands, role by role', weight: 'md', x: 68, y: 38, rotate: 5 },
   { label: 'Resume', path: '/resume-builder', blurb: 'Guided QA/SDET resume builder', weight: 'sm', x: 12, y: 68, rotate: 2 },
-  { label: 'Roadmaps', path: '/roadmaps', blurb: 'Manual testing to SDET and automation architect', weight: 'sm', x: 48, y: 62, rotate: -6 },
+  { label: 'About', path: '/about', blurb: 'Why Route2Hire exists for testers', weight: 'sm', x: 48, y: 62, rotate: -6 },
   { label: 'Questions', path: '/interview-questions', blurb: 'Topic-wise QA/SDET questions with model answers', weight: 'md', x: 74, y: 72, rotate: 4 },
   { label: 'Blogs', path: '/blogs', blurb: 'Playbooks for automation, CI and interview strategy', weight: 'sm', x: 38, y: 82, rotate: -1 },
 ];
@@ -47,7 +47,7 @@ export const PAPER_STACK = [
     label: 'Chapter II',
     title: 'Study real QA interviews',
     body: 'Company-wise interview experiences and topic-wise question banks shared by QA and SDET engineers who already cleared those rounds.',
-    cta: { label: 'Read interview experiences', path: '/interviewExp' },
+    cta: { label: 'Read interview experiences', path: '/interview-experiences' },
     marks: ['Amazon - flaky test ownership', 'Razorpay - webhook retries', 'Flipkart - CI gating'],
   },
   {
@@ -81,7 +81,7 @@ export const FEATURES = [
     title: 'Interview Experiences',
     description:
       'Round-by-round QA and SDET interview experiences from Amazon, Flipkart, Razorpay and more, written by testers who sat in those rooms.',
-    path: '/interviewExp',
+    path: '/interview-experiences',
   },
   {
     id: 'questions',
@@ -102,7 +102,7 @@ export const FEATURES = [
     title: 'Salary Structures',
     description:
       'Real QA, SDET and automation testing compensation data shared by the community, broken down by role, level and experience.',
-    path: '/salaryStructures',
+    path: '/salary-structures',
   },
   {
     id: 'resume',
@@ -112,11 +112,11 @@ export const FEATURES = [
     path: '/resume-builder',
   },
   {
-    id: 'roadmaps',
-    title: 'Career Roadmaps',
+    id: 'contact',
+    title: 'Contact & Social',
     description:
-      'Structured learning paths from manual testing to SDET, automation architect and beyond, with the skills expected at every stage.',
-    path: '/roadmaps',
+      'Reach the Route2Hire team on Instagram, Telegram, email, or LinkedIn for collaborations and career questions.',
+    path: '/contact-us',
   },
   {
     id: 'blog',

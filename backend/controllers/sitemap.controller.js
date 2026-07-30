@@ -32,30 +32,23 @@ const generateSitemapXML = (urls) => {
 
 `;
 
-  // Static URLs with priorities (only canonical URLs, no duplicates)
+  // Public, indexable canonical URLs only (no private/admin/deleted/orphan paths)
   const staticUrls = [
     { url: '/', priority: '1.00' },
     { url: '/about', priority: '0.80' },
-    { url: '/sign-in', priority: '0.60' },
-    { url: '/sign-up', priority: '0.60' },
-    { url: '/profile', priority: '0.70' },
-    { url: '/my-jobs', priority: '0.70' },
-    { url: '/publicpolls', priority: '0.70' },
-    { url: '/mypolls', priority: '0.60' },
-    { url: '/interview-experiences', priority: '0.80' }, // Canonical URL (removed /interviewExp duplicate)
-    { url: '/salary-structures', priority: '0.80' }, // Canonical URL (prefer kebab-case)
-    { url: '/myCorner', priority: '0.60' },
-    { url: '/contact-us', priority: '0.60' },
-    { url: '/privacy-policy', priority: '0.40' }, // Canonical URL (prefer kebab-case)
-    { url: '/terms-of-service', priority: '0.40' }, // Canonical URL (prefer kebab-case)
-    { url: '/cookie-policy', priority: '0.40' }, // Canonical URL (prefer kebab-case)
     { url: '/jobs', priority: '0.90' },
-    { url: '/resume-builder', priority: '0.70' },
+    { url: '/interview-experiences', priority: '0.80' },
+    { url: '/salary-structures', priority: '0.80' },
     { url: '/interview-questions', priority: '0.80' },
     { url: '/qa-sdet-dsa-sheet', priority: '0.80' },
-    { url: '/dashboard', priority: '0.60' },
-    { url: '/admin/interview-questions', priority: '0.50' },
-    { url: '/blogs', priority: '0.80' }
+    { url: '/resume-builder', priority: '0.70' },
+    { url: '/blogs', priority: '0.80' },
+    { url: '/contact-us', priority: '0.60' },
+    { url: '/sign-in', priority: '0.40' },
+    { url: '/sign-up', priority: '0.40' },
+    { url: '/privacy-policy', priority: '0.30' },
+    { url: '/terms-of-service', priority: '0.30' },
+    { url: '/cookie-policy', priority: '0.30' },
   ];
 
   // Add static URLs

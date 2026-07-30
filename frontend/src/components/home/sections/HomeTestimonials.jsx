@@ -91,7 +91,7 @@ export default function HomeTestimonials() {
               transition={{ duration: 0.5, ease: easeOut }}
               className="relative"
             >
-              <p className="font-display text-xl font-medium leading-relaxed tracking-tight text-[#1C1917] sm:text-2xl md:text-[1.75rem] md:leading-relaxed">
+              <p className="font-display text-base font-medium leading-relaxed tracking-tight text-[#1C1917] sm:text-lg md:text-xl md:leading-relaxed">
                 {current.testimonial}
               </p>
               <footer className="mt-8 flex items-center gap-4 border-t border-[#E5DCCE] pt-6">

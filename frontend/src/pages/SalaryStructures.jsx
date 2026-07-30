@@ -79,6 +79,14 @@ export default function SalaryStructures() {
   const navigate = useNavigate();
   const { salaryId, slug } = useParams();
 
+  // Redirect legacy camelCase URLs to canonical kebab-case
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    if (currentPath === '/salaryStructures' || currentPath.startsWith('/salaryStructures/')) {
+      navigate(currentPath.replace('/salaryStructures', '/salary-structures'), { replace: true });
+    }
+  }, [navigate]);
+
   const openPanel = (type) => {
     if (type === 'filters') setPanelFilters(filters);
     if (type === 'share') {
@@ -184,7 +192,7 @@ export default function SalaryStructures() {
     (salary, { replace = false } = {}) => {
       setSelectedSalary(salary);
       const nextSlug = slugify(`${salary.company || 'company'}-${salary.position || 'role'}`);
-      navigate(`/salaryStructures/${nextSlug}/${salary._id}`, { replace });
+      navigate(`/salary-structures/${nextSlug}/${salary._id}`, { replace });
       setIsLedgerOpen(false);
     },
     [navigate]
@@ -331,8 +339,8 @@ export default function SalaryStructures() {
   const canonicalUrl =
     selectedSalary && salaryId
       ? slug
-        ? `https://route2hire.com/salaryStructures/${slug}/${salaryId}`
-        : `https://route2hire.com/salaryStructures/${salaryId}`
+        ? `https://route2hire.com/salary-structures/${slug}/${salaryId}`
+        : `https://route2hire.com/salary-structures/${salaryId}`
       : 'https://route2hire.com/salary-structures';
 
   const inputClass = `w-full rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] px-3 py-2.5 text-sm text-[#2C241B] outline-none transition focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/30 ${focusRing}`;

@@ -532,7 +532,7 @@ export default function BlogListingPage() {
         )}
 
         <div className="mt-16">
-          <RelatedLinks />
+          <RelatedLinks type="blog" />
         </div>
       </div>
     </div>

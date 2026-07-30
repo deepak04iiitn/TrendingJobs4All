@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import '../styles/Home.css';
 import { preloadCriticalResources } from '../utils/performanceOptimizations';
 import FeedbackFab from '../components/FeedbackFab';
+import RelatedLinks from '../components/RelatedLinks';
 import {
   HomeSeo,
   CoverHero,
@@ -23,7 +24,7 @@ export default function Home() {
     <>
       <HomeSeo />
       <div className="home-page bg-[#F7F3EC]">
-      <FeedbackFab />
+        <FeedbackFab />
         <CoverHero />
         <WordField />
         <PaperStack />
@@ -32,6 +33,9 @@ export default function Home() {
         <HomeFaq />
         <HomeCommunity />
         <HomeClosing />
+        <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+          <RelatedLinks type="home" />
+        </div>
       </div>
     </>
   );

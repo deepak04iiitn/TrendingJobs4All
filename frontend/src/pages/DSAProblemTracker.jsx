@@ -708,7 +708,7 @@ export default function DSAProblemTracker() {
           </section>
 
           <div className="mt-12">
-            <RelatedLinks type="general" />
+            <RelatedLinks type="dsa" />
           </div>
         </div>
       </div>

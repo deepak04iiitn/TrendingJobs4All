@@ -34,98 +34,78 @@ const generateLLMSText = (dynamicContent) => {
   const staticContent = [
     {
       url: '/',
-      title: 'Tech Career Hub',
-      description: 'Connect tech professionals with curated jobs, interview prep, and salary insights to accelerate career growth.'
-    },
-    {
-      url: '/sign-in',
-      title: 'Route2Hire Sign In',
-      description: 'Facilitates user sign-in for accessing job listings and career resources on Route2Hire platform.'
-    },
-    {
-      url: '/sign-up',
-      title: 'Route2Hire Sign-Up',
-      description: 'Facilitates user sign-up to access premium job listings and career resources.'
+      title: 'QA & SDET Career Hub',
+      description: 'Route2Hire connects QA, SDET and Test Automation professionals with curated jobs, interview prep, DSA practice, salary insights and resume tools.'
     },
     {
       url: '/about',
       title: 'About Route2Hire',
-      description: 'Connect professionals with personalized job opportunities and career resources for growth and success.'
+      description: 'Learn how Route2Hire helps software testing professionals find jobs, prepare for interviews and grow their careers.'
     },
     {
       url: '/jobs',
-      title: 'Premium Job Listings',
-      description: 'List and facilitate applications for high-paying job opportunities worldwide in various tech and QA roles.'
-    },
-    {
-      url: '/my-jobs',
-      title: 'My Jobs Dashboard',
-      description: 'Provide a personalized job dashboard for tracking and bookmarking career opportunities.'
-    },
-    {
-      url: '/publicpolls',
-      title: 'Community Polls',
-      description: 'Facilitate community engagement through public polls and real-time analytics to reveal trending opinions and insights.'
-    },
-    {
-      url: '/mypolls',
-      title: 'My Polls - Career Hub',
-      description: 'Provide users access to personalized career polls and related job resources.'
-    },
-    {
-      url: '/interviewExp',
-      title: 'Interview Experiences',
-      description: 'Explore and share detailed interview experiences and insights by company and position.'
+      title: 'QA & SDET Job Listings',
+      description: 'Browse curated Quality Assurance, SDET and Test Automation job openings refreshed for software testing professionals.'
     },
     {
       url: '/interview-experiences',
-      title: 'Interview Experiences Hub',
-      description: 'Browse comprehensive interview experiences shared by professionals across various companies and roles.'
+      title: 'Interview Experiences',
+      description: 'Explore and share detailed QA and SDET interview experiences and insights by company and role.'
     },
     {
-      url: '/salaryStructures',
+      url: '/salary-structures',
       title: 'Salary Insights',
-      description: 'Provide and share salary data to promote pay transparency and informed career decisions.'
+      description: 'Browse and share QA/SDET salary data to support pay transparency and informed career decisions.'
     },
     {
       url: '/resume-builder',
-      title: 'Premium Resume Builder',
-      description: 'Allow users to create professional resumes and access career resources for job opportunities.'
+      title: 'Resume Builder',
+      description: 'Create ATS-friendly resumes for QA and SDET roles with live preview and PDF download.'
     },
     {
       url: '/interview-questions',
       title: 'Interview Questions Bank',
-      description: 'Prepare candidates with categorized real interview questions and detailed explanations for IT job interviews.'
+      description: 'Practice categorized real interview questions and explanations for QA, SDET and Test Automation interviews.'
     },
     {
       url: '/qa-sdet-dsa-sheet',
       title: 'QA SDET DSA Sheet',
-      description: 'Master Data Structures & Algorithms with real QA/SDET interview questions. Track your progress through actual problems asked in QA and SDET interviews, organized by category and difficulty.'
-    },
-    {
-      url: '/contact-us',
-      title: 'Contact Route2Hire',
-      description: 'Provide contact information and connect users with career opportunities and support.'
-    },
-    {
-      url: '/terms-of-service',
-      title: 'Route2Hire Terms of Service',
-      description: 'Outline the terms, user rights, responsibilities, and legal guidelines for using Route2Hire services.'
-    },
-    {
-      url: '/privacy-policy',
-      title: 'Privacy Policy',
-      description: 'Explain Route2Hire\'s practices on collecting, using, and protecting user privacy and data.'
-    },
-    {
-      url: '/cookie-policy',
-      title: 'Cookie Policy',
-      description: 'Explain cookie usage and management on the site to enhance user experience and privacy control.'
+      description: 'Master Data Structures and Algorithms with curated QA/SDET interview problems, progress tracking and leaderboard.'
     },
     {
       url: '/blogs',
       title: 'Blogs & Articles',
-      description: 'Read professional blogs covering technology, development, QA, SDET careers, and industry insights on Route2Hire.'
+      description: 'Read professional blogs covering QA, SDET careers, automation and interview strategy on Route2Hire.'
+    },
+    {
+      url: '/contact-us',
+      title: 'Contact Route2Hire',
+      description: 'Contact Route2Hire via Instagram, Telegram, email or LinkedIn for support and collaborations.'
+    },
+    {
+      url: '/sign-in',
+      title: 'Route2Hire Sign In',
+      description: 'Sign in to access saved jobs, resume drafts and personalized career tools.'
+    },
+    {
+      url: '/sign-up',
+      title: 'Route2Hire Sign-Up',
+      description: 'Create a free Route2Hire account for QA and SDET career tools.'
+    },
+    {
+      url: '/terms-of-service',
+      title: 'Terms of Service',
+      description: 'Terms, user rights and guidelines for using Route2Hire.'
+    },
+    {
+      url: '/privacy-policy',
+      title: 'Privacy Policy',
+      description: 'How Route2Hire collects, uses and protects personal data.'
+    },
+    {
+      url: '/cookie-policy',
+      title: 'Cookie Policy',
+      description: 'How Route2Hire uses cookies and how users can manage preferences.'
     }
   ];
 
@@ -192,8 +172,7 @@ const generateLLMSText = (dynamicContent) => {
   content += `- **Interview Preparation**: Real interview experiences and question banks\n`;
   content += `- **Salary Transparency**: Anonymous salary data for informed career decisions\n`;
   content += `- **Career Resources**: Resume builder, interview tips, and career guidance\n`;
-  content += `- **Professional Blogs**: Expert articles on technology, development, QA, and SDET careers\n`;
-  content += `- **Community Features**: Polls, discussions, and professional networking\n\n`;
+  content += `- **Professional Blogs**: Expert articles on technology, development, QA, and SDET careers\n\n`;
   content += `Our platform helps professionals make informed career decisions, prepare for interviews, and connect with opportunities that match their skills and aspirations.\n\n`;
   content += `Last updated: ${new Date().toISOString().split('T')[0]}\n`;
 
