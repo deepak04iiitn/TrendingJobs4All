@@ -4,38 +4,30 @@ import {
   Users, 
   MessageCircle, 
   Briefcase, 
-  FileSpreadsheet, 
   DollarSign, 
-  Award 
 } from 'lucide-react';
 
 const PlatformStatistics = () => {
   const [statistics, setStatistics] = useState(null);
-  const [previousStatistics, setPreviousStatistics] = useState(null); // For storing previous statistics
+  const [previousStatistics, setPreviousStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
-        // Fetch current statistics
         const statisticsResponse = await fetch('/backend/admin/statistics');
         const statisticsData = await statisticsResponse.json();
-        console.log(statisticsData);  // Check the structure of data
 
-        // Save the previous statistics data to calculate percentage changes
         setPreviousStatistics(statistics); 
 
-        // Transform the data into a suitable format for the chart
         if (statisticsData) {
           const chartData = [
             {
-              name: 'Current', // You can customize this label, e.g., 'Current' or '2024'
+              name: 'Current',
               Users: statisticsData.usersLength,
               Comments: statisticsData.commentsLength,
               Experiences: statisticsData.interviewExperiencesLength,
-              Referrals: statisticsData.referralsLength,
-              resumeTemplatesLength: statisticsData.resumeTemplatesLength, // Check if these fields exist
-            salariesLength: statisticsData.salariesLength
+              salariesLength: statisticsData.salariesLength
             }
           ];
           setStatistics(chartData);
@@ -53,9 +45,8 @@ const PlatformStatistics = () => {
     fetchStatistics();
   }, []);
 
-  // Function to calculate percentage change
   const calculatePercentageChange = (current, previous) => {
-    if (previous === 0) return current > 0 ? '∞' : '0%'; // Handle division by zero
+    if (previous === 0) return current > 0 ? '∞' : '0%';
     return ((current - previous) / previous * 100).toFixed(2) + '%';
   };
 
@@ -90,7 +81,6 @@ const PlatformStatistics = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 mt-12">
-      {/* Statistics Cards */}
       <StatCard 
         icon={Users} 
         title="Total Users" 
@@ -116,14 +106,6 @@ const PlatformStatistics = () => {
         animation="transition-transform duration-700 transform hover:scale-105"
       />
       <StatCard 
-        icon={FileSpreadsheet} 
-        title="Resume Templates" 
-        count={statistics?.[0]?.resumeTemplatesLength} 
-        previousCount={previousStatistics?.[0]?.resumeTemplatesLength} 
-        color="border-l-4 border-yellow-500"
-        animation="transition-transform duration-700 transform hover:scale-105"
-      />
-      <StatCard 
         icon={DollarSign} 
         title="Salary Insights" 
         count={statistics?.[0]?.salariesLength} 
@@ -131,16 +113,7 @@ const PlatformStatistics = () => {
         color="border-l-4 border-indigo-500"
         animation="transition-transform duration-700 transform hover:scale-105"
       />
-      <StatCard 
-        icon={Award} 
-        title="Referrals" 
-        count={statistics?.[0]?.Referrals} 
-        previousCount={previousStatistics?.[0]?.Referrals} 
-        color="border-l-4 border-red-500"
-        animation="transition-transform duration-700 transform hover:scale-105"
-      />
 
-      {/* Trend Visualization (BarChart) */}
       {statistics && statistics.length > 0 && (
         <div className="col-span-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 transition-all duration-500 hover:scale-105 hover:shadow-xl">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
@@ -148,20 +121,14 @@ const PlatformStatistics = () => {
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={statistics}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+              <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255,255,255,0.9)', 
-                  borderRadius: '12px', 
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)' 
-                }} 
-              />
+              <Tooltip />
               <Bar dataKey="Users" fill="#3B82F6" />
               <Bar dataKey="Comments" fill="#10B981" />
               <Bar dataKey="Experiences" fill="#8B5CF6" />
-              <Bar dataKey="Referrals" fill="#EF4444" />
+              <Bar dataKey="salariesLength" fill="#6366F1" />
             </BarChart>
           </ResponsiveContainer>
         </div>

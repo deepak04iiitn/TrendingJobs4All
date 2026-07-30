@@ -1,6 +1,5 @@
 import InterviewExperience from '../models/interview.model.js';
 import Salary from '../models/salary.model.js';
-import Referral from '../models/referral.model.js';
 import InterviewQuestion from '../models/interviewQuestion.model.js';
 import Blog from '../models/blog.model.js';
 import mongoose from 'mongoose';
@@ -33,36 +32,23 @@ const generateSitemapXML = (urls) => {
 
 `;
 
-  // Static URLs with priorities (only canonical URLs, no duplicates)
+  // Public, indexable canonical URLs only (no private/admin/deleted/orphan paths)
   const staticUrls = [
     { url: '/', priority: '1.00' },
     { url: '/about', priority: '0.80' },
-    { url: '/sign-in', priority: '0.60' },
-    { url: '/sign-up', priority: '0.60' },
-    { url: '/profile', priority: '0.70' },
-    { url: '/my-jobs', priority: '0.70' },
-    { url: '/publicpolls', priority: '0.70' },
-    { url: '/mypolls', priority: '0.60' },
-    { url: '/interview-experiences', priority: '0.80' }, // Canonical URL (removed /interviewExp duplicate)
-    { url: '/salary-structures', priority: '0.80' }, // Canonical URL (prefer kebab-case)
-    { url: '/referrals', priority: '0.80' },
-    { url: '/resume-templates', priority: '0.70' }, // Canonical URL (prefer kebab-case)
-    { url: '/roadmaps', priority: '0.60' },
-    { url: '/myCorner', priority: '0.60' },
-    { url: '/BuyMeACoffee', priority: '0.50' },
-    { url: '/contactUs', priority: '0.60' },
-    { url: '/privacy-policy', priority: '0.40' }, // Canonical URL (prefer kebab-case)
-    { url: '/terms-of-service', priority: '0.40' }, // Canonical URL (prefer kebab-case)
-    { url: '/cookie-policy', priority: '0.40' }, // Canonical URL (prefer kebab-case)
-    { url: '/newsletter', priority: '0.50' },
     { url: '/jobs', priority: '0.90' },
-    { url: '/resume-builder', priority: '0.70' },
+    { url: '/interview-experiences', priority: '0.80' },
+    { url: '/salary-structures', priority: '0.80' },
     { url: '/interview-questions', priority: '0.80' },
     { url: '/qa-sdet-dsa-sheet', priority: '0.80' },
-    { url: '/dashboard', priority: '0.60' },
-    { url: '/admin/interview-questions', priority: '0.50' },
-    { url: '/connect-with-route2hire', priority: '0.75' }, // Canonical URL
-    { url: '/blogs', priority: '0.80' }
+    { url: '/resume-builder', priority: '0.70' },
+    { url: '/blogs', priority: '0.80' },
+    { url: '/contact-us', priority: '0.60' },
+    { url: '/sign-in', priority: '0.40' },
+    { url: '/sign-up', priority: '0.40' },
+    { url: '/privacy-policy', priority: '0.30' },
+    { url: '/terms-of-service', priority: '0.30' },
+    { url: '/cookie-policy', priority: '0.30' },
   ];
 
   // Add static URLs
@@ -105,14 +91,12 @@ export const generateSitemap = async (req, res) => {
     const [
       interviewExperiences,
       salaryRecords,
-      referrals,
       interviewQuestions,
       jobs,
       blogs
     ] = await Promise.all([
       InterviewExperience.find({}, '_id company position updatedAt').lean().limit(10000), // Include fields for slug
       Salary.find({}, '_id company position updatedAt').lean().limit(10000),
-      Referral.find({}, '_id company positions updatedAt').lean().limit(10000),
       InterviewQuestion.find({}, '_id topic updatedAt').lean().limit(10000),
       mongoose.connection.db.collection('naukri').find(
         { 
@@ -124,7 +108,7 @@ export const generateSitemap = async (req, res) => {
         },
         { projection: { _id: 1, time: 1 } }
       ).limit(10000).toArray(), // Limit to prevent huge sitemaps
-      Blog.find({ published: true }, '_id slug updatedAt').lean().limit(10000)
+      Blog.find({ status: 'published' }, 'slug updatedAt').lean().limit(10000)
     ]);
 
     const dynamicUrls = [];
@@ -145,19 +129,6 @@ export const generateSitemap = async (req, res) => {
         url: `/salary/${salary._id}`,
         priority: '0.70',
         lastmod: salary.updatedAt ? new Date(salary.updatedAt).toISOString().split('T')[0] : null
-      });
-    });
-
-    // Add referral URLs
-    referrals.forEach(referral => {
-      const primaryPosition = Array.isArray(referral.positions) && referral.positions.length > 0 
-        ? referral.positions[0].position 
-        : 'role';
-      const slug = createSlug(`${referral.company || 'company'}-${primaryPosition}`);
-      dynamicUrls.push({
-        url: `/referral/${slug}/${referral._id}`,
-        priority: '0.70',
-        lastmod: referral.updatedAt ? new Date(referral.updatedAt).toISOString().split('T')[0] : null
       });
     });
 
@@ -185,7 +156,7 @@ export const generateSitemap = async (req, res) => {
     // Add blog URLs
     blogs.forEach(blog => {
       dynamicUrls.push({
-        url: `/blogs/${blog.slug}/${blog._id}`,
+        url: `/blogs/${blog.slug}`,
         priority: '0.80',
         lastmod: blog.updatedAt ? new Date(blog.updatedAt).toISOString().split('T')[0] : null
       });
@@ -230,14 +201,12 @@ export const getSitemapStats = async (req, res) => {
     const [
       interviewCount,
       salaryCount,
-      referralCount,
       questionCount,
       jobCount,
       blogCount
     ] = await Promise.all([
       InterviewExperience.countDocuments(),
       Salary.countDocuments(),
-      Referral.countDocuments(),
       InterviewQuestion.countDocuments(),
       mongoose.connection.db.collection('naukri').countDocuments({
         apply_link: { $exists: true, $ne: null, $ne: '' },
@@ -246,11 +215,11 @@ export const getSitemapStats = async (req, res) => {
         apply_link: { $not: { $regex: /invalid-url|\/404\/|\/404$|not.found|not.available/i } },
         apply_link: { $regex: /^https?:\/\/.+\..+/i }
       }),
-      Blog.countDocuments({ published: true })
+      Blog.countDocuments({ status: 'published' })
     ]);
 
-    const totalDynamicUrls = interviewCount + salaryCount + referralCount + questionCount + jobCount + blogCount;
-    const staticUrlCount = 27; // Count of static URLs (removed duplicates, using canonical URLs only)
+    const totalDynamicUrls = interviewCount + salaryCount + questionCount + jobCount + blogCount;
+    const staticUrlCount = 25; // Count of static URLs (removed referrals/resume-templates)
     const totalUrls = staticUrlCount + totalDynamicUrls;
 
     res.json({
@@ -260,7 +229,6 @@ export const getSitemapStats = async (req, res) => {
         dynamicUrls: {
           interviewExperiences: interviewCount,
           salaryRecords: salaryCount,
-          referrals: referralCount,
           interviewQuestions: questionCount,
           jobs: jobCount,
           blogs: blogCount,

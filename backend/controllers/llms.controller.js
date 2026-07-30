@@ -1,6 +1,5 @@
 import InterviewExperience from '../models/interview.model.js';
 import Salary from '../models/salary.model.js';
-import Referral from '../models/referral.model.js';
 import InterviewQuestion from '../models/interviewQuestion.model.js';
 import Blog from '../models/blog.model.js';
 import User from '../models/user.model.js';
@@ -35,123 +34,78 @@ const generateLLMSText = (dynamicContent) => {
   const staticContent = [
     {
       url: '/',
-      title: 'Tech Career Hub',
-      description: 'Connect tech professionals with curated jobs, referrals, interview prep, and salary insights to accelerate career growth.'
-    },
-    {
-      url: '/sign-in',
-      title: 'Route2Hire Sign In',
-      description: 'Facilitates user sign-in for accessing job listings and career resources on Route2Hire platform.'
-    },
-    {
-      url: '/sign-up',
-      title: 'Route2Hire Sign-Up',
-      description: 'Facilitates user sign-up to access premium job listings and career resources.'
+      title: 'QA & SDET Career Hub',
+      description: 'Route2Hire connects QA, SDET and Test Automation professionals with curated jobs, interview prep, DSA practice, salary insights and resume tools.'
     },
     {
       url: '/about',
       title: 'About Route2Hire',
-      description: 'Connect professionals with personalized job opportunities and career resources for growth and success.'
+      description: 'Learn how Route2Hire helps software testing professionals find jobs, prepare for interviews and grow their careers.'
     },
     {
       url: '/jobs',
-      title: 'Premium Job Listings',
-      description: 'List and facilitate applications for high-paying job opportunities worldwide in various tech and QA roles.'
-    },
-    {
-      url: '/my-jobs',
-      title: 'My Jobs Dashboard',
-      description: 'Provide a personalized job dashboard for tracking and bookmarking career opportunities.'
-    },
-    {
-      url: '/publicpolls',
-      title: 'Community Polls',
-      description: 'Facilitate community engagement through public polls and real-time analytics to reveal trending opinions and insights.'
-    },
-    {
-      url: '/mypolls',
-      title: 'My Polls - Career Hub',
-      description: 'Provide users access to personalized career polls and related job resources.'
-    },
-    {
-      url: '/interviewExp',
-      title: 'Interview Experiences',
-      description: 'Explore and share detailed interview experiences and insights by company and position.'
+      title: 'QA & SDET Job Listings',
+      description: 'Browse curated Quality Assurance, SDET and Test Automation job openings refreshed for software testing professionals.'
     },
     {
       url: '/interview-experiences',
-      title: 'Interview Experiences Hub',
-      description: 'Browse comprehensive interview experiences shared by professionals across various companies and roles.'
+      title: 'Interview Experiences',
+      description: 'Explore and share detailed QA and SDET interview experiences and insights by company and role.'
     },
     {
-      url: '/salaryStructures',
+      url: '/salary-structures',
       title: 'Salary Insights',
-      description: 'Provide and share salary data to promote pay transparency and informed career decisions.'
-    },
-    {
-      url: '/referrals',
-      title: 'Job Referral Platform',
-      description: 'Facilitate job referrals and networking to help professionals access career opportunities and share referrals.'
-    },
-    {
-      url: '/resumeTemplates',
-      title: 'Resume Templates',
-      description: 'Provide and share tailored resume templates to enhance job applications for various roles and experience levels.'
+      description: 'Browse and share QA/SDET salary data to support pay transparency and informed career decisions.'
     },
     {
       url: '/resume-builder',
-      title: 'Premium Resume Builder',
-      description: 'Allow users to create professional resumes and access career resources for job opportunities.'
-    },
-    {
-      url: '/roadmaps',
-      title: 'Career Roadmaps (Coming Soon)',
-      description: 'Planned skill roadmaps for QA, SDET, and Test Automation roles to guide learners.'
+      title: 'Resume Builder',
+      description: 'Create ATS-friendly resumes for QA and SDET roles with live preview and PDF download.'
     },
     {
       url: '/interview-questions',
       title: 'Interview Questions Bank',
-      description: 'Prepare candidates with categorized real interview questions and detailed explanations for IT job interviews.'
+      description: 'Practice categorized real interview questions and explanations for QA, SDET and Test Automation interviews.'
     },
     {
       url: '/qa-sdet-dsa-sheet',
       title: 'QA SDET DSA Sheet',
-      description: 'Master Data Structures & Algorithms with real QA/SDET interview questions. Track your progress through actual problems asked in QA and SDET interviews, organized by category and difficulty.'
-    },
-    {
-      url: '/newsletter',
-      title: 'Route2Hire Premium Jobs',
-      description: 'Offer premium job alerts and career resources for personalized job search and professional growth.'
-    },
-    {
-      url: '/contactUs',
-      title: 'Contact Route2Hire',
-      description: 'Provide contact information and connect users with career opportunities and support.'
-    },
-    {
-      url: '/terms',
-      title: 'Route2Hire Terms of Service',
-      description: 'Outline the terms, user rights, responsibilities, and legal guidelines for using Route2Hire services.'
-    },
-    {
-      url: '/privacyPolicy',
-      title: 'Privacy Policy',
-      description: 'Explain Route2Hire\'s practices on collecting, using, and protecting user privacy and data.'
-    },
-    {
-      url: '/cookies',
-      title: 'Cookie Policy',
-      description: 'Explain cookie usage and management on the site to enhance user experience and privacy control.'
-    },
-    {
-      url: '/community',
-      title: 'Community - Join Route2Hire',
-      description: 'Join Route2Hire\'s vibrant community of 3500+ job seekers and tech enthusiasts. Connect on Telegram, WhatsApp, Instagram, and Topmate for instant job alerts, career tips, and professional networking opportunities.'
+      description: 'Master Data Structures and Algorithms with curated QA/SDET interview problems, progress tracking and leaderboard.'
     },
     {
       url: '/blogs',
       title: 'Blogs & Articles',
-      description: 'Read professional blogs covering technology, development, QA, SDET careers, and industry insights on Route2Hire.'
+      description: 'Read professional blogs covering QA, SDET careers, automation and interview strategy on Route2Hire.'
+    },
+    {
+      url: '/contact-us',
+      title: 'Contact Route2Hire',
+      description: 'Contact Route2Hire via Instagram, Telegram, email or LinkedIn for support and collaborations.'
+    },
+    {
+      url: '/sign-in',
+      title: 'Route2Hire Sign In',
+      description: 'Sign in to access saved jobs, resume drafts and personalized career tools.'
+    },
+    {
+      url: '/sign-up',
+      title: 'Route2Hire Sign-Up',
+      description: 'Create a free Route2Hire account for QA and SDET career tools.'
+    },
+    {
+      url: '/terms-of-service',
+      title: 'Terms of Service',
+      description: 'Terms, user rights and guidelines for using Route2Hire.'
+    },
+    {
+      url: '/privacy-policy',
+      title: 'Privacy Policy',
+      description: 'How Route2Hire collects, uses and protects personal data.'
+    },
+    {
+      url: '/cookie-policy',
+      title: 'Cookie Policy',
+      description: 'How Route2Hire uses cookies and how users can manage preferences.'
     }
   ];
 
@@ -182,19 +136,6 @@ const generateLLMSText = (dynamicContent) => {
     });
   }
 
-  if (dynamicContent.referrals.length > 0) {
-    content += `\n## Job Referrals & Networking\n\n`;
-    dynamicContent.referrals.slice(0, 20).forEach(referral => {
-      const company = referral.company || 'Unknown Company';
-      const positions = referral.positions && referral.positions.length > 0 
-        ? referral.positions.map(p => p.position).join(', ')
-        : 'Various positions';
-      const primary = referral.positions && referral.positions.length > 0 ? referral.positions[0].position : 'role';
-      const slug = createSlug(`${company}-${primary}`);
-      content += `- [${company} Job Referrals](${baseUrl}/referral/${slug}/${referral._id}): Job referral opportunities at ${company} for positions: ${positions}.\n`;
-    });
-  }
-
   if (dynamicContent.interviewQuestions.length > 0) {
     content += `\n## Interview Questions & Preparation\n\n`;
     dynamicContent.interviewQuestions.slice(0, 20).forEach(question => {
@@ -221,7 +162,7 @@ const generateLLMSText = (dynamicContent) => {
       const title = blog.title || 'Blog Article';
       const category = blog.category || 'General';
       const excerpt = blog.excerpt || 'Professional insights and industry knowledge.';
-      content += `- [${title}](${baseUrl}/blogs/${blog.slug}/${blog._id}): ${excerpt} - Category: ${category}.\n`;
+      content += `- [${title}](${baseUrl}/blogs/${blog.slug}): ${excerpt} - Category: ${category}.\n`;
     });
   }
 
@@ -230,10 +171,8 @@ const generateLLMSText = (dynamicContent) => {
   content += `- **Job Listings**: Curated high-quality job opportunities in tech and QA roles\n`;
   content += `- **Interview Preparation**: Real interview experiences and question banks\n`;
   content += `- **Salary Transparency**: Anonymous salary data for informed career decisions\n`;
-  content += `- **Referral Network**: Connect with professionals for job referrals\n`;
-  content += `- **Career Resources**: Resume templates, interview tips, and career guidance\n`;
-  content += `- **Professional Blogs**: Expert articles on technology, development, QA, and SDET careers\n`;
-  content += `- **Community Features**: Polls, discussions, and professional networking\n\n`;
+  content += `- **Career Resources**: Resume builder, interview tips, and career guidance\n`;
+  content += `- **Professional Blogs**: Expert articles on technology, development, QA, and SDET careers\n\n`;
   content += `Our platform helps professionals make informed career decisions, prepare for interviews, and connect with opportunities that match their skills and aspirations.\n\n`;
   content += `Last updated: ${new Date().toISOString().split('T')[0]}\n`;
 
@@ -255,14 +194,12 @@ export const generateLLMS = async (req, res) => {
     const [
       interviewExperiences,
       salaryRecords,
-      referrals,
       interviewQuestions,
       jobs,
       blogs
     ] = await Promise.all([
       InterviewExperience.find({}, '_id company position fullName').lean().limit(20),
       Salary.find({}, '_id company position ctc').lean().limit(20),
-      Referral.find({}, '_id company positions').lean().limit(20),
       InterviewQuestion.find({}, '_id topic').lean().limit(20),
       mongoose.connection.db.collection('naukri').find(
         { 
@@ -274,13 +211,12 @@ export const generateLLMS = async (req, res) => {
         },
         { projection: { _id: 1, job_title: 1, company: 1, location: 1 } }
       ).limit(30).toArray(),
-      Blog.find({ published: true }, '_id title slug excerpt category').lean().limit(20)
+      Blog.find({ status: 'published' }, 'title slug excerpt category').lean().limit(20)
     ]);
 
     const dynamicContent = {
       interviewExperiences,
       salaryRecords,
-      referrals,
       interviewQuestions,
       jobs,
       blogs
@@ -325,14 +261,12 @@ export const getLLMSStats = async (req, res) => {
     const [
       interviewCount,
       salaryCount,
-      referralCount,
       questionCount,
       jobCount,
       blogCount
     ] = await Promise.all([
       InterviewExperience.countDocuments(),
       Salary.countDocuments(),
-      Referral.countDocuments(),
       InterviewQuestion.countDocuments(),
       mongoose.connection.db.collection('naukri').countDocuments({
         apply_link: { $exists: true, $ne: null, $ne: '' },
@@ -341,11 +275,11 @@ export const getLLMSStats = async (req, res) => {
         apply_link: { $not: { $regex: /invalid-url|\/404\/|\/404$|not.found|not.available/i } },
         apply_link: { $regex: /^https?:\/\/.+\..+/i }
       }),
-      Blog.countDocuments({ published: true })
+      Blog.countDocuments({ status: 'published' })
     ]);
 
-    const totalDynamicItems = interviewCount + salaryCount + referralCount + questionCount + jobCount + blogCount;
-    const staticItemCount = 23; // Count of static items (updated to include /blogs)
+    const totalDynamicItems = interviewCount + salaryCount + questionCount + jobCount + blogCount;
+    const staticItemCount = 21; // Count of static items (removed referrals/resume templates)
     const totalItems = staticItemCount + totalDynamicItems;
 
     res.json({
@@ -355,7 +289,6 @@ export const getLLMSStats = async (req, res) => {
         dynamicItems: {
           interviewExperiences: interviewCount,
           salaryRecords: salaryCount,
-          referrals: referralCount,
           interviewQuestions: questionCount,
           jobs: jobCount,
           blogs: blogCount,

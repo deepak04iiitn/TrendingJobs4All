@@ -583,8 +583,8 @@ export default function InterviewDetailPage() {
             {/* Breadcrumb Navigation */}
             <Breadcrumb 
               items={[
-                { label: 'Interview Experiences', path: '/interviewExp' },
-                { label: experience.company || 'Company', path: `/interviewExp?company=${encodeURIComponent(experience.company || '')}` },
+                { label: 'Interview Experiences', path: '/interview-experiences' },
+                { label: experience.company || 'Company', path: `/interview-experiences?company=${encodeURIComponent(experience.company || '')}` },
                 { label: experience.position || 'Interview Experience' }
               ]}
             />

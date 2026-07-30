@@ -1,77 +1,77 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+
+const tocSchema = new mongoose.Schema(
+  { id: String, text: String, level: Number },
+  { _id: false },
+);
+
+const faqSchema = new mongoose.Schema(
+  { q: String, a: String },
+  { _id: false },
+);
 
 const blogSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     slug: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
     },
-    excerpt: {
-      type: String,
-      required: true,
-      maxlength: 300,
-    },
-    content: {
-      type: String,
-      required: true,
-    },
-    featuredImage: {
-      type: String,
-      default: '',
-    },
-    category: {
-      type: String,
-      required: true,
-    },
-    tags: {
-      type: [String],
-      default: [],
-    },
+    title: { type: String, required: true, trim: true },
+    subtitle: { type: String, default: '' },
+    excerpt: { type: String, default: '', maxlength: 500 },
+    content: { type: [mongoose.Schema.Types.Mixed], required: true },
+    coverImage: { type: String, default: '' },
+    coverImageAlt: { type: String, default: '' },
+
     author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+      name: { type: String, required: true },
+      role: { type: String, default: 'Route2Hire Team' },
+      avatar: { type: String, default: '' },
     },
-    published: {
-      type: Boolean,
-      default: false,
+
+    category: { type: String, required: true, trim: true },
+    tags: { type: [String], default: [] },
+
+    status: {
+      type: String,
+      enum: ['draft', 'published', 'scheduled'],
+      default: 'draft',
     },
-    views: {
-      type: Number,
-      default: 0,
+    scheduledAt: { type: Date },
+    publishedAt: { type: Date },
+
+    isFeatured: { type: Boolean, default: false },
+    readingTime: { type: Number, default: 5 },
+    contentVersion: { type: Number, default: 2 },
+
+    seo: {
+      metaTitle: { type: String, default: '' },
+      metaDescription: { type: String, default: '' },
+      keywords: { type: [String], default: [] },
+      ogImage: { type: String, default: '' },
     },
-    likes: {
-      type: Array,
-      default: [],
-    },
-    numberOfLikes: {
-      type: Number,
-      default: 0,
-    },
-    dislikes: {
-      type: Array,
-      default: [],
-    },
-    numberOfDislikes: {
-      type: Number,
-      default: 0,
-    },
-    readTime: {
-      type: Number,
-      default: 0, // in minutes
-    },
+
+    faq: { type: [faqSchema], default: [] },
+    toc: { type: [tocSchema], default: [] },
+    relatedSlugs: { type: [String], default: [] },
+
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+    dislikes: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-// Index for better search performance
-blogSchema.index({ title: 'text', content: 'text', excerpt: 'text' });
+blogSchema.index({ status: 1, publishedAt: -1 });
+blogSchema.index({ category: 1 });
+blogSchema.index({ tags: 1 });
+blogSchema.index({ isFeatured: 1 });
+blogSchema.index({ views: -1 });
+blogSchema.index({ likes: -1 });
+blogSchema.index({ title: 'text', excerpt: 'text', tags: 'text' });
 
 const Blog = mongoose.model('Blog', blogSchema);
 

@@ -1,30 +1,30 @@
 import React from 'react';
-import { FileSearch } from 'lucide-react';
+import { FileSearch, Plus } from 'lucide-react';
+import { focusRing } from '../theme/tokens';
 
 export default function InterviewEmptyState({ onShareClick }) {
   return (
-    <div className="w-full py-12 flex flex-col items-center justify-center">
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-8 rounded-3xl">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-indigo-100/50">
-          <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center">
-            <FileSearch className="w-8 h-8 text-white" />
-          </div>
-          <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-3">
-            No Experiences Shared Yet
-          </h3>
-          <p className="text-gray-600 text-center max-w-md mx-auto">
-            Be the first to share your interview experience and help others in their journey. Your insights could make a difference!
-          </p>
-          <div className="mt-8 text-center">
-            <button 
-              onClick={onShareClick}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-md hover:shadow-xl transition-all duration-300 gap-2"
-            >
-              Share Your Experience
-            </button>
-          </div>
-        </div>
+    <div className="rounded-2xl border border-dashed border-[#E5DCCE] bg-[#FFFDF8] px-6 py-16 text-center">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#F7F3EC] text-[#C4A574]">
+        <FileSearch className="h-6 w-6" aria-hidden />
+      </div>
+      <h3 className="font-display mt-5 text-2xl font-semibold text-[#1C1917] sm:text-3xl">
+        No interview experiences yet
+      </h3>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[#78716C]">
+        Be the first to share a QA, SDET or test automation interview story. Your insights could help
+        the next candidate prepare with confidence.
+      </p>
+      <div className="mt-6">
+        <button
+          type="button"
+          onClick={onShareClick}
+          className={`inline-flex items-center gap-2 rounded-xl border border-[#2C241B] bg-[#2C241B] px-5 py-2.5 text-sm font-semibold text-[#FFFDF8] shadow-[0_10px_24px_-12px_rgba(44,36,27,0.55)] transition hover:bg-[#1A1510] ${focusRing}`}
+        >
+          <Plus className="h-4 w-4" aria-hidden />
+          Share your experience
+        </button>
       </div>
     </div>
   );
-};
+}

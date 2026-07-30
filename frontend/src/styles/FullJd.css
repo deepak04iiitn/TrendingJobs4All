@@ -1,0 +1,241 @@
+/* Job detail — Role Dossier */
+
+html:has(.jd-page) {
+  scroll-behavior: smooth;
+}
+
+.jd-page {
+  color: #57534e;
+  background: #f7f3ec;
+  font-family: var(--font-body);
+  overflow-x: clip;
+}
+
+.jd-page h1,
+.jd-page h2,
+.jd-page h3,
+.jd-page .font-display {
+  font-family: var(--font-display);
+  color: #1c1917;
+}
+
+.jd-page a,
+.jd-page button {
+  transition:
+    color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+
+.jd-divider {
+  width: 3rem;
+  height: 2px;
+  background: #c4a574;
+  border-radius: 999px;
+}
+
+.jd-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.5rem;
+}
+
+.jd-meta__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #57534e;
+}
+
+.jd-meta__item svg {
+  color: #c4a574;
+  flex-shrink: 0;
+}
+
+.jd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.jd-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.75rem;
+  width: 2.75rem;
+  border-radius: 0.85rem;
+  border: 1px solid #e5dcce;
+  background: #fffdf8;
+  color: #57534e;
+}
+
+.jd-icon-btn:hover {
+  border-color: #c4a574;
+  background: #efe8dc;
+  color: #2c241b;
+}
+
+.jd-icon-btn.is-saved {
+  border-color: #c4a574;
+  background: #efe8dc;
+  color: #2c241b;
+}
+
+.jd-apply {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  background: #2c241b;
+  color: #fffdf8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.8rem 1.35rem;
+}
+
+.jd-apply:hover {
+  background: #1a1510;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px -12px rgba(44, 36, 27, 0.45);
+}
+
+.jd-panel {
+  border: 1px solid #e5dcce;
+  border-radius: 1.25rem;
+  background: #fffdf8;
+}
+
+.jd-note {
+  border: 1px solid #e5dcce;
+  border-radius: 0.85rem;
+  background: #efe8dc;
+  padding: 0.9rem 1rem;
+  font-size: 0.875rem;
+  color: #6b5a48;
+}
+
+.jd-body {
+  color: #57534e;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.jd-body strong {
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.jd-body br + br {
+  display: block;
+  content: '';
+  margin-top: 0.35rem;
+}
+
+.jd-share-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.jd-share-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #e5dcce;
+  border-radius: 1rem;
+  background: #f7f3ec;
+  padding: 1rem 0.75rem;
+  color: #57534e;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.jd-share-item:hover {
+  border-color: #c4a574;
+  background: #efe8dc;
+  color: #2c241b;
+}
+
+.jd-toast {
+  position: fixed;
+  top: 5.5rem;
+  right: 1rem;
+  z-index: 80;
+  border: 1px solid #e5dcce;
+  border-radius: 0.85rem;
+  background: #fffdf8;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 16px 36px -24px rgba(44, 36, 27, 0.3);
+  color: #1c1917;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Related links (shared component) */
+.jobs-explore {
+  border-top: 1px solid #e5dcce;
+  padding-top: 1.75rem;
+}
+
+.jobs-explore__title {
+  margin-bottom: 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #6b5a48;
+}
+
+.jobs-explore__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0;
+}
+
+.jobs-explore__item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.jobs-explore__sep {
+  display: inline-block;
+  width: 1px;
+  height: 0.85rem;
+  margin: 0 0.75rem;
+  background: #e5dcce;
+}
+
+.jobs-explore__link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #57534e;
+}
+
+.jobs-explore__link:hover {
+  color: #2c241b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.jd-page) {
+    scroll-behavior: auto;
+  }
+
+  .jd-page a,
+  .jd-page button,
+  .jd-apply {
+    transition: none;
+  }
+
+  .jd-apply:hover {
+    transform: none;
+  }
+}

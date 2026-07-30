@@ -8,7 +8,8 @@
     "start": "node backend/index.js",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
     "export:naukri:apply-links": "node backend/scripts/export-naukri-apply-links.js",
-    "validate:naukri:apply-links": "node backend/scripts/validate-apply-links.js"
+    "validate:naukri:apply-links": "node backend/scripts/validate-apply-links.js",
+    "migrate:blogs": "node backend/scripts/migrate-blogs-to-blocks.js"
   },
   "keywords": [],
   "author": "",
@@ -17,12 +18,14 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^2.2.0",
+    "cheerio": "^1.2.0",
     "cloudinary": "^2.7.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "highlight.js": "^11.11.1",
     "html-pdf-node": "^1.0.8",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",

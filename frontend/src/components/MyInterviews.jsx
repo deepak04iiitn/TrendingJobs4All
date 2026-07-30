@@ -1,224 +1,215 @@
-import React, { useState, useEffect } from 'react';
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { Plus, Trash2, Building2, ThumbsUp, ThumbsDown, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { focusRing } from '../theme/tokens';
+
+const PAGE_SIZE = 10;
 
 export default function MyInterviews() {
-
   const { currentUser } = useSelector((state) => state.user);
   const [experiences, setExperiences] = useState([]);
-  const [visibleExperiences, setVisibleExperiences] = useState(10);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedExperienceId, setSelectedExperienceId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  
-  useEffect(() => {
-    fetchExperiences();
-  }, []);
-
-  const fetchExperiences = async () => {
+  const fetchExperiences = useCallback(async (pageNum = 1) => {
     try {
-      const response = await fetch(`/backend/user/interviews/${currentUser._id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch experiences');
-      }
+      setLoading(true);
+      const response = await fetch(
+        `/backend/user/interviews/${currentUser._id}?page=${pageNum}&limit=${PAGE_SIZE}`,
+      );
+      if (!response.ok) throw new Error('Failed to fetch experiences');
       const data = await response.json();
-      setExperiences(data);
+      setExperiences(data.items || []);
+      setTotal(data.total || 0);
+      setPages(data.pages || 1);
+      setPage(data.page || pageNum);
     } catch (error) {
       console.error('Error fetching experiences:', error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [currentUser._id]);
 
+  useEffect(() => {
+    fetchExperiences(page);
+  }, [fetchExperiences, page]);
 
   const handleDeleteExperience = async () => {
     try {
-        const response = await fetch(`/backend/interviews/delete/${selectedExperienceId}`, {
-            method: 'DELETE',
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete experience');
-        }
-
-        setExperiences(prev => prev.filter(exp => exp._id !== selectedExperienceId));
-
-        setDeleteModalOpen(false);
-
+      const response = await fetch(`/backend/interviews/delete/${selectedExperienceId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete experience');
+      setDeleteModalOpen(false);
+      const nextTotal = total - 1;
+      const nextPages = Math.max(1, Math.ceil(nextTotal / PAGE_SIZE));
+      const nextPage = Math.min(page, nextPages);
+      if (nextPage !== page) setPage(nextPage);
+      else fetchExperiences(nextPage);
     } catch (error) {
-        console.error('Error deleting experience:', error);
+      console.error('Error deleting experience:', error);
     }
-};
-
-
-  // Open delete confirmation modal
-  const openDeleteModal = (experienceId) => {
-    setSelectedExperienceId(experienceId);
-    setDeleteModalOpen(true);
   };
 
-  // Show more experiences
-  const handleShowMore = () => {
-    setVisibleExperiences(prev => prev + 10);
-  };
+  if (loading && experiences.length === 0) {
+    return <p className="py-16 text-center text-sm text-[#78716C]">Loading your experiences...</p>;
+  }
 
-
-  const renderEmptyState = () => (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-md mx-auto text-center bg-white shadow-xl rounded-2xl p-8 transform transition-all duration-500 hover:scale-105">
-        <div className="mb-6">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-24 w-24 mx-auto text-blue-500 opacity-70"
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={1} 
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
-            />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Your Interview Journey Begins Here
-        </h2>
-        <p className="text-gray-600 mb-6">
-          It looks like you haven't shared any interview experiences yet. 
-          Your insights can help others navigate their career paths!
-        </p>
-        <button 
-          className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center mx-auto space-x-2 group"
-          onClick={() => navigate('/interviewExp')}
-        >
-          <FaPlus className="group-hover:rotate-180 transition-transform" />
-          <span>Share Your First Experience</span>
-        </button>
-        <div className="mt-6 border-t pt-4 text-sm text-gray-500">
-          By sharing, you contribute to a community of learning and growth.
-        </div>
-      </div>
-    </div>
-  );
-
-
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-
-      {/* Page Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 mt-10 py-12 mb-8 rounded-lg shadow-lg">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center">
-            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-6">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-10 w-10 text-white"
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" 
-                />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-4xl font-extrabold text-white mb-2 tracking-tight">
-                My Interview Experiences
-              </h1>
-              <p className="text-white text-opacity-80 text-lg">
-                Explore, manage, and track your professional journey through shared interview insights
-              </p>
-            </div>
+  if (!loading && total === 0) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8]">
+        <div
+          aria-hidden
+          className="h-1.5 w-full"
+          style={{ background: 'linear-gradient(90deg, #C4A574, #EFE8DC, #C4A574)' }}
+        />
+        <div className="px-6 py-14 text-center sm:px-10">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F7F3EC] text-[#C4A574]">
+            <Building2 className="h-6 w-6" aria-hidden />
           </div>
-        </div>
-      </div>
-
-      {experiences.length === 0 ? (
-        renderEmptyState()
-      ) : (
-
-        <>
-          {/* Experiences Table */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="overflow-x-auto"> {/* Add this wrapper for horizontal scrolling */}
-          <table className="w-full table-auto min-w-[600px]"> {/* Add min-w-[600px] to ensure scrollability */}
-            <thead className="bg-gray-100 border-b">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Company</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Position</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">No of Likes</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">No of Dislikes</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-900 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {experiences.slice(0, visibleExperiences).map((exp) => (
-                <tr key={exp._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-4 whitespace-nowrap">{exp.company}</td>
-                  <td className="px-4 py-4 whitespace-nowrap">{exp.position}</td>
-                  <td className="px-4 py-4 whitespace-nowrap">{exp.numberOfLikes}</td>
-                  <td className="px-4 py-4 whitespace-nowrap">{exp.numberOfDislikes}</td>
-                  <td className="px-4 py-4 whitespace-nowrap space-x-2">
-                    <button 
-                      className="flex items-center px-3 py-1 rounded-full text-sm text-red-500 hover:text-white hover:bg-red-500 transition-all duration-300 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-red-500"
-                      onClick={() => openDeleteModal(exp._id)}
-                    >
-                      <FaTrash className="mr-2" />
-                      <span>Delete</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-        </>
-
-      )}
-
-      
-      {/* Show More Button */}
-      {visibleExperiences < experiences.length && (
-        <div className="flex justify-center mt-6">
-          <button 
-            onClick={handleShowMore}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          <h3 className="font-display mt-5 text-2xl font-semibold text-[#1C1917]">
+            No interview stories yet
+          </h3>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[#57534E]">
+            Share a QA or SDET interview experience — your notes can help the next candidate prepare
+            with confidence.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/interview-experiences')}
+            className={`mt-7 inline-flex items-center gap-2 rounded-xl bg-[#2C241B] px-5 py-2.5 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
           >
-            Show More Experiences
+            <Plus className="h-4 w-4" aria-hidden />
+            Share an experience
           </button>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p className="mb-4 text-sm text-[#78716C]">
+        <span className="font-medium tabular-nums text-[#2C241B]">{total}</span>{' '}
+        experience{total === 1 ? '' : 's'} shared
+        {pages > 1 && (
+          <span className="ml-2 text-[#78716C]">
+            · Page {page} of {pages}
+          </span>
+        )}
+      </p>
+
+      <div className="overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8]">
+        {loading ? (
+          <p className="py-10 text-center text-sm text-[#78716C]">Loading...</p>
+        ) : (
+          <ul className="divide-y divide-[#E5DCCE]">
+            {experiences.map((exp) => (
+              <li
+                key={exp._id}
+                className="flex flex-col gap-3 px-4 py-4 transition hover:bg-[#F7F3EC]/60 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+              >
+                <div className="min-w-0">
+                  <p className="font-display truncate text-base font-medium text-[#1C1917]">
+                    {exp.company}
+                  </p>
+                  <p className="mt-0.5 truncate text-sm text-[#57534E]">{exp.position}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-[#78716C]">
+                    <span className="inline-flex items-center gap-1">
+                      <ThumbsUp className="h-3 w-3 text-[#C4A574]" /> {exp.numberOfLikes ?? 0}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <ThumbsDown className="h-3 w-3" /> {exp.numberOfDislikes ?? 0}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {exp._id && (
+                    <Link
+                      to={`/interview-experience/${exp._id}`}
+                      className={`inline-flex items-center gap-1 rounded-lg border border-[#E5DCCE] px-3 py-1.5 text-xs font-medium text-[#6B5A48] hover:bg-[#F7F3EC] ${focusRing}`}
+                    >
+                      <ExternalLink className="h-3 w-3" /> View
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedExperienceId(exp._id);
+                      setDeleteModalOpen(true);
+                    }}
+                    className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 ${focusRing}`}
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {pages > 1 && (
+        <nav className="mt-5 flex items-center justify-center gap-2" aria-label="Pagination">
+          <button
+            type="button"
+            disabled={page <= 1 || loading}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className={`inline-flex items-center gap-1 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-sm text-[#6B5A48] transition hover:bg-[#EFE8DC] disabled:opacity-40 ${focusRing}`}
+          >
+            <ChevronLeft className="h-4 w-4" /> Prev
+          </button>
+          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              type="button"
+              disabled={loading}
+              onClick={() => setPage(p)}
+              className={`h-9 min-w-9 rounded-xl px-2.5 text-sm font-medium transition ${focusRing} ${
+                p === page
+                  ? 'bg-[#2C241B] text-[#FFFDF8]'
+                  : 'border border-[#E5DCCE] bg-[#FFFDF8] text-[#6B5A48] hover:bg-[#EFE8DC]'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            type="button"
+            disabled={page >= pages || loading}
+            onClick={() => setPage((p) => Math.min(pages, p + 1))}
+            className={`inline-flex items-center gap-1 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-sm text-[#6B5A48] transition hover:bg-[#EFE8DC] disabled:opacity-40 ${focusRing}`}
+          >
+            Next <ChevronRight className="h-4 w-4" />
+          </button>
+        </nav>
       )}
 
-      {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h2 className="text-xl font-bold mb-4 text-gray-800">
-              Confirm Deletion
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this interview experience? 
-              This action cannot be undone.
+        <div className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-[#2C241B]/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] p-6 shadow-xl">
+            <h2 className="font-display text-lg font-semibold text-[#1C1917]">Delete experience?</h2>
+            <p className="mt-2 text-sm text-[#57534E]">
+              This removes your interview story permanently. This cannot be undone.
             </p>
-            <div className="flex justify-end space-x-3">
-              <button 
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
                 onClick={() => setDeleteModalOpen(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                className={`rounded-xl border border-[#E5DCCE] px-4 py-2 text-sm text-[#6B5A48] hover:bg-[#F7F3EC] ${focusRing}`}
               >
                 Cancel
               </button>
-              <button 
+              <button
+                type="button"
                 onClick={handleDeleteExperience}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                className={`rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 ${focusRing}`}
               >
                 Delete
               </button>

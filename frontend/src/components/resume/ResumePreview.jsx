@@ -648,22 +648,22 @@ const ResumePreview = ({ selectedFields = [], resumeData = {} }) => {
 
     return (
         <div className="relative">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-white">Resume Preview</h3>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h3 className="font-display text-lg font-semibold text-[#1C1917]">Paper preview</h3>
                 <button
                     onClick={handleDownload}
-                    className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-medium"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#2C241B] px-3.5 py-2 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510]"
                     title="Download PDF"
                 >
-                    <FaDownload size={14} />
+                    <FaDownload size={12} />
                     <span>Download PDF</span>
                 </button>
             </div>
 
-            <div className="relative w-full overflow-x-auto bg-slate-800/20 rounded-xl p-4 border border-slate-600/30">
+            <div className="relative w-full overflow-x-auto rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] p-3 sm:p-4">
                 <div
                     ref={resumeRef}
-                    className="bg-white shadow-2xl mx-auto text-gray-900 leading-tight rounded-lg overflow-hidden"
+                    className="mx-auto overflow-hidden rounded-sm bg-white text-gray-900 shadow-[0_20px_50px_-28px_rgba(44,36,27,0.45)] leading-tight"
                     style={{ 
                         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
                         fontSize: '0.7rem',

@@ -2,9 +2,7 @@ import { errorHandler } from "../utils/error.js"
 import bcryptjs from 'bcryptjs'
 import User from "../models/user.model.js";
 import InterviewExperience from "../models/interview.model.js";
-import Referral from "../models/referral.model.js";
 import Salary from "../models/salary.model.js";
-import Template from "../models/template.model.js";
 
 
 const updateUserActivityStatus = async (userId) => {
@@ -172,67 +170,63 @@ export const getUser = async(req, res, next) => {
 
 export const getUserInterviews = async (req, res, next) => {
   if (req.user.id === req.params.expId) {
-      try {
-          // Update user's activity status
-          await updateUserActivityStatus(req.user.id);
-          
-          const interviews = await InterviewExperience.find({ userRef: req.params.expId });
-          res.status(200).json(interviews);
-      } catch (error) {
-          next(error);
-      }
-  } else {
-      return next(errorHandler(401, 'You can only view your own interview experiences!'));
-  }
-}
+    try {
+      await updateUserActivityStatus(req.user.id);
 
-export const getUserReferrals = async (req, res, next) => {
-  if (req.user.id === req.params.refId) {
-      try {
-          // Update user's activity status
-          await updateUserActivityStatus(req.user.id);
-          
-          const referrals = await Referral.find({ userRef: req.params.refId });
-          res.status(200).json(referrals);
-      } catch (error) {
-          next(error);
-      }
+      const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 10));
+      const skip = (page - 1) * limit;
+      const filter = { userRef: req.params.expId };
+
+      const [items, total] = await Promise.all([
+        InterviewExperience.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+        InterviewExperience.countDocuments(filter),
+      ]);
+
+      res.status(200).json({
+        items,
+        total,
+        page,
+        pages: Math.max(1, Math.ceil(total / limit)),
+        limit,
+      });
+    } catch (error) {
+      next(error);
+    }
   } else {
-      return next(errorHandler(401, 'You can only view your own referrals!'));
+    return next(errorHandler(401, 'You can only view your own interview experiences!'));
   }
-}
+};
 
 export const getUserSalary = async (req, res, next) => {
   if (req.user.id === req.params.salId) {
-      try {
-          // Update user's activity status
-          await updateUserActivityStatus(req.user.id);
-          
-          const salary = await Salary.find({ userRef: req.params.salId });
-          res.status(200).json(salary);
-      } catch (error) {
-          next(error);
-      }
-  } else {
-      return next(errorHandler(401, 'You can only view your own salary structure!'));
-  }
-}
+    try {
+      await updateUserActivityStatus(req.user.id);
 
-export const getUserResume = async (req, res, next) => {
-  if (req.user.id === req.params.resId) {
-      try {
-          // Update user's activity status
-          await updateUserActivityStatus(req.user.id);
-          
-          const resume = await Template.find({ userRef: req.params.resId });
-          res.status(200).json(resume);
-      } catch (error) {
-          next(error);
-      }
+      const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 10));
+      const skip = (page - 1) * limit;
+      const filter = { userRef: req.params.salId };
+
+      const [items, total] = await Promise.all([
+        Salary.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+        Salary.countDocuments(filter),
+      ]);
+
+      res.status(200).json({
+        items,
+        total,
+        page,
+        pages: Math.max(1, Math.ceil(total / limit)),
+        limit,
+      });
+    } catch (error) {
+      next(error);
+    }
   } else {
-      return next(errorHandler(401, 'You can only view your own resume template!'));
+    return next(errorHandler(401, 'You can only view your own salary structure!'));
   }
-}
+};
 
 export const getusers = async(req, res, next) => {
   if(!req.user.isUserAdmin) {
@@ -248,7 +242,7 @@ export const getusers = async(req, res, next) => {
       const sortDirection = req.query.sort === 'asc' ? 1 : -1;
 
       // Optional filter by a specific calendar date (YYYY-MM-DD)
-      const { date } = req.query;
+      const { date, search } = req.query;
       const filter = {};
       let startOfDay = null;
       let endOfDay = null;
@@ -261,6 +255,12 @@ export const getusers = async(req, res, next) => {
               endOfDay = end;
               filter.createdAt = { $gte: start, $lt: end };
           }
+      }
+
+      // Optional search by username or email
+      if (search && search.trim()) {
+          const regex = new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+          filter.$or = [{ username: regex }, { email: regex }];
       }
 
       const users = await User.find(filter)

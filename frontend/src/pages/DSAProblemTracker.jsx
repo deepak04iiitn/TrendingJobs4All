@@ -1,15 +1,91 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
-import Breadcrumb from '../components/Breadcrumb';
-import RelatedLinks from '../components/RelatedLinks';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
-import { ChevronDown, ChevronRight, Check, Star, Pencil, Search, Filter, X, Grid3X3, BarChart3, CheckCircle, Code, Target, Bookmark } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import {
+  ChevronDown,
+  ChevronRight,
+  Check,
+  Star,
+  Pencil,
+  Search,
+  Filter,
+  X,
+  Grid3X3,
+  BarChart3,
+  CheckCircle,
+  Target,
+  Bookmark,
+  NotebookPen,
+  Trophy,
+  Award,
+  Users,
+} from 'lucide-react';
 import axios from '../utils/axios';
 import toast from 'react-hot-toast';
+import RelatedLinks from '../components/RelatedLinks';
+import { focusRing } from '../theme/tokens';
 
-const DSAProblemTracker = () => {
+const difficulties = ['Easy', 'Medium', 'Hard'];
+
+const difficultyTone = {
+  Easy: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  Medium: 'border-amber-200 bg-amber-50 text-amber-700',
+  Hard: 'border-rose-200 bg-rose-50 text-rose-700',
+};
+
+const difficultyDot = {
+  Easy: 'bg-emerald-500',
+  Medium: 'bg-amber-500',
+  Hard: 'bg-rose-500',
+};
+
+const rankTone = (rank) => {
+  if (rank === 1) return 'bg-[#2C241B] text-[#FFFDF8]';
+  if (rank === 2) return 'bg-[#6B5A48] text-[#FFFDF8]';
+  if (rank === 3) return 'bg-[#C4A574] text-[#2C241B]';
+  return 'bg-[#F7F3EC] text-[#6B5A48]';
+};
+
+const categoryOrder = [
+  'Array',
+  'String',
+  'Math',
+  'Hash Table',
+  'Two Pointers',
+  'Sorting',
+  'Stack',
+  'Queue',
+  'Matrix',
+  'Sliding Window',
+  'Linked List',
+  'Binary Search',
+  'Bit Manipulation',
+  'Greedy',
+  'Recursion',
+  'Divide and Conquer',
+  'Heap',
+  'Backtracking',
+  'Tree',
+  'Graph',
+  'Dynamic Programming',
+  'Design',
+  'Trie',
+];
+
+const getSortedCategories = (problemsObj) => {
+  const categories = Object.keys(problemsObj || {});
+  return categories.sort((a, b) => {
+    const indexA = categoryOrder.indexOf(a);
+    const indexB = categoryOrder.indexOf(b);
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    return a.localeCompare(b);
+  });
+};
+
+export default function DSAProblemTracker() {
+  const reduceMotion = useReducedMotion();
   const [problems, setProblems] = useState({});
   const [stats, setStats] = useState({ total: 0, completed: 0, favorites: 0, completionPercentage: 0 });
   const [loading, setLoading] = useState(true);
@@ -18,77 +94,57 @@ const DSAProblemTracker = () => {
   const [expandedCategories, setExpandedCategories] = useState({});
   const [expandedDifficulties, setExpandedDifficulties] = useState({});
   const [notesModal, setNotesModal] = useState({ isOpen: false, problem: null, notes: '' });
-  const [bulkSelectMode, setBulkSelectMode] = useState(false);
-  const [selectedProblems, setSelectedProblems] = useState(new Set());
-  const [showStats, setShowStats] = useState(false);
-  const [showNotesSection, setShowNotesSection] = useState(false);
+  const [showNotesPanel, setShowNotesPanel] = useState(false);
+  const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
   const [weeklyWinners, setWeeklyWinners] = useState([]);
   const [leaderboardPeriod, setLeaderboardPeriod] = useState('all');
-  const [leaderboardTab, setLeaderboardTab] = useState('leaderboard'); // 'leaderboard' | 'winners'
+  const [leaderboardTab, setLeaderboardTab] = useState('leaderboard');
   const [lbLimit, setLbLimit] = useState(10);
   const [lbSearch, setLbSearch] = useState('');
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  useEffect(() => {
-    fetchProblems();
-  }, []);
+  const hydrateExpansion = (problemsObj, expandAll = false) => {
+    const categories = getSortedCategories(problemsObj);
+    if (categories.length === 0) return;
 
-  // Refetch leaderboard function that can be called manually
-  const refetchLeaderboard = async () => {
-    try {
-      const [lbRes, winnersRes] = await Promise.all([
-        axios.get(`/backend/dsa-problems/leaderboard?limit=${lbLimit}&period=${leaderboardPeriod}`),
-        axios.get('/backend/dsa-problems/weekly-winners')
-      ]);
-      if (lbRes.data?.success) setLeaderboard(lbRes.data.items || []);
-      if (winnersRes.data?.success) setWeeklyWinners(winnersRes.data.items || []);
-    } catch (e) {
-      // non-blocking
-    }
+    const categoryState = {};
+    const difficultyState = {};
+    categories.forEach((cat, idx) => {
+      categoryState[cat] = expandAll ? true : idx === 0;
+      difficulties.forEach((d) => {
+        difficultyState[`${cat}-${d}`] = expandAll ? true : idx === 0;
+      });
+    });
+    setExpandedCategories(categoryState);
+    setExpandedDifficulties(difficultyState);
   };
 
-  useEffect(() => {
-    if (!showLeaderboard) return;
-    // Initial fetch
-    refetchLeaderboard();
-
-    // SSE stream for live leaderboard
-    let es;
-    try {
-      es = new EventSource(`/backend/dsa-problems/leaderboard/stream?limit=${lbLimit}&period=${leaderboardPeriod}`, { withCredentials: true });
-      es.addEventListener('leaderboard', (ev) => {
-        try {
-          const payload = JSON.parse(ev.data);
-          if (Array.isArray(payload.items)) setLeaderboard(payload.items);
-        } catch (_) {}
+  const recalculateStats = (nextProblems) => {
+    let completed = 0;
+    let favorites = 0;
+    let total = 0;
+    Object.keys(nextProblems).forEach((category) => {
+      difficulties.forEach((difficulty) => {
+        (nextProblems[category][difficulty] || []).forEach((problem) => {
+          total += 1;
+          if (problem.isCompleted) completed += 1;
+          if (problem.isFavorite) favorites += 1;
+        });
       });
-    } catch (_) {}
-
-    return () => {
-      if (es && typeof es.close === 'function') es.close();
-    };
-  }, [leaderboardPeriod, lbLimit, showLeaderboard]);
+    });
+    const completionPercentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+    setStats({ total, completed, favorites, completionPercentage });
+  };
 
   const fetchProblems = async () => {
     try {
       setLoading(true);
       const response = await axios.get('/backend/dsa-problems');
-      if (response.data.success) {
-        setProblems(response.data.data.problems);
-        setStats(response.data.data.stats);
-        
-        const categories = getSortedCategories(response.data.data.problems);
-        if (categories.length > 0) {
-          const firstCategory = categories[0];
-          setExpandedCategories({ [firstCategory]: true });
-          
-          const newExpandedDifficulties = {};
-          ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-            newExpandedDifficulties[`${firstCategory}-${difficulty}`] = true;
-          });
-          setExpandedDifficulties(newExpandedDifficulties);
-        }
+      if (response.data?.success) {
+        const incomingProblems = response.data.data?.problems || {};
+        setProblems(incomingProblems);
+        setStats(response.data.data?.stats || { total: 0, completed: 0, favorites: 0, completionPercentage: 0 });
+        hydrateExpansion(incomingProblems);
       }
     } catch (error) {
       console.error('Error fetching problems:', error);
@@ -98,59 +154,80 @@ const DSAProblemTracker = () => {
     }
   };
 
+  const refetchLeaderboard = async () => {
+    try {
+      const [lbRes, winnersRes] = await Promise.all([
+        axios.get(`/backend/dsa-problems/leaderboard?limit=${lbLimit}&period=${leaderboardPeriod}`),
+        axios.get('/backend/dsa-problems/weekly-winners'),
+      ]);
+      if (lbRes.data?.success) setLeaderboard(lbRes.data.items || []);
+      if (winnersRes.data?.success) setWeeklyWinners(winnersRes.data.items || []);
+    } catch {
+      // Non-blocking panel
+    }
+  };
+
+  useEffect(() => {
+    fetchProblems();
+  }, []);
+
+  useEffect(() => {
+    if (!showLeaderboardPanel) return;
+    refetchLeaderboard();
+
+    let es;
+    try {
+      es = new EventSource(
+        `/backend/dsa-problems/leaderboard/stream?limit=${lbLimit}&period=${leaderboardPeriod}`,
+        { withCredentials: true }
+      );
+      es.addEventListener('leaderboard', (ev) => {
+        try {
+          const payload = JSON.parse(ev.data);
+          if (Array.isArray(payload.items)) setLeaderboard(payload.items);
+        } catch {
+          // ignore
+        }
+      });
+    } catch {
+      // ignore
+    }
+
+    return () => {
+      if (es && typeof es.close === 'function') es.close();
+    };
+  }, [showLeaderboardPanel, lbLimit, leaderboardPeriod]);
+
   const updateProblemStatus = async (problemName, updates) => {
     try {
-      const response = await axios.put('/backend/dsa-problems/status', {
-        problemName,
-        ...updates
-      });
+      const response = await axios.put('/backend/dsa-problems/status', { problemName, ...updates });
+      if (!response.data?.success) return;
 
-      if (response.data.success) {
-        setProblems(prevProblems => {
-          const newProblems = { ...prevProblems };
-          let totalCompleted = 0;
-          let totalFavorites = 0;
-
-          Object.keys(newProblems).forEach(category => {
-            ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-              newProblems[category][difficulty] = newProblems[category][difficulty].map(problem => {
-                if (problem.problemName === problemName) {
-                  const updatedProblem = {
-                    ...problem,
-                    ...updates,
-                    completedAt: updates.isCompleted ? new Date() : (updates.isCompleted === false ? null : problem.completedAt)
-                  };
-                  if (updatedProblem.isCompleted) totalCompleted++;
-                  if (updatedProblem.isFavorite) totalFavorites++;
-                  return updatedProblem;
-                } else {
-                  if (problem.isCompleted) totalCompleted++;
-                  if (problem.isFavorite) totalFavorites++;
-                  return problem;
-                }
-              });
+      setProblems((prevProblems) => {
+        const nextProblems = { ...prevProblems };
+        Object.keys(nextProblems).forEach((category) => {
+          difficulties.forEach((difficulty) => {
+            nextProblems[category][difficulty] = nextProblems[category][difficulty].map((problem) => {
+              if (problem.problemName !== problemName) return problem;
+              return {
+                ...problem,
+                ...updates,
+                completedAt:
+                  updates.isCompleted === true
+                    ? new Date()
+                    : updates.isCompleted === false
+                      ? null
+                      : problem.completedAt,
+              };
             });
           });
-
-          setStats(prevStats => {
-            const newCompletionPercentage = Math.round((totalCompleted / prevStats.total) * 100);
-            return {
-              ...prevStats,
-              completed: totalCompleted,
-              favorites: totalFavorites,
-              completionPercentage: newCompletionPercentage
-            };
-          });
-
-          return newProblems;
         });
+        recalculateStats(nextProblems);
+        return nextProblems;
+      });
 
-        toast.success('Status updated successfully');
-        
-        // Immediately refetch leaderboard if it's visible and we marked as completed
-        if (showLeaderboard && updates.isCompleted !== undefined) {
-          refetchLeaderboard();
-        }
+      if (showLeaderboardPanel && updates.isCompleted !== undefined) {
+        refetchLeaderboard();
       }
     } catch (error) {
       console.error('Error updating problem status:', error);
@@ -160,381 +237,121 @@ const DSAProblemTracker = () => {
 
   const updateProblemNotes = async (problemName, notes) => {
     try {
-      const response = await axios.put('/backend/dsa-problems/notes', {
-        problemName,
-        notes
-      });
+      const response = await axios.put('/backend/dsa-problems/notes', { problemName, notes });
+      if (!response.data?.success) return;
 
-      if (response.data.success) {
-        setProblems(prevProblems => {
-          const newProblems = { ...prevProblems };
-          Object.keys(newProblems).forEach(category => {
-            ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-              newProblems[category][difficulty] = newProblems[category][difficulty].map(problem => {
-                if (problem.problemName === problemName) {
-                  return { ...problem, notes };
-                }
-                return problem;
-              });
-            });
+      setProblems((prevProblems) => {
+        const nextProblems = { ...prevProblems };
+        Object.keys(nextProblems).forEach((category) => {
+          difficulties.forEach((difficulty) => {
+            nextProblems[category][difficulty] = nextProblems[category][difficulty].map((problem) =>
+              problem.problemName === problemName ? { ...problem, notes } : problem
+            );
           });
-          return newProblems;
         });
-
-        toast.success('Notes updated successfully');
-        setNotesModal({ isOpen: false, problem: null, notes: '' });
-      }
+        return nextProblems;
+      });
+      setNotesModal({ isOpen: false, problem: null, notes: '' });
+      toast.success('Notes saved');
     } catch (error) {
       console.error('Error updating notes:', error);
       toast.error('Failed to update notes');
     }
   };
 
-  const toggleCategory = (category) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
-  };
-
-  const toggleDifficulty = (category, difficulty) => {
-    const key = `${category}-${difficulty}`;
-    setExpandedDifficulties(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
-
-  const openNotesModal = (problem) => {
-    setNotesModal({
-      isOpen: true,
-      problem,
-      notes: problem.notes || ''
-    });
-  };
-
-  const closeNotesModal = () => {
-    setNotesModal({
-      isOpen: false,
-      problem: null,
-      notes: ''
-    });
-  };
-
-  const handleNotesSubmit = () => {
-    if (notesModal.problem) {
-      updateProblemNotes(notesModal.problem.problemName, notesModal.notes);
-    }
-  };
-
   const deleteNotes = async (problemName) => {
     try {
-      const response = await axios.put('/backend/dsa-problems/notes', {
-        problemName,
-        notes: ''
-      });
+      const response = await axios.put('/backend/dsa-problems/notes', { problemName, notes: '' });
+      if (!response.data?.success) return;
 
-      if (response.data.success) {
-        setProblems(prevProblems => {
-          const newProblems = { ...prevProblems };
-          Object.keys(newProblems).forEach(category => {
-            ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-              newProblems[category][difficulty] = newProblems[category][difficulty].map(problem => {
-                if (problem.problemName === problemName) {
-                  return { ...problem, notes: '' };
-                }
-                return problem;
-              });
-            });
+      setProblems((prevProblems) => {
+        const nextProblems = { ...prevProblems };
+        Object.keys(nextProblems).forEach((category) => {
+          difficulties.forEach((difficulty) => {
+            nextProblems[category][difficulty] = nextProblems[category][difficulty].map((problem) =>
+              problem.problemName === problemName ? { ...problem, notes: '' } : problem
+            );
           });
-          return newProblems;
         });
-
-        toast.success('Notes deleted successfully');
-      }
+        return nextProblems;
+      });
+      toast.success('Note deleted');
     } catch (error) {
       console.error('Error deleting notes:', error);
       toast.error('Failed to delete notes');
     }
   };
 
-  const toggleBulkSelect = () => {
-    setBulkSelectMode(!bulkSelectMode);
-    setSelectedProblems(new Set());
+  const toggleCategory = (category) => {
+    setExpandedCategories((prev) => ({ ...prev, [category]: !prev[category] }));
+  };
+
+  const toggleDifficulty = (category, difficulty) => {
+    const key = `${category}-${difficulty}`;
+    setExpandedDifficulties((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const clearAllFilters = () => {
     setSearchTerm('');
     setFilter('all');
-    
-    const categories = getSortedCategories(problems);
-    
-    if (categories.length > 0) {
-      const newExpandedCategories = {};
-      const newExpandedDifficulties = {};
-      
-      categories.forEach(category => {
-        newExpandedCategories[category] = true;
-        
-        ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-          newExpandedDifficulties[`${category}-${difficulty}`] = true;
-        });
-      });
-      
-      setExpandedCategories(newExpandedCategories);
-      setExpandedDifficulties(newExpandedDifficulties);
-    }
-    
-    toast.success('Filters cleared');
+    hydrateExpansion(problems, true);
   };
 
-  const toggleProblemSelection = (problemName) => {
-    const newSelected = new Set(selectedProblems);
-    if (newSelected.has(problemName)) {
-      newSelected.delete(problemName);
-    } else {
-      newSelected.add(problemName);
-    }
-    setSelectedProblems(newSelected);
-  };
+  const filteredProblems = useMemo(() => {
+    const cloned = JSON.parse(JSON.stringify(problems || {}));
+    const q = searchTerm.trim().toLowerCase();
 
-  const bulkMarkCompleted = async () => {
-    if (selectedProblems.size === 0) return;
-
-    try {
-      const response = await axios.put('/backend/dsa-problems/bulk-update', {
-        problemNames: Array.from(selectedProblems),
-        updates: { isCompleted: true }
-      });
-
-      if (response.data.success) {
-        setProblems(prevProblems => {
-          const newProblems = { ...prevProblems };
-          let totalCompleted = 0;
-          let totalFavorites = 0;
-
-          Object.keys(newProblems).forEach(category => {
-            ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-              newProblems[category][difficulty] = newProblems[category][difficulty].map(problem => {
-                if (selectedProblems.has(problem.problemName)) {
-                  const updatedProblem = {
-                    ...problem,
-                    isCompleted: true,
-                    completedAt: new Date()
-                  };
-                  if (updatedProblem.isCompleted) totalCompleted++;
-                  if (updatedProblem.isFavorite) totalFavorites++;
-                  return updatedProblem;
-                } else {
-                  if (problem.isCompleted) totalCompleted++;
-                  if (problem.isFavorite) totalFavorites++;
-                  return problem;
-                }
-              });
-            });
-          });
-
-          setStats(prevStats => {
-            const newCompletionPercentage = Math.round((totalCompleted / prevStats.total) * 100);
-            return {
-              ...prevStats,
-              completed: totalCompleted,
-              favorites: totalFavorites,
-              completionPercentage: newCompletionPercentage
-            };
-          });
-
-          return newProblems;
-        });
-
-        toast.success(`Marked ${selectedProblems.size} problems as completed`);
-        setSelectedProblems(new Set());
-        setBulkSelectMode(false);
-        
-        // Immediately refetch leaderboard if it's visible
-        if (showLeaderboard) {
-          refetchLeaderboard();
+    Object.keys(cloned).forEach((category) => {
+      difficulties.forEach((difficulty) => {
+        let items = cloned[category][difficulty] || [];
+        if (q) {
+          items = items.filter((problem) => problem.problemName.toLowerCase().includes(q));
         }
-      }
-    } catch (error) {
-      console.error('Error in bulk update:', error);
-      toast.error('Failed to update problems');
-    }
-  };
-
-  const bulkMarkFavorite = async () => {
-    if (selectedProblems.size === 0) return;
-
-    try {
-      const response = await axios.put('/backend/dsa-problems/bulk-update', {
-        problemNames: Array.from(selectedProblems),
-        updates: { isFavorite: true }
+        if (filter === 'completed') items = items.filter((problem) => problem.isCompleted);
+        if (filter === 'incomplete') items = items.filter((problem) => !problem.isCompleted);
+        if (filter === 'favorites') items = items.filter((problem) => problem.isFavorite);
+        cloned[category][difficulty] = items;
       });
 
-      if (response.data.success) {
-        setProblems(prevProblems => {
-          const newProblems = { ...prevProblems };
-          let totalCompleted = 0;
-          let totalFavorites = 0;
-
-          Object.keys(newProblems).forEach(category => {
-            ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-              newProblems[category][difficulty] = newProblems[category][difficulty].map(problem => {
-                if (selectedProblems.has(problem.problemName)) {
-                  const updatedProblem = {
-                    ...problem,
-                    isFavorite: true
-                  };
-                  if (updatedProblem.isCompleted) totalCompleted++;
-                  if (updatedProblem.isFavorite) totalFavorites++;
-                  return updatedProblem;
-                } else {
-                  if (problem.isCompleted) totalCompleted++;
-                  if (problem.isFavorite) totalFavorites++;
-                  return problem;
-                }
-              });
-            });
-          });
-
-          setStats(prevStats => {
-            const newCompletionPercentage = Math.round((totalCompleted / prevStats.total) * 100);
-            return {
-              ...prevStats,
-              completed: totalCompleted,
-              favorites: totalFavorites,
-              completionPercentage: newCompletionPercentage
-            };
-          });
-
-          return newProblems;
-        });
-
-        toast.success(`Marked ${selectedProblems.size} problems as favorites`);
-        setSelectedProblems(new Set());
-        setBulkSelectMode(false);
-      }
-    } catch (error) {
-      console.error('Error in bulk update:', error);
-      toast.error('Failed to update problems');
-    }
-  };
-
-  const getFilteredProblems = () => {
-    let filteredProblems = JSON.parse(JSON.stringify(problems));
-
-    if (searchTerm) {
-      Object.keys(filteredProblems).forEach(category => {
-        ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-          filteredProblems[category][difficulty] = filteredProblems[category][difficulty].filter(problem =>
-            problem.problemName.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-        });
-      });
-    }
-
-    if (filter !== 'all') {
-      Object.keys(filteredProblems).forEach(category => {
-        ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-          filteredProblems[category][difficulty] = filteredProblems[category][difficulty].filter(problem => {
-            switch (filter) {
-              case 'completed':
-                return problem.isCompleted;
-              case 'favorites':
-                return problem.isFavorite;
-              case 'incomplete':
-                return !problem.isCompleted;
-              default:
-                return true;
-            }
-          });
-        });
-      });
-    }
-
-    Object.keys(filteredProblems).forEach(category => {
-      const hasProblems = ['Easy', 'Medium', 'Hard'].some(difficulty =>
-        filteredProblems[category][difficulty].length > 0
-      );
-      if (!hasProblems) {
-        delete filteredProblems[category];
-      }
+      const hasAny = difficulties.some((difficulty) => (cloned[category][difficulty] || []).length > 0);
+      if (!hasAny) delete cloned[category];
     });
+    return cloned;
+  }, [problems, searchTerm, filter]);
 
-    return filteredProblems;
-  };
-
-  const filteredProblems = getFilteredProblems();
-
-  const getProblemsWithNotes = () => {
-    const problemsWithNotes = [];
-    Object.keys(problems).forEach(category => {
-      ['Easy', 'Medium', 'Hard'].forEach(difficulty => {
-        problems[category][difficulty].forEach(problem => {
+  const problemsWithNotes = useMemo(() => {
+    const list = [];
+    Object.keys(problems || {}).forEach((category) => {
+      difficulties.forEach((difficulty) => {
+        (problems[category][difficulty] || []).forEach((problem) => {
           if (problem.notes && problem.notes.trim()) {
-            problemsWithNotes.push({
-              ...problem,
-              category,
-              difficulty
-            });
+            list.push({ ...problem, category, difficulty });
           }
         });
       });
     });
-    return problemsWithNotes;
-  };
+    return list;
+  }, [problems]);
 
-  const problemsWithNotes = getProblemsWithNotes();
+  const leaderboardFiltered = useMemo(
+    () =>
+      leaderboard.filter(
+        (row) =>
+          !lbSearch ||
+          row.username?.toLowerCase().includes(lbSearch.toLowerCase()) ||
+          row.email?.toLowerCase().includes(lbSearch.toLowerCase())
+      ),
+    [leaderboard, lbSearch]
+  );
 
-  const categoryOrder = [
-    'Array',
-    'String',
-    'Math',
-    'Hash Table',
-    'Two Pointers',
-    'Sorting',
-    'Stack',
-    'Queue',
-    'Matrix',
-    'Sliding Window',
-    'Linked List',
-    'Binary Search',
-    'Bit Manipulation',
-    'Greedy',
-    'Recursion',
-    'Divide and Conquer',
-    'Heap',
-    'Backtracking',
-    'Tree',
-    'Graph',
-    'Dynamic Programming',
-    'Design',
-    'Trie'
-  ];
-
-  const getSortedCategories = (problemsObj) => {
-    const categories = Object.keys(problemsObj);
-    return categories.sort((a, b) => {
-      const indexA = categoryOrder.indexOf(a);
-      const indexB = categoryOrder.indexOf(b);
-      
-      if (indexA !== -1 && indexB !== -1) {
-        return indexA - indexB;
-      }
-      
-      if (indexA !== -1) return -1;
-      if (indexB !== -1) return 1;
-      
-      return a.localeCompare(b);
-    });
-  };
+  const hasActiveFilters = Boolean(searchTerm || filter !== 'all');
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F3EC] px-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 font-medium text-lg">Loading DSA problems...</p>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-[#E5DCCE] border-t-[#C4A574]" />
+          <p className="text-sm font-medium text-[#6B5A48]">Loading your DSA practice studio…</p>
         </div>
       </div>
     );
@@ -543,798 +360,337 @@ const DSAProblemTracker = () => {
   return (
     <>
       <Helmet>
-        <title>QA/SDET DSA Sheet | Real Coding Problems & Interview Questions</title>
+        <title>DSA Problem Tracker for QA &amp; SDET Interviews | Route2Hire</title>
         <meta
           name="description"
-          content="Master QA and SDET DSA problems with real interview questions. Practice Data Structures & Algorithms for QA automation, SDET, and software testing roles. Explore categorized DSA questions with difficulty levels, patterns, and solutions for QA engineers, SDETs, and automation testers."
+          content="Track your Data Structures & Algorithms practice for QA, SDET and test automation interviews. Solve curated coding problems, bookmark favorites, write approach notes, and compare progress on the community leaderboard."
         />
         <meta
           name="keywords"
-          content="qa dsa sheet, QA DSA Sheet, QA/SDET DSA Sheet, qa/sdet dsa sheet, sdet dsa sheet, SDET DSA Sheet, qa automation dsa sheet, QA Automation DSA Sheet, sdet coding sheet, SDET Coding Sheet, qa coding sheet, QA Coding Sheet, qa interview dsa sheet, QA Interview DSA Sheet, sdet interview dsa sheet, SDET Interview DSA Sheet, 
-          qa dsa problems, QA DSA Problems, sdet dsa problems, SDET DSA Problems, qa dsa questions, QA DSA Questions, sdet dsa questions, SDET DSA Questions, qa coding problems, QA Coding Problems, sdet coding problems, SDET Coding Problems, qa dsa practice, QA DSA Practice, sdet dsa practice, SDET DSA Practice, qa dsa challenges, QA DSA Challenges, sdet dsa challenges, SDET DSA Challenges, qa dsa examples, QA DSA Examples, sdet dsa examples, SDET DSA Examples, qa dsa exercises, QA DSA Exercises, sdet dsa exercises, SDET DSA Exercises,
-          qa interview questions, QA Interview Questions, sdet interview questions, SDET Interview Questions, qa coding interview questions, QA Coding Interview Questions, sdet coding interview questions, SDET Coding Interview Questions, qa automation interview questions, QA Automation Interview Questions, sdet interview preparation, SDET Interview Preparation, qa interview preparation, QA Interview Preparation, qa interview roadmap, QA Interview Roadmap, sdet interview roadmap, SDET Interview Roadmap,
-          data structures and algorithms for qa, Data Structures and Algorithms for QA, data structures and algorithms for sdet, Data Structures and Algorithms for SDET, qa dsa topics, QA DSA Topics, sdet dsa topics, SDET DSA Topics, dsa for qa engineers, DSA for QA Engineers, dsa for sdet, DSA for SDET, dsa for test engineers, DSA for Test Engineers, dsa for automation engineers, DSA for Automation Engineers, dsa for software testers, DSA for Software Testers,
-          best dsa sheet for qa, best dsa sheet for sdet, qa dsa sheet with solutions, sdet dsa sheet with answers, qa dsa sheet with explanations, qa coding questions for interview, sdet dsa interview questions, dsa for qa automation engineer, dsa for manual tester, dsa for automation tester, dsa for qa fresher, dsa for sdet interview, qa automation dsa questions, sdet data structure questions, qa coding challenges, sdet coding challenges, qa dsa roadmap, sdet dsa roadmap,
-          striver sde sheet for qa, Striver SDE Sheet for QA, striver sde sheet for sdet, Striver SDE Sheet for SDET, love babbar dsa sheet for qa, Love Babbar DSA Sheet for QA, sde sheet for test engineers, SDE Sheet for Test Engineers, dsa sheet for qa testers, DSA Sheet for QA Testers, dsa sheet for sdet preparation, DSA Sheet for SDET Preparation,
-          qa coding practice, QA Coding Practice, sdet coding practice, SDET Coding Practice, qa algorithms practice, QA Algorithms Practice, sdet algorithms practice, SDET Algorithms Practice, qa automation coding problems, QA Automation Coding Problems, sdet coding interview prep, SDET Coding Interview Prep, qa test engineer coding questions, QA Test Engineer Coding Questions, qa engineer coding interview, QA Engineer Coding Interview, qa coding patterns, QA Coding Patterns, sdet coding patterns, SDET Coding Patterns,
-          QA DSA SHEET, SDET DSA SHEET, QA AUTOMATION DSA SHEET, QA CODING QUESTIONS, SDET INTERVIEW QUESTIONS, QA DSA PROBLEMS, SDET CODING PROBLEMS, DSA FOR QA ENGINEERS, DSA FOR SDET, QA INTERVIEW ROADMAP, SDET INTERVIEW ROADMAP, QA DSA PRACTICE, SDET DSA PRACTICE,
-          what is the best dsa sheet for qa engineers, real dsa problems for sdet interview, qa automation engineer dsa practice, how to prepare dsa for qa interview, qa dsa coding questions with solutions, top dsa problems for sdet interview, qa and sdet coding interview guide, dsa for test automation and qa engineers, qa and sdet interview preparation roadmap, qa dsa sheet for beginners"
+          content="DSA problem tracker, QA interview coding questions, SDET DSA practice, data structures and algorithms for testers, test automation interview prep, coding practice tracker"
         />
-        <meta property="og:title" content="QA/SDET DSA Sheet | Real Interview Questions & Coding Problems" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:title" content="DSA Problem Tracker for QA & SDET Interviews | Route2Hire" />
         <meta
           property="og:description"
-          content="Practice QA and SDET DSA questions designed for automation and testing engineers. Learn and solve real-world Data Structures & Algorithms problems tailored for QA, SDET, and QA automation interviews."
+          content="Practice curated DSA problems built for QA and SDET interviews. Track completion, bookmark favorites, keep approach notes and climb the leaderboard."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://route2hire.com/dsa-tracker" />
         <meta property="og:image" content="https://route2hire.com/assets/Route2Hire.png" />
-        <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://route2hire.com/dsa-tracker" />
       </Helmet>
 
+      <div className="relative min-h-screen overflow-hidden bg-[#F7F3EC] pb-16 pt-28 sm:pb-24 sm:pt-32">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-[380px] bg-gradient-to-b from-[#FFFDF8] to-transparent"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 top-6 hidden select-none font-display text-[220px] font-semibold leading-none text-[#2C241B]/[0.04] lg:block"
+        >
+          {'{ }'}
+        </div>
 
-
-      <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto mt-20">
-          {/* Breadcrumb Navigation */}
-          <div className="mb-6">
-            <Breadcrumb 
-              items={[
-                { label: 'QA SDET DSA Sheet' }
-              ]}
-            />
-          </div>
-          
-          {/* Header */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+          <motion.header
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="mb-12"
+            transition={{ duration: 0.45 }}
+            className="border-b border-[#E5DCCE] pb-8 sm:pb-10"
           >
-            <div className="text-center mb-8">
-              {/* Main Icon and Title */}
-              <motion.div 
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-                className="flex items-center justify-center gap-1 sm:gap-2 md:gap-3 lg:gap-4 mb-6"
-              >
-                <motion.div 
-                  whileHover={{ 
-                    scale: 1.1, 
-                    rotate: 5,
-                    boxShadow: "0 20px 40px rgba(99, 102, 241, 0.3)"
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative group flex-shrink-0"
-                >
-                  <div className="p-2.5 sm:p-3 md:p-3.5 bg-indigo-600 rounded-2xl sm:rounded-3xl shadow-lg group-hover:shadow-xl transition-all duration-300">
-                    <Code className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 lg:h-10 lg:w-10 text-white" />
-                  </div>
-                  {/* Animated background glow */}
-                  <div className="absolute inset-0 bg-indigo-400 rounded-2xl sm:rounded-3xl blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-300 -z-10"></div>
-                </motion.div>
-                
-                <motion.h1 
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
-                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-slate-900 tracking-tight"
-                >
-                  QA/SDET DSA Problems
-                </motion.h1>
-              </motion.div>
-
-              {/* Subtitle with enhanced styling */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                className="max-w-4xl mx-auto"
-              >
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-600 leading-relaxed mb-4 font-medium">
-                  Master Data Structures & Algorithms with real interview questions
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div className="max-w-3xl">
+                <h1 className="font-display mt-4 text-[clamp(2rem,4.4vw,3.4rem)] font-semibold leading-[1.05] tracking-tight text-[#1C1917]">
+                  QA &amp; SDET DSA problem tracker
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#57534E] sm:text-base">
+                  Practice curated Data Structures &amp; Algorithms questions built for QA, SDET and
+                  test automation interviews. Mark problems complete, bookmark the ones worth
+                  revisiting, jot quick approach notes, and see how your progress compares on the
+                  community leaderboard.
                 </p>
-                <p className="text-sm sm:text-base md:text-lg text-slate-500 leading-relaxed">
-                  These questions have been taken from a large pool of real interview experiences. Practice and Ace your next interview.
-                </p>
-              </motion.div>
-
-              {/* Interactive Feature Pills */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-                className="flex flex-wrap items-center justify-center gap-3 mt-8"
-              >
-                {[
-                  { icon: CheckCircle, text: "Real Interview Questions", color: "emerald" },
-                  { icon: Bookmark, text: "Add Personal Notes", color: "indigo" },
-                  { icon: Target, text: "Track Progress", color: "blue" },
-                  { icon: Star, text: "Mark Favorites", color: "amber" }
-                ].map((feature, index) => (
-                  <motion.div
-                    key={feature.text}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.7 + index * 0.1, duration: 0.3 }}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className={`flex items-center gap-2 px-4 py-2 bg-${feature.color}-50 border border-${feature.color}-200 rounded-full text-${feature.color}-700 font-semibold text-sm shadow-sm hover:shadow-md transition-all duration-300`}
-                  >
-                    <feature.icon className="h-4 w-4" />
-                    <span>{feature.text}</span>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2">Total Problems</p>
-                  <p className="text-4xl font-bold text-slate-900">{stats.total}</p>
-                </div>
-                <div className="h-14 w-14 bg-slate-100 rounded-xl flex items-center justify-center">
-                  <Grid3X3 className="h-7 w-7 text-slate-700" />
-                </div>
               </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl shadow-sm border border-emerald-200 p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-2">Completed</p>
-                  <p className="text-4xl font-bold text-emerald-600">{stats.completed}</p>
-                </div>
-                <div className="h-14 w-14 bg-emerald-100 rounded-xl flex items-center justify-center">
-                  <CheckCircle className="h-7 w-7 text-emerald-600" />
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-sm border border-amber-200 p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-amber-600 uppercase tracking-wide mb-2">Favorites</p>
-                  <p className="text-4xl font-bold text-amber-600">{stats.favorites}</p>
-                </div>
-                <div className="h-14 w-14 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <Star className="h-7 w-7 text-amber-600 fill-amber-600" />
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-sm border border-indigo-200 p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-2">Progress</p>
-                  <p className="text-4xl font-bold text-indigo-600">{stats.completionPercentage}%</p>
-                </div>
-                <div className="h-14 w-14">
-                  <CircularProgressbar
-                    value={stats.completionPercentage}
-                    styles={buildStyles({
-                      pathColor: '#4f46e5',
-                      trailColor: '#e0e7ff',
-                      textColor: '#4f46e5',
-                    })}
-                  />
-                </div>
-              </div>
-            </motion.div>
-
-          </div>
-
-          {/* Horizontal Leaderboard Strip */}
-          <div
-            className={`relative mb-8 rounded-2xl border overflow-hidden transition-all duration-300 ${showLeaderboard ? 'border-transparent bg-gradient-to-r from-indigo-50 via-sky-50 to-rose-50 shadow-lg' : 'border-slate-200 bg-white hover:shadow-md'}`}
-          >
-            <button
-              onClick={() => setShowLeaderboard(prev => !prev)}
-              className="w-full text-left relative group"
-            >
-              <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-indigo-500 via-fuchsia-500 to-pink-500" />
-              <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-cyan-500 via-emerald-500 to-lime-500 opacity-60" />
-              <div className="pointer-events-none absolute -top-10 -left-10 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-200 via-fuchsia-200 to-pink-200 blur-2xl opacity-60" />
-              <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-gradient-to-br from-cyan-200 via-emerald-200 to-lime-200 blur-2xl opacity-60" />
-              <div className="flex items-center justify-between px-4 sm:px-6 py-4 relative">
-                <div className="flex items-center gap-4">
-                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-sm ring-2 ring-offset-2 transition-all ${showLeaderboard ? 'bg-white ring-indigo-200' : 'bg-gradient-to-br from-indigo-100 to-pink-100 ring-transparent group-hover:ring-indigo-200'}`}>
-                    <BarChart3 className={`${showLeaderboard ? 'text-indigo-700' : 'text-indigo-700'} h-5 w-5`} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-base sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-700 via-fuchsia-700 to-pink-700 bg-clip-text text-transparent">Live Leaderboard</p>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-red-100 to-rose-100 text-rose-700 animate-pulse hidden sm:inline-block">LIVE</span>
-                    </div>
-                    <p className={`text-xs sm:text-sm ${showLeaderboard ? 'text-indigo-700' : 'text-slate-600'}`}>Tap to view all time and weekly rankings and weekly winners</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-sm font-semibold ${showLeaderboard ? 'text-indigo-800' : 'text-slate-700'}`}>{showLeaderboard ? 'Hide' : 'View'}</span>
-                  <div className={`h-7 w-7 rounded-full flex items-center justify-center transition-transform ${showLeaderboard ? 'bg-white text-indigo-700 rotate-90' : 'bg-gradient-to-br from-slate-100 to-white text-slate-600 group-hover:text-indigo-700'}`}>
-                    <ChevronRight className="h-4 w-4" />
-                  </div>
-                </div>
-              </div>
-            </button>
-          </div>
-
-          {/* Live Leaderboard & Weekly Winners - Tabs */}
-          {showLeaderboard && (
-          <div className="bg-white rounded-2xl shadow-sm border border-indigo-200 p-0 mb-8 overflow-hidden">
-            <div className="flex items-center border-b border-slate-200">
-              <button
-                onClick={() => setLeaderboardTab('leaderboard')}
-                className={`px-5 py-3 text-sm font-semibold transition-colors ${leaderboardTab==='leaderboard' ? 'text-indigo-700 border-b-2 border-indigo-600' : 'text-slate-600 hover:text-slate-800'}`}
-              >
-                Leaderboard
-              </button>
-              <button
-                onClick={() => setLeaderboardTab('winners')}
-                className={`px-5 py-3 text-sm font-semibold transition-colors ${leaderboardTab==='winners' ? 'text-indigo-700 border-b-2 border-indigo-600' : 'text-slate-600 hover:text-slate-800'}`}
-              >
-                Weekly Winners
-              </button>
             </div>
 
-            {/* Leaderboard Tab Content */}
-            {leaderboardTab === 'leaderboard' && (
-              <div className="p-6">
-                <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                  <div className="inline-flex rounded-lg border border-slate-300 overflow-hidden">
-                    <button
-                      onClick={() => setLeaderboardPeriod('all')}
-                      className={`px-3 py-2 text-sm font-medium ${leaderboardPeriod==='all' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700'}`}
-                    >
-                      All-Time
-                    </button>
-                    <button
-                      onClick={() => setLeaderboardPeriod('weekly')}
-                      className={`px-3 py-2 text-sm font-medium ${leaderboardPeriod==='weekly' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700'}`}
-                    >
-                      This Week
-                    </button>
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { label: 'Total problems', value: stats.total, Icon: Grid3X3, tone: 'text-[#2C241B]' },
+                { label: 'Completed', value: stats.completed, Icon: CheckCircle, tone: 'text-emerald-700' },
+                { label: 'Favorites', value: stats.favorites, Icon: Bookmark, tone: 'text-amber-700' },
+                { label: 'Progress', value: `${stats.completionPercentage}%`, Icon: Target, tone: 'text-[#2C241B]' },
+              ].map(({ label, value, Icon, tone }) => (
+                <div
+                  key={label}
+                  className="rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] p-4 shadow-[0_2px_10px_-4px_rgba(44,36,27,0.08)]"
+                >
+                  <div className="flex items-center gap-2 text-[#78716C]">
+                    <Icon className="h-4 w-4" aria-hidden />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.1em]">{label}</span>
                   </div>
-                  <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search user..."
-                      value={lbSearch}
-                      onChange={(e) => setLbSearch(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50"
-                    />
-                  </div>
+                  <p className={`font-display mt-2 text-2xl font-semibold sm:text-3xl ${tone}`}>{value}</p>
                 </div>
+              ))}
+            </div>
 
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-slate-600 border-b">
-                        <th className="py-2 pr-3">Rank</th>
-                        <th className="py-2 pr-3">User</th>
-                        <th className="py-2 pr-3">Points</th>
-                        <th className="py-2 pr-3">Completed</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(leaderboard.filter(r => !lbSearch || r.username?.toLowerCase().includes(lbSearch.toLowerCase()) || r.email?.toLowerCase().includes(lbSearch.toLowerCase()))).map((row) => (
-                        <tr key={`${row.userId}-${row.rank}`} className="border-b last:border-0">
-                          <td className="py-3 pr-3 font-bold text-indigo-700">#{row.rank}</td>
-                          <td className="py-3 pr-3">
-                            <div className="flex items-center gap-2">
-                              {row.profilePicture ? (
-                                <img src={row.profilePicture} alt={row.username} className="w-7 h-7 rounded-full object-cover" />
-                              ) : (
-                                <div className="w-7 h-7 rounded-full bg-slate-200" />
-                              )}
-                              <span className="font-medium text-slate-800">{row.username}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 pr-3 font-semibold text-slate-900">{row.totalPoints}</td>
-                          <td className="py-3 pr-3 text-slate-700">{row.completedCount}</td>
-                        </tr>
-                      ))}
-                      {leaderboard.length === 0 && (
-                        <tr>
-                          <td colSpan={4} className="py-6 text-center text-slate-500">No entries yet</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+            <div
+              className="mt-5 h-2 w-full overflow-hidden rounded-full bg-[#EFE8DC]"
+              role="progressbar"
+              aria-valuenow={stats.completionPercentage}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Overall DSA completion progress"
+            >
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#C4A574] to-[#2C241B] transition-all duration-500"
+                style={{ width: `${stats.completionPercentage}%` }}
+              />
+            </div>
+          </motion.header>
 
-                <div className="flex items-center justify-end mt-4">
-                  <div className="flex items-center gap-2">
-                    {lbLimit > 10 && (
-                      <button onClick={() => setLbLimit(10)} className="px-3 py-1.5 text-sm border rounded-lg hover:bg-slate-50">Show less</button>
-                    )}
-                    <button onClick={() => setLbLimit(lbLimit + 10)} className="px-3 py-1.5 text-sm border rounded-lg hover:bg-slate-50">Show more</button>
-                  </div>
-                </div>
-
-                {!!lbSearch && leaderboard.filter(r => r.username?.toLowerCase().includes(lbSearch.toLowerCase()) || r.email?.toLowerCase().includes(lbSearch.toLowerCase())).length === 0 && (
-                  <div className="mt-2 text-xs text-slate-500">User not in top {lbLimit}. Try "Show more" to load additional ranks.</div>
-                )}
-              </div>
-            )}
-
-            {/* Winners Tab Content */}
-            {leaderboardTab === 'winners' && (
-              <div className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50">
-                <h2 className="text-lg font-bold text-amber-800 mb-4">Weekly Winners</h2>
-                <div className="space-y-3">
-                  {weeklyWinners.map((w, index) => (
-                    <div key={w.userId} className="flex items-center justify-between p-3 rounded-xl bg-white/70 border border-amber-200">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${index===0?'bg-yellow-500':index===1?'bg-slate-400':'bg-amber-700'}`}>{index+1}</div>
-                        <div className="flex items-center gap-2">
-                          {w.profilePicture ? (
-                            <img src={w.profilePicture} alt={w.username} className="w-8 h-8 rounded-full object-cover" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-slate-200" />
-                          )}
-                          <div>
-                            <div className="text-slate-900 font-semibold">{w.username}</div>
-                            <div className="text-xs text-slate-500">{w.completedCount} completed</div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-slate-900 font-bold">{w.totalPoints} pts</div>
-                      </div>
-                    </div>
-                  ))}
-                  {weeklyWinners.length === 0 && (
-                    <div className="text-center text-slate-600 py-4">No winners yet this week</div>
-                  )}
-                </div>
-                
-              </div>
-            )}
-          </div>
-          )}
-
-          {/* Controls */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <section className="sticky top-[84px] z-20 mt-6 rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8]/95 p-3 shadow-[0_2px_16px_-8px_rgba(44,36,27,0.1)] backdrop-blur-sm sm:p-4">
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_auto_auto]">
+              <label className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#78716C]" />
                 <input
                   type="text"
-                  placeholder="Search problems by name..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-slate-50 text-slate-900 placeholder-slate-400"
+                  placeholder="Search DSA problems by name..."
+                  aria-label="Search DSA problems by name"
+                  className={`w-full rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] py-2.5 pl-10 pr-3 text-sm text-[#2C241B] outline-none transition placeholder:text-[#78716C] focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/30 ${focusRing}`}
                 />
-              </div>
-
-              {/* Filter Dropdown */}
-              <div className="relative">
-                <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none z-10" />
+              </label>
+              <label className="relative">
+                <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#78716C]" />
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="pl-12 pr-10 py-3.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none bg-slate-50 cursor-pointer min-w-[180px] text-slate-900 font-medium"
+                  aria-label="Filter problems by status"
+                  className={`w-full appearance-none rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] py-2.5 pl-10 pr-3 text-sm text-[#2C241B] outline-none transition focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/30 ${focusRing}`}
                 >
-                  <option value="all">All Problems</option>
-                  <option value="completed">Completed</option>
-                  <option value="incomplete">Incomplete</option>
-                  <option value="favorites">Favorites</option>
+                  <option value="all">All problems</option>
+                  <option value="completed">Completed only</option>
+                  <option value="incomplete">Incomplete only</option>
+                  <option value="favorites">Favorites only</option>
                 </select>
-              </div>
-
-              {/* Clear Filters */}
-              {(searchTerm || filter !== 'all') && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  onClick={clearAllFilters}
-                  className="px-5 py-3.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl hover:bg-rose-100 transition-all font-semibold flex items-center gap-2 whitespace-nowrap"
-                >
-                  <X className="h-5 w-5" />
-                  Clear Filters
-                </motion.button>
-              )}
-
-              {/* Notes Section Toggle */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setShowNotesSection(!showNotesSection)}
-                className={`px-5 py-3.5 rounded-xl font-semibold transition-all whitespace-nowrap flex items-center gap-2 border ${
-                  showNotesSection
-                    ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                }`}
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowNotesPanel(true)}
+                className={`inline-flex items-center justify-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-4 py-2.5 text-sm font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
               >
-                <Bookmark className="h-5 w-5" />
-                {showNotesSection ? 'Hide Notes' : 'View Notes'}
-                {problemsWithNotes.length > 0 && (
-                  <span className={`ml-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                    showNotesSection ? 'bg-white bg-opacity-20 text-white' : 'bg-indigo-100 text-indigo-700'
-                  }`}>
-                    {problemsWithNotes.length}
-                  </span>
-                )}
-              </motion.button>
-
-              {/* Bulk Select Toggle */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={toggleBulkSelect}
-                className={`px-5 py-3.5 rounded-xl font-semibold transition-all whitespace-nowrap border ${
-                  bulkSelectMode
-                    ? 'bg-violet-600 text-white border-violet-600 hover:bg-violet-700'
-                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                }`}
+                <NotebookPen className="h-4 w-4" aria-hidden />
+                Notes
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLeaderboardPanel(true)}
+                className={`inline-flex items-center justify-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-4 py-2.5 text-sm font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
               >
-                {bulkSelectMode ? 'Exit Bulk Select' : 'Bulk Select'}
-              </motion.button>
+                <BarChart3 className="h-4 w-4" aria-hidden />
+                Leaderboard
+              </button>
             </div>
+          </section>
 
-            {/* Bulk Actions */}
-            {bulkSelectMode && selectedProblems.size > 0 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-5 pt-5 border-t border-slate-200 flex gap-3"
-              >
-                <button
-                  onClick={bulkMarkCompleted}
-                  className="flex-1 px-5 py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition-all font-semibold"
-                >
-                  Mark {selectedProblems.size} as Completed
-                </button>
-                <button
-                  onClick={bulkMarkFavorite}
-                  className="flex-1 px-5 py-3 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl hover:bg-amber-100 transition-all font-semibold"
-                >
-                  Mark {selectedProblems.size} as Favorite
-                </button>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Notes Section */}
-          <AnimatePresence>
-            {showNotesSection && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white rounded-2xl shadow-sm border border-indigo-200 p-6 mb-8"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                    <div className="p-2 bg-indigo-100 rounded-lg">
-                      <Bookmark className="h-6 w-6 text-indigo-600" />
-                    </div>
-                    My Notes
-                    <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-bold rounded-full">
-                      {problemsWithNotes.length}
-                    </span>
-                  </h2>
-                  <button
-                    onClick={() => setShowNotesSection(false)}
-                    className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors"
-                  >
-                    <X className="h-5 w-5 text-slate-600" />
-                  </button>
-                </div>
-
-                {problemsWithNotes.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="inline-block p-4 bg-slate-100 rounded-2xl mb-4">
-                      <Bookmark className="h-16 w-16 text-slate-400" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">No notes yet</h3>
-                    <p className="text-slate-600">
-                      Add notes to problems by clicking the pencil icon next to any problem.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {problemsWithNotes.map((problem) => (
-                      <motion.div
-                        key={problem.problemName}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-5 rounded-xl border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 transition-colors"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-3 flex-wrap">
-                              <a
-                                href={problem.problemLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-bold text-slate-900 hover:text-indigo-600 transition-colors text-lg"
-                              >
-                                {problem.problemName}
-                              </a>
-                              <span className="px-3 py-1 bg-white border border-slate-200 text-xs font-bold rounded-full text-slate-700">
-                                {problem.category} • {problem.difficulty}
-                              </span>
-                              {problem.isCompleted && (
-                                <span className="px-3 py-1 bg-emerald-100 border border-emerald-300 text-emerald-700 text-xs font-bold rounded-full flex items-center gap-1">
-                                  <CheckCircle className="h-3 w-3" />
-                                  Completed
-                                </span>
-                              )}
-                            </div>
-                            <div className="bg-white p-4 rounded-lg border border-indigo-200">
-                              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{problem.notes}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => openNotesModal(problem)}
-                              className="p-2.5 rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors border border-indigo-200"
-                              title="Edit notes"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => deleteNotes(problem.problemName)}
-                              className="p-2.5 rounded-lg bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors border border-rose-200"
-                              title="Delete notes"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Problems List */}
-          <div className="space-y-5">
+          <section className="mt-6 space-y-4">
             {Object.keys(filteredProblems).length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-16 text-center">
-                <div className="inline-block p-4 bg-slate-100 rounded-2xl mb-4">
-                  <Search className="h-16 w-16 text-slate-400" />
+              <div className="rounded-2xl border border-dashed border-[#E5DCCE] bg-[#FFFDF8] px-6 py-14 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F7F3EC] text-[#C4A574]">
+                  <Search className="h-5 w-5" aria-hidden />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">No problems found</h3>
-                <p className="text-slate-600 mb-6 max-w-md mx-auto">
-                  No problems match your current filters. Try adjusting your search or filter criteria.
+                <h3 className="font-display mt-4 text-3xl text-[#1C1917]">No matching problems</h3>
+                <p className="mx-auto mt-2 max-w-md text-sm text-[#78716C]">
+                  Try a different keyword, or reset your filters to get back to the full DSA
+                  question set and keep your practice streak going.
                 </p>
-                {(searchTerm || filter !== 'all') && (
+                {hasActiveFilters && (
                   <button
+                    type="button"
                     onClick={clearAllFilters}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-semibold inline-flex items-center gap-2"
+                    className={`mt-5 rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] px-4 py-2 text-sm font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
                   >
-                    <X className="h-5 w-5" />
-                    Clear All Filters
+                    Clear filters
                   </button>
                 )}
               </div>
             ) : (
-              getSortedCategories(filteredProblems).map((category) => (
-                <motion.div
-                  key={category}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
-                >
-                  {/* Category Header */}
-                  <button
-                    onClick={() => toggleCategory(category)}
-                    className="w-full px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-200"
-                  >
-                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                      {expandedCategories[category] ? (
-                        <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600 flex-shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600 flex-shrink-0" />
-                      )}
-                      <h2 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 truncate">{category}</h2>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                      <span className="px-3 sm:px-4 py-1 sm:py-1.5 bg-white border border-slate-200 rounded-full text-xs sm:text-sm font-bold text-slate-700 whitespace-nowrap">
-                        {['Easy', 'Medium', 'Hard'].reduce(
-                          (sum, diff) => sum + (filteredProblems[category][diff]?.length || 0),
-                          0
-                        )}{' '}
-                        problems
-                      </span>
-                    </div>
-                  </button>
+              getSortedCategories(filteredProblems).map((category) => {
+                const categoryTotal = difficulties.reduce(
+                  (sum, diff) => sum + (filteredProblems[category][diff]?.length || 0),
+                  0
+                );
+                const categoryCompleted = difficulties.reduce(
+                  (sum, diff) =>
+                    sum + (filteredProblems[category][diff] || []).filter((p) => p.isCompleted).length,
+                  0
+                );
+                const categoryProgress = categoryTotal === 0 ? 0 : Math.round((categoryCompleted / categoryTotal) * 100);
 
-                  {/* Category Content */}
-                  <AnimatePresence>
-                    {expandedCategories[category] && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="p-6 space-y-4">
-                          {['Easy', 'Medium', 'Hard'].map((difficulty) => {
+                return (
+                  <motion.div
+                    key={category}
+                    initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="overflow-hidden rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] shadow-[0_2px_12px_-6px_rgba(44,36,27,0.08)]"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory(category)}
+                      className={`flex w-full items-center justify-between gap-4 bg-[#F7F3EC] px-5 py-4 text-left transition hover:bg-[#EFE8DC] ${focusRing}`}
+                    >
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        {expandedCategories[category] ? (
+                          <ChevronDown className="h-5 w-5 shrink-0 text-[#6B5A48]" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 shrink-0 text-[#6B5A48]" />
+                        )}
+                        <div className="min-w-0">
+                          <h2 className="font-display truncate text-xl font-semibold text-[#1C1917] sm:text-2xl">
+                            {category}
+                          </h2>
+                          <p className="text-xs text-[#78716C]">
+                            {categoryCompleted} of {categoryTotal} solved
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <div className="hidden h-1.5 w-20 overflow-hidden rounded-full bg-[#E5DCCE] sm:block">
+                          <div
+                            className="h-full rounded-full bg-[#C4A574]"
+                            style={{ width: `${categoryProgress}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6B5A48]">
+                          {categoryTotal} problems
+                        </span>
+                      </div>
+                    </button>
+
+                    <AnimatePresence>
+                      {expandedCategories[category] && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden px-4 py-3 sm:px-5"
+                        >
+                          {difficulties.map((difficulty) => {
                             const problemsList = filteredProblems[category][difficulty] || [];
                             if (problemsList.length === 0) return null;
-
-                            const difficultyKey = `${category}-${difficulty}`;
-                            const difficultyStyles = {
-                              Easy: {
-                                bg: 'bg-emerald-50',
-                                border: 'border-emerald-300',
-                                text: 'text-emerald-700',
-                                hover: 'hover:bg-emerald-100',
-                              },
-                              Medium: {
-                                bg: 'bg-amber-50',
-                                border: 'border-amber-300',
-                                text: 'text-amber-700',
-                                hover: 'hover:bg-amber-100',
-                              },
-                              Hard: {
-                                bg: 'bg-rose-50',
-                                border: 'border-rose-300',
-                                text: 'text-rose-700',
-                                hover: 'hover:bg-rose-100',
-                              },
-                            };
-
-                            const style = difficultyStyles[difficulty];
+                            const key = `${category}-${difficulty}`;
+                            const solvedCount = problemsList.filter((p) => p.isCompleted).length;
 
                             return (
-                              <div key={difficulty} className="space-y-3">
-                                {/* Difficulty Header */}
+                              <div key={difficulty} className="mb-4 border-b border-[#E5DCCE] pb-3 last:mb-0 last:border-b-0">
                                 <button
+                                  type="button"
                                   onClick={() => toggleDifficulty(category, difficulty)}
-                                  className={`w-full px-5 py-3.5 rounded-xl border-2 flex items-center justify-between transition-all ${style.bg} ${style.border} ${style.text} ${style.hover}`}
+                                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-2.5 text-sm font-semibold ${difficultyTone[difficulty]} ${focusRing}`}
                                 >
-                                  <div className="flex items-center gap-2.5">
-                                    {expandedDifficulties[difficultyKey] ? (
-                                      <ChevronDown className="h-5 w-5" />
-                                    ) : (
-                                      <ChevronRight className="h-5 w-5" />
-                                    )}
-                                    <span className="font-bold text-base">{difficulty}</span>
-                                    <span className="text-sm font-semibold">({problemsList.length} problems)</span>
-                                  </div>
+                                  <span className="inline-flex items-center gap-2">
+                                    {expandedDifficulties[key] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                                    <span className={`h-1.5 w-1.5 rounded-full ${difficultyDot[difficulty]}`} aria-hidden />
+                                    {difficulty}
+                                  </span>
+                                  <span>{solvedCount}/{problemsList.length} solved</span>
                                 </button>
 
-                                {/* Problems List */}
                                 <AnimatePresence>
-                                  {expandedDifficulties[difficultyKey] && (
+                                  {expandedDifficulties[key] && (
                                     <motion.div
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: 'auto', opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.3 }}
-                                      className="overflow-hidden space-y-2.5 pl-3"
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: 'auto' }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      className="space-y-2 pt-3"
                                     >
                                       {problemsList.map((problem) => (
-                                        <motion.div
+                                        <article
                                           key={problem.problemName}
-                                          initial={{ opacity: 0, x: -20 }}
-                                          animate={{ opacity: 1, x: 0 }}
-                                          className={`p-4 rounded-xl border-2 transition-all ${
+                                          className={`rounded-xl border p-3.5 transition sm:p-4 ${
                                             problem.isCompleted
-                                              ? 'bg-emerald-50 border-emerald-300'
-                                              : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-sm'
-                                          } ${bulkSelectMode && selectedProblems.has(problem.problemName) ? 'ring-2 ring-violet-500 ring-offset-2' : ''}`}
+                                              ? 'border-emerald-200 bg-emerald-50/70'
+                                              : 'border-[#E5DCCE] bg-[#F7F3EC] hover:border-[#C4A574]/60'
+                                          }`}
                                         >
-                                          <div className="flex items-center gap-4">
-                                            {/* Bulk Select Checkbox */}
-                                            {bulkSelectMode && (
-                                              <input
-                                                type="checkbox"
-                                                checked={selectedProblems.has(problem.problemName)}
-                                                onChange={() => toggleProblemSelection(problem.problemName)}
-                                                className="h-5 w-5 text-violet-600 border-slate-300 rounded focus:ring-2 focus:ring-violet-500 cursor-pointer"
-                                              />
-                                            )}
+                                          <div className="flex flex-col gap-2">
+                                            <div className="flex items-center gap-3">
+                                              <button
+                                                type="button"
+                                                onClick={() => updateProblemStatus(problem.problemName, { isCompleted: !problem.isCompleted })}
+                                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition ${focusRing} ${
+                                                  problem.isCompleted
+                                                    ? 'border-emerald-300 bg-emerald-500 text-white hover:bg-emerald-600'
+                                                    : 'border-[#E5DCCE] bg-[#FFFDF8] text-transparent hover:border-[#C4A574]'
+                                                }`}
+                                                title={problem.isCompleted ? 'Mark incomplete' : 'Mark completed'}
+                                                aria-label={problem.isCompleted ? `Mark ${problem.problemName} incomplete` : `Mark ${problem.problemName} completed`}
+                                              >
+                                                <Check className="h-3.5 w-3.5" />
+                                              </button>
 
-                                            {/* Problem Info */}
-                                            <div className="flex-1">
-                                              <div className="flex items-center gap-2.5 mb-1 flex-wrap">
+                                              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
                                                 <a
                                                   href={problem.problemLink}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
-                                                  className="font-semibold text-slate-900 hover:text-indigo-600 transition-colors"
+                                                  className={`truncate rounded-sm font-medium leading-none text-[#2C241B] hover:underline ${focusRing}`}
                                                 >
                                                   {problem.problemName}
                                                 </a>
                                                 {problem.isCompleted && (
-                                                  <span className="px-2.5 py-0.5 bg-emerald-100 border border-emerald-300 text-emerald-700 text-xs font-bold rounded-full flex items-center gap-1">
-                                                    <CheckCircle className="h-3 w-3" />
+                                                  <span className="rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
                                                     Completed
                                                   </span>
                                                 )}
+                                                {problem.isFavorite && (
+                                                  <span className="rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                                                    Favorite
+                                                  </span>
+                                                )}
                                               </div>
-                                              {problem.notes && (
-                                                <p className="text-sm text-slate-600 mt-2 line-clamp-2">{problem.notes}</p>
-                                              )}
-                                            </div>
 
-                                            {/* Action Buttons */}
-                                            <div className="flex items-center gap-2">
+                                              <div className="flex shrink-0 items-center gap-1.5">
                                               <button
-                                                onClick={() =>
-                                                  updateProblemStatus(problem.problemName, {
-                                                    isCompleted: !problem.isCompleted,
-                                                  })
-                                                }
-                                                className={`p-2.5 rounded-lg transition-all border ${
-                                                  problem.isCompleted
-                                                    ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200 border-emerald-300'
-                                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-300'
-                                                }`}
-                                                title={problem.isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
-                                              >
-                                                <Check className="h-5 w-5" />
-                                              </button>
-
-                                              <button
-                                                onClick={() =>
-                                                  updateProblemStatus(problem.problemName, {
-                                                    isFavorite: !problem.isFavorite,
-                                                  })
-                                                }
-                                                className={`p-2.5 rounded-lg transition-all border ${
+                                                type="button"
+                                                onClick={() => updateProblemStatus(problem.problemName, { isFavorite: !problem.isFavorite })}
+                                                className={`rounded-lg border p-2 transition ${focusRing} ${
                                                   problem.isFavorite
-                                                    ? 'bg-amber-100 text-amber-600 hover:bg-amber-200 border-amber-300'
-                                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-300'
+                                                    ? 'border-amber-200 bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                                    : 'border-[#E5DCCE] bg-[#FFFDF8] text-[#6B5A48] hover:bg-[#EFE8DC]'
                                                 }`}
-                                                title={problem.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                                                title={problem.isFavorite ? 'Remove favorite' : 'Add favorite'}
+                                                aria-label={problem.isFavorite ? `Remove ${problem.problemName} from favorites` : `Add ${problem.problemName} to favorites`}
                                               >
-                                                <Star
-                                                  className={`h-5 w-5 ${problem.isFavorite ? 'fill-current' : ''}`}
-                                                />
+                                                <Star className={`h-4 w-4 ${problem.isFavorite ? 'fill-current' : ''}`} />
                                               </button>
-
                                               <button
-                                                onClick={() => openNotesModal(problem)}
-                                                className={`p-2.5 rounded-lg transition-all border ${
-                                                  problem.notes && problem.notes.trim()
-                                                    ? 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200 border-indigo-300 ring-2 ring-indigo-200'
-                                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-300'
+                                                type="button"
+                                                onClick={() => setNotesModal({ isOpen: true, problem, notes: problem.notes || '' })}
+                                                className={`rounded-lg border p-2 transition ${focusRing} ${
+                                                  problem.notes?.trim()
+                                                    ? 'border-[#C4A574] bg-[#EFE8DC] text-[#6B5A48] hover:bg-[#E5DCCE]'
+                                                    : 'border-[#E5DCCE] bg-[#FFFDF8] text-[#6B5A48] hover:bg-[#EFE8DC]'
                                                 }`}
-                                                title={problem.notes && problem.notes.trim() ? 'Edit notes' : 'Add notes'}
+                                                title={problem.notes?.trim() ? 'Edit notes' : 'Add notes'}
+                                                aria-label={problem.notes?.trim() ? `Edit notes for ${problem.problemName}` : `Add notes for ${problem.problemName}`}
                                               >
-                                                <Pencil className="h-5 w-5" />
+                                                <Pencil className="h-4 w-4" />
                                               </button>
                                             </div>
+                                            </div>
+
+                                            {problem.notes && (
+                                              <p
+                                                className="line-clamp-2 pl-10 text-sm text-[#6B5A48]"
+                                              >
+                                                {problem.notes}
+                                              </p>
+                                            )}
                                           </div>
-                                        </motion.div>
+                                        </article>
                                       ))}
                                     </motion.div>
                                   )}
@@ -1342,69 +698,312 @@ const DSAProblemTracker = () => {
                               </div>
                             );
                           })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })
             )}
-          </div>
-          
-          {/* Related Links Section */}
+          </section>
+
           <div className="mt-12">
-            <RelatedLinks type="general" />
+            <RelatedLinks type="dsa" />
           </div>
         </div>
       </div>
 
-      {/* Notes Modal */}
+      <AnimatePresence>
+        {showNotesPanel && (
+          <>
+            <motion.button
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowNotesPanel(false)}
+              className="fixed inset-0 z-[2147483646] bg-[#2C241B]/30"
+              aria-label="Close notes panel backdrop"
+            />
+            <motion.aside
+              initial={reduceMotion ? false : { x: 420, opacity: 0.9 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 420, opacity: 0.9 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed right-0 top-0 z-[2147483647] h-full w-full max-w-[420px] border-l border-[#E5DCCE] bg-[#FFFDF8] shadow-[0_0_0_1px_rgba(229,220,206,0.5),_-10px_0_30px_rgba(44,36,27,0.12)]"
+            >
+              <div className="flex h-full flex-col">
+                <div className="flex items-center justify-between border-b border-[#E5DCCE] px-5 py-4">
+                  <div className="flex items-center gap-2">
+                    <NotebookPen className="h-5 w-5 text-[#C4A574]" aria-hidden />
+                    <p className="font-display text-2xl text-[#1C1917]">Notes</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowNotesPanel(false)}
+                    className={`rounded-lg border border-[#E5DCCE] bg-[#F7F3EC] p-2 text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+                    aria-label="Close notes panel"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto px-5 py-5">
+                  <div className="space-y-3">
+                    {problemsWithNotes.length === 0 ? (
+                      <div className="rounded-xl border border-dashed border-[#E5DCCE] bg-[#F7F3EC] px-4 py-8 text-center">
+                        <NotebookPen className="mx-auto h-6 w-6 text-[#C4A574]" aria-hidden />
+                        <p className="mt-3 text-sm text-[#78716C]">
+                          No notes yet. Add approach notes on any problem to see them here.
+                        </p>
+                      </div>
+                    ) : (
+                      problemsWithNotes.map((problem) => (
+                        <article key={problem.problemName} className="rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] p-3.5">
+                          <a
+                            href={problem.problemLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`font-medium text-[#2C241B] hover:underline ${focusRing}`}
+                          >
+                            {problem.problemName}
+                          </a>
+                          <p className="mt-1 text-xs text-[#78716C]">
+                            {problem.category} • {problem.difficulty}
+                          </p>
+                          <p className="mt-2 text-sm leading-relaxed text-[#57534E]">{problem.notes}</p>
+                          <div className="mt-2 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setNotesModal({ isOpen: true, problem, notes: problem.notes || '' })}
+                              className={`rounded-lg border border-[#E5DCCE] bg-[#FFFDF8] px-2.5 py-1 text-xs text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteNotes(problem.problemName)}
+                              className={`rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs text-rose-700 transition hover:bg-rose-100 ${focusRing}`}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </article>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showLeaderboardPanel && (
+          <>
+            <motion.button
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLeaderboardPanel(false)}
+              className="fixed inset-0 z-[2147483646] bg-[#2C241B]/30"
+              aria-label="Close leaderboard panel backdrop"
+            />
+            <motion.aside
+              initial={reduceMotion ? false : { x: 420, opacity: 0.9 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 420, opacity: 0.9 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed right-0 top-0 z-[2147483647] h-full w-full max-w-[420px] border-l border-[#E5DCCE] bg-[#FFFDF8] shadow-[0_0_0_1px_rgba(229,220,206,0.5),_-10px_0_30px_rgba(44,36,27,0.12)]"
+            >
+              <div className="flex h-full flex-col">
+                <div className="flex items-center justify-between border-b border-[#E5DCCE] px-5 py-4">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-[#C4A574]" aria-hidden />
+                    <p className="font-display text-2xl text-[#1C1917]">Leaderboard</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowLeaderboardPanel(false)}
+                    className={`rounded-lg border border-[#E5DCCE] bg-[#F7F3EC] p-2 text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+                    aria-label="Close leaderboard panel"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto px-5 py-5">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-1.5 text-[#6B5A48]">
+                      <Users className="h-3.5 w-3.5" aria-hidden />
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em]">Community ranking</p>
+                    </div>
+                    <div className="inline-flex rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] p-1">
+                      <button
+                        type="button"
+                        onClick={() => setLeaderboardTab('leaderboard')}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] ${focusRing} ${
+                          leaderboardTab === 'leaderboard' ? 'bg-[#2C241B] text-[#FFFDF8]' : 'text-[#6B5A48]'
+                        }`}
+                      >
+                        <Trophy className="h-3.5 w-3.5" aria-hidden />
+                        Ranking
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLeaderboardTab('winners')}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] ${focusRing} ${
+                          leaderboardTab === 'winners' ? 'bg-[#2C241B] text-[#FFFDF8]' : 'text-[#6B5A48]'
+                        }`}
+                      >
+                        <Award className="h-3.5 w-3.5" aria-hidden />
+                        Winners
+                      </button>
+                    </div>
+
+                    {leaderboardTab === 'leaderboard' ? (
+                      <>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setLeaderboardPeriod('all')}
+                            className={`flex-1 rounded-xl border px-2.5 py-2 text-xs font-semibold uppercase tracking-[0.08em] ${focusRing} ${
+                              leaderboardPeriod === 'all'
+                                ? 'border-[#2C241B] bg-[#2C241B] text-[#FFFDF8]'
+                                : 'border-[#E5DCCE] bg-[#F7F3EC] text-[#6B5A48]'
+                            }`}
+                          >
+                            All-time
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setLeaderboardPeriod('weekly')}
+                            className={`flex-1 rounded-xl border px-2.5 py-2 text-xs font-semibold uppercase tracking-[0.08em] ${focusRing} ${
+                              leaderboardPeriod === 'weekly'
+                                ? 'border-[#2C241B] bg-[#2C241B] text-[#FFFDF8]'
+                                : 'border-[#E5DCCE] bg-[#F7F3EC] text-[#6B5A48]'
+                            }`}
+                          >
+                            This week
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          value={lbSearch}
+                          onChange={(e) => setLbSearch(e.target.value)}
+                          placeholder="Search user"
+                          className={`w-full rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] px-3 py-2 text-sm text-[#2C241B] outline-none transition focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/30 ${focusRing}`}
+                        />
+                        <div className="space-y-2">
+                          {leaderboardFiltered.map((row) => (
+                            <div
+                              key={`${row.userId}-${row.rank}`}
+                              className="flex items-center justify-between gap-3 rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] px-3 py-2.5"
+                            >
+                              <div className="flex min-w-0 items-center gap-3">
+                                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${rankTone(row.rank)}`}>
+                                  {row.rank}
+                                </span>
+                                <p className="truncate text-sm font-semibold text-[#2C241B]">{row.username}</p>
+                              </div>
+                              <p className="shrink-0 text-sm font-semibold text-[#6B5A48]">{row.totalPoints} pts</p>
+                            </div>
+                          ))}
+                          {leaderboardFiltered.length === 0 && (
+                            <p className="text-sm text-[#78716C]">No entries.</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setLbLimit(lbLimit + 10)}
+                          className={`w-full rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-sm text-[#6B5A48] transition hover:bg-[#F7F3EC] ${focusRing}`}
+                        >
+                          Show more
+                        </button>
+                      </>
+                    ) : (
+                      <div className="space-y-2">
+                        {weeklyWinners.length === 0 ? (
+                          <p className="text-sm text-[#78716C]">No weekly winners yet.</p>
+                        ) : (
+                          weeklyWinners.map((w, index) => (
+                            <div
+                              key={w.userId}
+                              className="flex items-center justify-between gap-3 rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] px-3 py-2.5"
+                            >
+                              <div className="flex min-w-0 items-center gap-3">
+                                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${rankTone(index + 1)}`}>
+                                  {String(index + 1).padStart(2, '0')}
+                                </span>
+                                <p className="truncate text-sm font-semibold text-[#2C241B]">{w.username}</p>
+                              </div>
+                              <p className="shrink-0 text-sm font-semibold text-[#6B5A48]">{w.totalPoints} pts</p>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {notesModal.isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
-            onClick={closeNotesModal}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#2C241B]/45 p-4 backdrop-blur-[2px]"
+            onClick={() => setNotesModal({ isOpen: false, problem: null, notes: '' })}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full border border-slate-200"
+              className="w-full max-w-2xl rounded-2xl border border-[#E5DCCE] bg-[#FFFDF8] p-6 shadow-[0_20px_45px_rgba(44,36,27,0.2)] sm:p-7"
             >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-slate-900">
-                  Notes for {notesModal.problem?.problemName}
-                </h3>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] text-[#C4A574]">
+                    <NotebookPen className="h-4 w-4" aria-hidden />
+                  </span>
+                  <h3 className="font-display truncate text-2xl text-[#1C1917]">{notesModal.problem?.problemName}</h3>
+                </div>
                 <button
-                  onClick={closeNotesModal}
-                  className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+                  type="button"
+                  onClick={() => setNotesModal({ isOpen: false, problem: null, notes: '' })}
+                  className={`shrink-0 rounded-lg border border-[#E5DCCE] p-2 text-[#6B5A48] transition hover:bg-[#F7F3EC] ${focusRing}`}
+                  aria-label="Close notes editor"
                 >
-                  <X className="h-6 w-6 text-slate-600" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
               <textarea
                 value={notesModal.notes}
-                onChange={(e) => setNotesModal({ ...notesModal, notes: e.target.value })}
-                placeholder="Add your notes, approach, or learnings here..."
-                rows={10}
-                className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none text-slate-900 placeholder-slate-400"
+                onChange={(e) => setNotesModal((prev) => ({ ...prev, notes: e.target.value }))}
+                placeholder="Write your approach, edge-cases, or reminder notes..."
+                rows={9}
+                className={`w-full resize-none rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] px-4 py-3 text-sm text-[#2C241B] outline-none transition focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/40 ${focusRing}`}
               />
 
-              <div className="flex gap-3 mt-6">
+              <div className="mt-4 flex gap-2.5">
                 <button
-                  onClick={handleNotesSubmit}
-                  className="flex-1 px-6 py-3.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-semibold"
+                  type="button"
+                  onClick={() => notesModal.problem && updateProblemNotes(notesModal.problem.problemName, notesModal.notes)}
+                  className={`rounded-xl border border-[#2C241B] bg-[#2C241B] px-5 py-2.5 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510] ${focusRing}`}
                 >
-                  Save Notes
+                  Save note
                 </button>
                 <button
-                  onClick={closeNotesModal}
-                  className="px-6 py-3.5 bg-slate-100 text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-200 transition-colors font-semibold"
+                  type="button"
+                  onClick={() => setNotesModal({ isOpen: false, problem: null, notes: '' })}
+                  className={`rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-5 py-2.5 text-sm font-medium text-[#6B5A48] transition hover:bg-[#F7F3EC] ${focusRing}`}
                 >
                   Cancel
                 </button>
@@ -1415,6 +1014,4 @@ const DSAProblemTracker = () => {
       </AnimatePresence>
     </>
   );
-};
-
-export default DSAProblemTracker;
+}

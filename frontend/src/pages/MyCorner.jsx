@@ -1,207 +1,279 @@
-import React, { useState, useEffect } from 'react';
-import { 
+import { useState, useEffect } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
   FileText,
-  Users,
   DollarSign,
-  FileEdit,
-  Settings,
   Menu,
   X,
-  ChevronRight,
-  Puzzle
+  Home,
+  ChevronLeft,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
-import Breadcrumb from '../components/Breadcrumb';
-import RelatedLinks from '../components/RelatedLinks';
-import { useSelector } from 'react-redux';
 import MyInterviews from '../components/MyInterviews';
-import MyReferrals from '../components/MyReferrals';
 import MySalary from '../components/MySalary';
-import MyResumeTemplates from '../components/MyResumeTemplates';
-import ResumeBuilder from './ResumeBuilder';
-import MyPolls from './MyPolls';
+import { focusRing } from '../theme/tokens';
+
+const MENU = [
+  {
+    id: 'interview',
+    icon: FileText,
+    label: 'Interview experiences',
+    blurb: 'Stories you have shared',
+  },
+  {
+    id: 'salary',
+    icon: DollarSign,
+    label: 'Salary structures',
+    blurb: 'Offers you have posted',
+  },
+];
 
 export default function MyCorner() {
   const { currentUser } = useSelector((state) => state.user);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState('interview');
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setIsCollapsed(true);
-      }
+    const onResize = () => {
+      if (window.innerWidth >= 1024) setMobileOpen(false);
     };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const menuItems = [
-    { id: 'interview', icon: FileText, label: 'Interview Exp.' },
-    { id: 'referral', icon: Users, label: 'Referrals' },
-    { id: 'salary', icon: DollarSign, label: 'Salary Structures' },
-    { id: 'resume', icon: FileEdit, label: 'Resume Templates' },
-    { id: 'polls', icon: Puzzle, label: 'My Polls' },
-  ];
+  if (!currentUser) {
+    return <Navigate to="/sign-in?redirect=/myCorner" replace />;
+  }
 
-  const handleMenuItemClick = (itemId) => {
-    setActiveItem(itemId);
-    if (window.innerWidth < 768) {
-      setIsMobileMenuOpen(false);
-    }
+  const active = MENU.find((m) => m.id === activeItem) || MENU[0];
+
+  const selectItem = (id) => {
+    setActiveItem(id);
+    setMobileOpen(false);
   };
 
-  const getActiveComponent = () => {
-    switch (activeItem) {
-      case 'interview':
-        return <MyInterviews />;
-      case 'referral':
-        return <MyReferrals />;
-      case 'salary':
-        return <MySalary />;
-      case 'resume':
-        return <MyResumeTemplates />;
-      case 'resumeBuilder':
-        return <ResumeBuilder />;
-      case 'polls':
-        return <MyPolls />;
-      default:
-        return <div className="p-8">Select a menu item</div>;
-    }
-  };
+  const sidebarInner = (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 border-b border-[#E5DCCE] px-4 py-5">
+        {(!collapsed || mobileOpen) ? (
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6B5A48]">
+              Personal
+            </p>
+            <h1 className="font-display truncate text-lg font-semibold leading-tight text-[#1C1917]">
+              My Corner
+            </h1>
+          </div>
+        ) : (
+          <p className="text-center font-display text-sm font-semibold text-[#1C1917]">MC</p>
+        )}
+      </div>
+
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3" aria-label="My Corner sections">
+        {MENU.map(({ id, icon: Icon, label, blurb }) => {
+          const isActive = activeItem === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => selectItem(id)}
+              title={label}
+              className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition ${focusRing} ${
+                isActive
+                  ? 'bg-[#2C241B] text-[#FFFDF8]'
+                  : 'text-[#6B5A48] hover:bg-[#F7F3EC] hover:text-[#2C241B]'
+              } ${collapsed && !mobileOpen ? 'justify-center' : ''}`}
+            >
+              <Icon
+                className={`h-4 w-4 shrink-0 ${isActive ? 'text-[#C4A574]' : 'text-[#C4A574]/80'}`}
+                aria-hidden
+              />
+              {(!collapsed || mobileOpen) && (
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">{label}</span>
+                  <span
+                    className={`mt-0.5 block truncate text-[11px] ${
+                      isActive ? 'text-[#E5DCCE]' : 'text-[#78716C]'
+                    }`}
+                  >
+                    {blurb}
+                  </span>
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      <div className="shrink-0 border-t border-[#E5DCCE] p-3">
+        <button
+          type="button"
+          onClick={() => navigate('/profile')}
+          className={`flex w-full items-center gap-3 rounded-xl border border-[#E5DCCE] bg-[#F7F3EC]/70 px-3 py-2.5 text-left transition hover:bg-[#EFE8DC] ${focusRing} ${
+            collapsed && !mobileOpen ? 'justify-center' : ''
+          }`}
+        >
+          <img
+            src={currentUser.profilePicture || '/assets/Profile.jpg'}
+            alt=""
+            className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-[#E5DCCE]"
+          />
+          {(!collapsed || mobileOpen) && (
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium text-[#1C1917]">
+                {currentUser.username}
+              </span>
+              <span className="block truncate text-[11px] text-[#78716C]">{currentUser.email}</span>
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          className={`mt-2 hidden w-full items-center justify-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-xs font-medium text-[#6B5A48] transition hover:bg-[#F7F3EC] lg:flex ${focusRing}`}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <PanelLeft className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
+          {!collapsed && 'Collapse'}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      {/* ✅ Helmet for SEO */}
       <Helmet>
-        <title>My Corner | Personal Dashboard - Route2Hire QA & SDET Platform</title>
+        <title>My Corner | Personal workspace — Route2Hire</title>
         <meta
           name="description"
-          content="Access your personal dashboard on Route2Hire. Manage your QA, SDET, Test Automation interviews, referrals, salary data, resume templates, and polls in one place for software testing professionals."
+          content="Your personal Route2Hire workspace. Manage interview experiences and salary structures you have shared as a QA or SDET professional."
         />
-        <meta
-          name="keywords"
-          content="Personal dashboard, My corner, QA dashboard, SDET dashboard, Test Automation dashboard, User dashboard, Personal workspace, QA career management"
-        />
-        <meta property="og:title" content="My Corner | Personal Dashboard - Route2Hire QA & SDET Platform" />
-        <meta
-          property="og:description"
-          content="Access your personal dashboard for QA, SDET, and Test Automation career management. Manage interviews, referrals, and career resources."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://route2hire.com/mycorner" />
-        <meta property="og:image" content="https://route2hire.com/assets/Route2Hire.png" />
-        <link rel="canonical" href="https://route2hire.com/mycorner" />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href="https://route2hire.com/myCorner" />
       </Helmet>
 
-      <div className="flex h-screen overflow-hidden">
-
-      {/* Mobile Header Bar - Fixed at top */}
-      <div className="absolute top-16 left-0 right-0 h-16 bg-white shadow-md z-40 md:hidden">
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="absolute top-1/2 left-4 -translate-y-1/2 bg-white p-2 rounded-lg hover:bg-gray-50 transition-colors"
+      <div className="flex min-h-screen bg-[#F7F3EC]">
+        {/* Desktop sidebar */}
+        <aside
+          className={`sticky top-0 hidden h-screen shrink-0 border-r border-[#E5DCCE] bg-[#FFFDF8] transition-[width] duration-300 lg:block ${
+            collapsed ? 'w-[88px]' : 'w-[280px]'
+          }`}
         >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-        <div className="flex items-center justify-center h-full">
-          <span className="font-semibold text-lg text-gray-800">MyCorner</span>
-        </div>
-      </div>
+          {sidebarInner}
+        </aside>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div 
-        className={`fixed md:relative h-screen bg-white shadow-xl transition-all duration-300 ease-in-out z-50
-          ${isCollapsed ? 'w-20' : 'w-64'}
-          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-          flex-shrink-0 pt-16 md:pt-0`}
-      >
-        {/* Toggle Button - Only visible on desktop */}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-8 bg-blue-600 p-1.5 rounded-full text-white hover:bg-blue-700 transition-colors hidden md:block"
-        >
-          {isCollapsed ? <ChevronRight size={16} /> : <X size={16} />}
-        </button>
-
-        {/* Header - Only visible on desktop */}
-        <div className="p-4 items-center space-x-4 hidden md:flex">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <Menu className="text-white" size={24} />
-          </div>
-          {!isCollapsed && (
-            <span className="font-semibold text-lg text-gray-800">MyCorner</span>
-          )}
-        </div>
-
-        {/* Menu Items */}
-        <nav className="mt-8 px-4">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleMenuItemClick(item.id)}
-              className={`w-full flex items-center py-3 px-4 rounded-lg mb-2 transition-all duration-200
-                ${activeItem === item.id 
-                  ? 'bg-blue-50 text-blue-600' 
-                  : 'text-gray-600 hover:bg-gray-50'}`}
-            >
-              <item.icon size={20} />
-              {!isCollapsed && (
-                <span className="ml-4 font-medium">{item.label}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        {/* User Profile Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-4'}`}>
-            <div className="relative w-10 h-10">
-              <img 
-                src={currentUser.profilePicture}
-                alt="Profile"
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-100"
+        {/* Mobile drawer */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[2147483646] bg-[#2C241B]/40 lg:hidden"
+                onClick={() => setMobileOpen(false)}
+                aria-hidden
               />
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
-            </div>
-            {!isCollapsed && (
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-gray-800">{currentUser.username}</h4>
-                <p className="text-xs text-gray-500">{currentUser.email}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+              <motion.aside
+                initial={{ x: -280 }}
+                animate={{ x: 0 }}
+                exit={{ x: -280 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+                className="fixed inset-y-0 left-0 z-[2147483647] flex w-[min(100%,280px)] flex-col border-r border-[#E5DCCE] bg-[#FFFDF8] lg:hidden"
+              >
+                <div className="absolute right-3 top-3 z-10">
+                  <button
+                    type="button"
+                    onClick={() => setMobileOpen(false)}
+                    className={`rounded-lg border border-[#E5DCCE] bg-[#FFFDF8] p-2 text-[#6B5A48] ${focusRing}`}
+                    aria-label="Close menu"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                {sidebarInner}
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
 
-      {/* Main Content Area - Adjust top padding and height for mobile */}
-      <div className="flex-1 overflow-auto bg-gray-50 w-full pt-16 md:pt-0 h-[calc(100vh-64px)] md:h-full relative">
-        {/* Breadcrumb Navigation */}
-        <div className="absolute top-4 left-4 z-10 hidden md:block">
-          <Breadcrumb 
-            items={[
-              { label: 'My Corner' }
-            ]}
-          />
+        {/* Main */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[#E5DCCE] bg-[#F7F3EC]/90 px-4 py-3 backdrop-blur-md sm:px-6 lg:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              className={`rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] p-2.5 text-[#6B5A48] ${focusRing}`}
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6B5A48]">
+                My Corner
+              </p>
+              <p className="truncate text-sm font-medium text-[#1C1917]">{active.label}</p>
+            </div>
+            <Link
+              to="/"
+              className={`inline-flex items-center gap-1.5 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-xs font-medium text-[#6B5A48] ${focusRing}`}
+            >
+              <Home className="h-3.5 w-3.5" />
+              Home
+            </Link>
+          </header>
+
+          <main className="relative min-h-0 flex-1 overflow-y-auto">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-48"
+              style={{
+                background:
+                  'radial-gradient(ellipse 60% 80% at 10% 0%, rgba(196,165,116,0.14), transparent 55%)',
+              }}
+            />
+
+            <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+              <div className="mb-8 hidden items-end justify-between gap-4 border-b border-[#E5DCCE] pb-6 lg:flex">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6B5A48]">
+                    Workspace
+                  </p>
+                  <h2 className="font-display mt-1 text-3xl font-semibold leading-[1.15] text-[#1C1917]">
+                    {active.label}
+                  </h2>
+                  <p className="mt-2 max-w-xl text-sm text-[#57534E]">{active.blurb}</p>
+                </div>
+                <Link
+                  to="/"
+                  className={`inline-flex items-center gap-1.5 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-xs font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  Back to site
+                </Link>
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeItem}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {activeItem === 'interview' ? <MyInterviews /> : <MySalary />}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </main>
         </div>
-        {getActiveComponent()}
-        
-        {/* Related Links Section */}
-        <div className="px-4 pb-8 mt-8">
-          <RelatedLinks type="general" />
-        </div>
-      </div>
       </div>
     </>
   );

@@ -1,206 +1,194 @@
-/* Home page specific styles */
-@keyframes fadeInSlide {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Home — Career Almanac (Warm Beige Cream + Fraunces) */
+
+html:has(.home-page) {
+  scroll-behavior: smooth;
 }
 
-.animate-fadeInSlide {
-  animation: fadeInSlide 0.6s ease-out;
+.home-page {
+  color: #57534e;
+  background: #f7f3ec;
+  overflow-x: clip;
+  font-family: var(--font-body);
 }
 
-/* Premium Scrollbar */
+.home-page h1,
+.home-page h2,
+.home-page h3,
+.home-page .font-display {
+  font-family: var(--font-display);
+  color: #1c1917;
+}
+
 .home-page ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 .home-page ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  background: #efe8dc;
 }
 
 .home-page ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  border-radius: 10px;
+  background: #e5dcce;
+  border-radius: 999px;
+  transition: background 0.25s ease;
 }
 
 .home-page ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #5a67d8, #6b46c1);
+  background: #c4a574;
 }
 
-/* Enhanced bounce animation */
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translate3d(0,0,0);
+/* —— Shared interactive polish —— */
+.home-page a,
+.home-page button {
+  transition:
+    color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    gap 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+
+.home-cta-primary {
+  transition:
+    background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px -14px rgba(44, 36, 27, 0.45);
+}
+
+.home-cta-primary:active {
+  transform: translateY(0);
+}
+
+/* —— Cover —— */
+.home-cover__grain {
+  opacity: 0.45;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.home-cover__wash {
+  animation: home-wash 18s ease-in-out infinite alternate;
+}
+
+.home-cover__arrow {
+  animation: home-bob 2.4s ease-in-out infinite;
+}
+
+@keyframes home-wash {
+  from {
+    transform: translate(0, 0) scale(1);
   }
-  40%, 43% {
-    transform: translate3d(0, -12px, 0);
-  }
-  70% {
-    transform: translate3d(0, -6px, 0);
-  }
-  90% {
-    transform: translate3d(0, -3px, 0);
+  to {
+    transform: translate(6%, 5%) scale(1.06);
   }
 }
 
-.animate-bounce {
-  animation: bounce 1.6s infinite;
-}
-
-/* Pulse effect for background elements */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
+@keyframes home-bob {
+  0%,
+  100% {
+    transform: translateY(0);
   }
   50% {
-    opacity: 0.8;
-    transform: scale(1.05);
+    transform: translateY(4px);
   }
 }
 
-.animate-pulse {
-  animation: pulse 4s ease-in-out infinite;
+/* —— Word field —— */
+.home-wordfield__word {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Glass morphism effects */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.home-wordfield__word:hover,
+.home-wordfield__word:focus-visible {
+  transform: scale(1.03);
 }
 
-/* Premium gradient text */
-.premium-text {
-  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.home-wordfield__stat dd {
+  transition: color 0.35s ease;
 }
 
-/* Hover glow effects */
-.glow-on-hover:hover {
-  box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+/* —— Paper stack —— */
+.home-paper__tab {
+  transition:
+    background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Smooth transitions for all interactive elements (scoped to Home only) */
-.home-page * {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.home-paper__tab:hover {
+  transform: translateX(2px);
 }
 
-/* Custom gradient borders */
-.gradient-border {
-  position: relative;
-  background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
-  background-size: 400% 400%;
-  animation: gradient-shift 6s ease infinite;
+.home-paper__ruled {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(229, 220, 206, 0.55) 27px,
+    rgba(229, 220, 206, 0.55) 28px
+  );
+  background-position: 0 4.5rem;
+  mask-image: linear-gradient(to bottom, transparent 0, black 18%, black 88%, transparent);
+  opacity: 0.55;
 }
 
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* —— Almanac —— */
+.home-almanac__row {
+  transition:
+    padding-left 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.35s ease;
 }
 
-/* Premium card hover effects */
-.premium-card {
-  transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+.home-almanac__row:hover {
+  padding-left: 0.5rem;
 }
 
-.premium-card:hover {
-  transform: rotateY(5deg) rotateX(5deg) translateZ(50px);
+/* —— Community channel rows —— */
+.home-channel-row {
+  transition: background-color 0.35s ease, padding-left 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Text shadow for better readability */
-.text-shadow {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+.home-channel-row:hover {
+  padding-left: 0.35rem;
+  background-color: rgba(255, 253, 248, 0.45);
 }
 
-/* Loading animation improvements */
-.loading-dots {
-  display: inline-block;
-}
-
-.loading-dots::after {
-  content: '';
-  animation: loading-dots 1.5s infinite;
-}
-
-@keyframes loading-dots {
-  0%, 20% { content: ''; }
-  40% { content: '.'; }
-  60% { content: '..'; }
-  80%, 100% { content: '...'; }
-}
-
-/* Infinite scroll animation for job preview */
-@keyframes infinite-scroll {
-  0% {
-    transform: translateY(0);
+@media (prefers-reduced-motion: reduce) {
+  html:has(.home-page) {
+    scroll-behavior: auto;
   }
-  100% {
-    transform: translateY(-50%);
+
+  .home-cover__wash,
+  .home-cover__arrow {
+    animation: none;
   }
-}
 
-.animate-infinite-scroll {
-  animation: infinite-scroll 20s linear infinite;
-  will-change: transform;
-}
-
-/* Custom scrollbar for modals */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-/* Modal animations */
-@keyframes animate-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  .home-page a,
+  .home-page button,
+  .home-cta-primary,
+  .home-wordfield__word,
+  .home-paper__tab,
+  .home-almanac__row,
+  .home-channel-row {
+    transition: none;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-.animate-in {
-  animation: animate-in 0.3s ease-out forwards;
-}
-
-@keyframes slide-in-from-left {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
+  .home-cta-primary:hover,
+  .home-paper__tab:hover,
+  .home-wordfield__word:hover,
+  .home-wordfield__word:focus-visible {
+    transform: none;
   }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
 
-.slide-in-from-left {
-  animation: slide-in-from-left 0.3s ease-out forwards;
+  .home-almanac__row:hover,
+  .home-channel-row:hover {
+    padding-left: 0;
+  }
 }

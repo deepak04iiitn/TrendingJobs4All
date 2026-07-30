@@ -1,0 +1,31 @@
+# robots.txt for Route2Hire
+# Controls access for web crawlers and AI agents.
+
+User-agent: *
+Allow: /
+Disallow: /profile
+Disallow: /dashboard
+Disallow: /admin/
+Disallow: /my-jobs
+
+# Sitemaps and AI crawler hints
+Sitemap: https://route2hire.com/sitemap.xml
+# LLM policy (informational only): https://route2hire.com/llms.txt
+
+# Optional: Allow major AI crawlers for structured understanding
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Crawl-delay to avoid overloading server
+Crawl-delay: 10
+
+# End of file
