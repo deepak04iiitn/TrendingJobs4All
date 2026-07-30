@@ -6,7 +6,6 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import FlashStrip from './components/FlashStrip';
 import Profile from './pages/Profile';
 import FullJd from './pages/FullJd';
 import MyJobs from './pages/MyJobs';
@@ -132,7 +131,7 @@ function AdminBlogsEditRedirect() {
 function Layout() {
   const location = useLocation();
   // The admin dashboard renders its own full-height shell and doesn't need the
-  // public site chrome (floating nav + promo strip) eating into its vertical space.
+  // public site chrome (floating nav) eating into its vertical space.
   const isAdminArea = location.pathname.startsWith('/admin');
   const isMyCorner = location.pathname.toLowerCase().startsWith('/mycorner');
   const hidePublicChrome = isAdminArea || isMyCorner;
@@ -141,7 +140,6 @@ function Layout() {
     <div className="flex flex-col min-h-screen">
       <SessionManager />
       {!hidePublicChrome && <Header />}
-      {!hidePublicChrome && <FlashStrip />}
       <div className="flex-grow">
         <Routes>
                 <Route path='/' element={<Home />} />
