@@ -93,11 +93,6 @@ const generateLLMSText = (dynamicContent) => {
       description: 'Allow users to create professional resumes and access career resources for job opportunities.'
     },
     {
-      url: '/roadmaps',
-      title: 'Career Roadmaps (Coming Soon)',
-      description: 'Planned skill roadmaps for QA, SDET, and Test Automation roles to guide learners.'
-    },
-    {
       url: '/interview-questions',
       title: 'Interview Questions Bank',
       description: 'Prepare candidates with categorized real interview questions and detailed explanations for IT job interviews.'
@@ -108,34 +103,24 @@ const generateLLMSText = (dynamicContent) => {
       description: 'Master Data Structures & Algorithms with real QA/SDET interview questions. Track your progress through actual problems asked in QA and SDET interviews, organized by category and difficulty.'
     },
     {
-      url: '/newsletter',
-      title: 'Route2Hire Premium Jobs',
-      description: 'Offer premium job alerts and career resources for personalized job search and professional growth.'
-    },
-    {
-      url: '/contactUs',
+      url: '/contact-us',
       title: 'Contact Route2Hire',
       description: 'Provide contact information and connect users with career opportunities and support.'
     },
     {
-      url: '/terms',
+      url: '/terms-of-service',
       title: 'Route2Hire Terms of Service',
       description: 'Outline the terms, user rights, responsibilities, and legal guidelines for using Route2Hire services.'
     },
     {
-      url: '/privacyPolicy',
+      url: '/privacy-policy',
       title: 'Privacy Policy',
       description: 'Explain Route2Hire\'s practices on collecting, using, and protecting user privacy and data.'
     },
     {
-      url: '/cookies',
+      url: '/cookie-policy',
       title: 'Cookie Policy',
       description: 'Explain cookie usage and management on the site to enhance user experience and privacy control.'
-    },
-    {
-      url: '/community',
-      title: 'Community - Join Route2Hire',
-      description: 'Join Route2Hire\'s vibrant community of 3500+ job seekers and tech enthusiasts. Connect on Telegram, WhatsApp, Instagram, and Topmate for instant job alerts, career tips, and professional networking opportunities.'
     },
     {
       url: '/blogs',

@@ -66,10 +66,14 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
             onChange(sectionField, newItems);
         };
 
-        const inputClasses = "w-full p-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-sm";
-        const buttonClasses = "w-full p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white rounded-lg hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-200 flex items-center justify-center space-x-2 text-sm font-medium";
-        const removeButtonClasses = "p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-200 text-sm";
-        const selectClasses = "w-full p-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 cursor-pointer text-sm";
+        const inputClasses =
+            'w-full rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] p-3 text-sm text-[#2C241B] placeholder:text-[#78716C] outline-none transition focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/25';
+        const buttonClasses =
+            'flex w-full items-center justify-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#EFE8DC] p-3 text-sm font-medium text-[#2C241B] transition hover:bg-[#C4A574]/25';
+        const removeButtonClasses =
+            'rounded-lg px-2 py-2 text-sm text-rose-600 transition hover:bg-rose-50';
+        const selectClasses =
+            'w-full cursor-pointer appearance-none rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] p-3 pr-8 text-sm text-[#2C241B] outline-none transition focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/25';
 
         switch (field) {
             case 'Header':
@@ -201,7 +205,7 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                                 key={itemIndex}
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-xl space-y-3"
+                                className="space-y-3 rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] p-4"
                             >
                                 {/* Field-specific inputs */}
                                 {field === 'Education' && (
@@ -262,13 +266,13 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                                             className={inputClasses}
                                         />
                                         <div className="space-y-1">
-                                            <label className="block text-sm font-medium text-gray-300">
+                                            <label className="block text-sm font-medium text-[#6B5A48]">
                                                 Technologies
                                             </label>
                                             <div className="flex flex-wrap gap-2">
                                                 {Array.isArray(item.technologies) && item.technologies.map((tech, techIndex) => (
-                                                    <div key={techIndex} className="flex items-center bg-white/10 rounded-xl px-3 py-1">
-                                                        <span className="text-sm text-white">{tech}</span>
+                                                    <div key={techIndex} className="flex items-center rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-1">
+                                                        <span className="text-sm text-[#2C241B]">{tech}</span>
                                                         <motion.button
                                                             whileHover={{ scale: 1.1 }}
                                                             whileTap={{ scale: 0.95 }}
@@ -277,7 +281,7 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                                                                 newTechs.splice(techIndex, 1);
                                                                 handleArrayItemChange(field, itemIndex, 'technologies', newTechs);
                                                             }}
-                                                            className="ml-2 text-gray-400 hover:text-white"
+                                                            className="ml-2 text-[#78716C] hover:text-rose-600"
                                                         >
                                                             ×
                                                         </motion.button>
@@ -427,7 +431,7 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                                     </>
                                 )}
                                 <div className="space-y-3">
-                                    <label className="block text-sm font-medium text-gray-300">Description (Bullet Points)</label>
+                                    <label className="block text-sm font-medium text-[#6B5A48]">Description (Bullet Points)</label>
                                     {(item.description || []).map((desc, descIndex) => (
                                         <div key={descIndex} className="flex items-center gap-2">
                                             <input
@@ -513,7 +517,7 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                                 key={categoryIndex}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30"
+                                className="rounded-xl border border-[#E5DCCE] bg-[#F7F3EC] p-4"
                             >
                                 <div className="flex items-center justify-between mb-3">
                                     <input
@@ -800,73 +804,65 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <motion.h2 
-                    initial={{ opacity: 0, x: -20 }}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <motion.h2
+                    initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="text-xl font-bold text-white flex items-center"
+                    className="font-display flex items-center gap-2 text-xl font-semibold text-[#1C1917]"
                 >
-                    <div className="relative mr-3">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg blur opacity-60"></div>
-                        <div className="relative bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg">
-                            <Save className="w-5 h-5 text-white" />
-                        </div>
-                    </div>
-                    Edit Resume
+                    <Save className="h-5 w-5 text-[#C4A574]" />
+                    Edit resume
                 </motion.h2>
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onReset}
-                    className="flex items-center space-x-2 px-3 py-2 bg-slate-700/50 text-slate-300 rounded-lg hover:bg-slate-700 text-sm font-medium transition-all duration-200"
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-sm font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC]"
                 >
-                    <RefreshCw className="w-4 h-4" />
-                    <span>Change Fields</span>
+                    <RefreshCw className="h-4 w-4" />
+                    Change sections
                 </motion.button>
             </div>
 
             {/* AI Job Description Analyzer */}
             {selectedFields.includes('Technical Skills') && (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-xl rounded-xl p-5 border border-slate-600/30"
+                    className="rounded-2xl border border-[#E5DCCE] bg-[#F7F3EC] p-5"
                 >
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg blur opacity-60"></div>
-                            <div className="relative bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg">
-                                <Wand2 className="w-4 h-4 text-white" />
-                            </div>
-                        </div>
-                        <h3 className="text-lg font-semibold text-white">AI Skill Extractor</h3>
+                    <div className="mb-3 flex items-center gap-2">
+                        <Wand2 className="h-4 w-4 text-[#C4A574]" />
+                        <h3 className="font-display text-lg font-semibold text-[#1C1917]">
+                            AI skill extractor
+                        </h3>
                     </div>
-                    <p className="text-slate-300 mb-4 text-sm">
-                        Paste a job description below and let AI extract relevant skills for your resume
+                    <p className="mb-4 text-sm text-[#57534E]">
+                        Paste a job description and extract relevant skills into Technical Skills.
                     </p>
                     <div className="space-y-3">
                         <textarea
                             value={jobDescription}
                             onChange={(e) => setJobDescription(e.target.value)}
-                            placeholder="Paste job description here..."
-                            className="w-full p-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 min-h-[120px] resize-none text-sm"
+                            placeholder="Paste job description here…"
+                            className="min-h-[120px] w-full resize-none rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] p-3 text-sm text-[#2C241B] placeholder:text-[#78716C] outline-none transition focus:border-[#C4A574] focus:ring-2 focus:ring-[#C4A574]/25"
                         />
                         <motion.button
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.99 }}
                             onClick={analyzeJobDescription}
                             disabled={isAnalyzing || !jobDescription.trim()}
-                            className="w-full p-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm"
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2C241B] p-3 text-sm font-medium text-[#FFFDF8] transition hover:bg-[#1A1510] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {isAnalyzing ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    <span>Analyzing...</span>
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                    <span>Analyzing…</span>
                                 </>
                             ) : (
                                 <>
-                                    <Sparkles className="w-4 h-4" />
-                                    <span>Extract Skills</span>
+                                    <Sparkles className="h-4 w-4" />
+                                    <span>Extract skills</span>
                                 </>
                             )}
                         </motion.button>
@@ -878,12 +874,12 @@ const ResumeForm = ({ selectedFields = [], resumeData = {}, onChange, onReset })
                 {(selectedFields || []).map((field, index) => (
                     <motion.div
                         key={field}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="space-y-3"
+                        transition={{ delay: index * 0.05 }}
+                        className="space-y-3 border-t border-[#E5DCCE] pt-5 first:border-t-0 first:pt-0"
                     >
-                        <h3 className="text-lg font-semibold text-white">{field}</h3>
+                        <h3 className="font-display text-lg font-semibold text-[#1C1917]">{field}</h3>
                         {renderFieldInput(field)}
                     </motion.div>
                 ))}

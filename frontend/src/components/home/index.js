@@ -7,5 +7,4 @@ export { default as HomeFaq } from './sections/HomeFaq';
 export { default as HomeCommunity } from './sections/HomeCommunity';
 export { default as HomeClosing } from './sections/HomeClosing';
 export { default as HomeTestimonials } from './sections/HomeTestimonials';
-export { default as HomeNewsletter } from './sections/HomeNewsletter';
 export { default as useHomeStats } from './hooks/useHomeStats';

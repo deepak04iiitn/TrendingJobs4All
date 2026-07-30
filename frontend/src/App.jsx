@@ -13,7 +13,6 @@ import MyJobs from './pages/MyJobs';
 import InterviewExp from './pages/InterviewExp';
 import SalaryStructures from './pages/SalaryStructures';
 import MyCorner from './pages/MyCorner';
-import PremiumSubscription from './pages/PremiumSubscription';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminShell from './pages/admin/AdminShell';
@@ -36,7 +35,6 @@ import InterviewDetailPage from './pages/InterviewDetailPage';
 import SalaryDetailPage from './pages/SalaryDetailPage';
 import ResumeBuilder from './pages/ResumeBuilder';
 import InterviewQuestions from './pages/InterviewQuestions';
-import Newsletter from './pages/Newsletter';
 import SocialIconFab from './components/SocialIconFab';
 import { useDispatch, useSelector } from 'react-redux';
 import { signoutSuccess, initializeSessionExpiry } from './redux/user/userSlice';
@@ -48,10 +46,6 @@ import BlogLegacyRedirect from './pages/BlogLegacyRedirect';
 import DSAProblemTracker from './pages/DSAProblemTracker';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import RoadmapPage from './pages/RoadmapPage';
-import RoadmapList from './pages/RoadmapList';
-import CreateRoadmap from './pages/CreateRoadmap';
-import Community from './pages/Community';
 
 
 function SessionManager() {
@@ -189,15 +183,14 @@ function Layout() {
                   <Route path='/admin-blogs/edit/:id' element={<AdminBlogsEditRedirect />} />
                 </Route>
                 
-                <Route path='/BuyMeACoffee' element={<PremiumSubscription />} />
-                <Route path='/contactUs' element={<ContactUs />} />
-                <Route path='/privacyPolicy' element={<PrivacyPolicy />} />
+                <Route path='/contact-us' element={<ContactUs />} />
+                <Route path='/contactUs' element={<Navigate to='/contact-us' replace />} />
                 <Route path='/privacy-policy' element={<PrivacyPolicy />} />
-                <Route path='/terms' element={<TermsOfService />} />
+                <Route path='/privacyPolicy' element={<Navigate to='/privacy-policy' replace />} />
                 <Route path='/terms-of-service' element={<TermsOfService />} />
-                <Route path='/cookies' element={<CookiePolicy />} />
+                <Route path='/terms' element={<Navigate to='/terms-of-service' replace />} />
                 <Route path='/cookie-policy' element={<CookiePolicy />} />
-                <Route path='/newsletter' element={<Newsletter />} />
+                <Route path='/cookies' element={<Navigate to='/cookie-policy' replace />} />
                 <Route path='/jobs' element={<Jobs />} />
                 <Route path='/resume-builder' element={<ResumeBuilder />} />
                 
@@ -215,13 +208,11 @@ function Layout() {
                 {/* DSA Problem Tracker Route */}
                 <Route path='/qa-sdet-dsa-sheet' element={<DSAProblemTracker />} />
 
-                {/* Roadmap Route */}
-                <Route path="/roadmaps" element={<RoadmapList />} />
-                <Route path="/roadmaps/create" element={<CreateRoadmap />} />
-                <Route path="/roadmaps/edit/:role" element={<CreateRoadmap />} />
-                <Route path="/roadmaps/:role" element={<RoadmapPage />} />
-
-                <Route path="/connect-with-route2hire" element={<Community />} />
+                {/* Roadmaps blocked — redirect public URLs to home */}
+                <Route path="/roadmap" element={<Navigate to="/" replace />} />
+                <Route path="/roadmap/*" element={<Navigate to="/" replace />} />
+                <Route path="/roadmaps" element={<Navigate to="/" replace />} />
+                <Route path="/roadmaps/*" element={<Navigate to="/" replace />} />
 
         </Routes>
       </div>
