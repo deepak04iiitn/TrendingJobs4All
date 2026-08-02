@@ -352,7 +352,7 @@ export default function Header() {
                 ? [{ action: () => handleProfileNavigation('/admin'), icon: LayoutDashboard, label: 'Admin Dashboard', desc: 'System overview' }]
                 : []),
               { action: () => handleProfileNavigation('/myCorner'), icon: BookOpen, label: 'My Corner', desc: 'Personal workspace' },
-              { action: () => handleProfileNavigation('/myCorner?panel=premium'), icon: BellRing, label: 'Premium Jobs', desc: 'Manage subscription' },
+              // { action: () => handleProfileNavigation('/myCorner?panel=premium'), icon: BellRing, label: 'Premium Jobs', desc: 'Manage subscription' },
             ].map(({ action, icon: Icon, label, desc }) => (
               <button
                 key={label}
@@ -511,13 +511,13 @@ export default function Header() {
                     >
                       <BookOpen size={14} /> Corner
                     </button>
-                    <button
+                    {/* <button
                       type="button"
                       onClick={() => handleProfileNavigation('/myCorner?panel=premium')}
                       className={`col-span-2 flex items-center justify-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] py-2.5 text-sm font-medium text-[#57534E] ${focusRing}`}
                     >
                       <BellRing size={14} /> Premium Jobs
-                    </button>
+                    </button> */}
                     {currentUser?.isUserAdmin && (
                       <button
                         type="button"
