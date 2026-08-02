@@ -37,7 +37,8 @@ const FOOTER_COLUMNS = [
     links: [
       { href: '/sign-in', label: 'Sign In' },
       { href: '/sign-up', label: 'Sign Up' },
-      { href: '/my-jobs', label: 'My Jobs' },
+      { href: '/premium-jobs', label: 'Premium Jobs' },
+      { href: '/myCorner?panel=jobs', label: 'My Jobs' },
       { href: '/profile', label: 'My Profile' },
     ],
   },

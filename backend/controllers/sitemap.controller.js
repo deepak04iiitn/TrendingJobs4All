@@ -37,6 +37,7 @@ const generateSitemapXML = (urls) => {
     { url: '/', priority: '1.00' },
     { url: '/about', priority: '0.80' },
     { url: '/jobs', priority: '0.90' },
+    { url: '/premium-jobs', priority: '0.90' },
     { url: '/interview-experiences', priority: '0.80' },
     { url: '/salary-structures', priority: '0.80' },
     { url: '/interview-questions', priority: '0.80' },

@@ -112,3 +112,46 @@ export async function fetchRoadmaps() {
 export async function deleteRoadmap(id) {
   await axios.delete(`/backend/roadmaps/admin/${id}`);
 }
+
+export async function fetchPremiumOverview() {
+  const res = await axios.get('/backend/admin/premium-jobs/overview');
+  return res.data;
+}
+
+export async function fetchPremiumSubscribers(params = {}) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') search.append(k, v);
+  });
+  const res = await axios.get(`/backend/admin/premium-jobs/subscribers?${search}`);
+  return res.data;
+}
+
+export async function updatePremiumSubscriber(id, updates) {
+  const res = await axios.patch(`/backend/admin/premium-jobs/subscribers/${id}`, updates);
+  return res.data;
+}
+
+export async function cancelPremiumSubscriber(id) {
+  const res = await axios.post(`/backend/admin/premium-jobs/subscribers/${id}/cancel`);
+  return res.data;
+}
+
+export async function sendPremiumEmailNow(id) {
+  const res = await axios.post(`/backend/admin/premium-jobs/subscribers/${id}/send-now`);
+  return res.data;
+}
+
+export async function triggerPremiumBatch() {
+  const res = await axios.post('/backend/admin/premium-jobs/trigger-batch');
+  return res.data;
+}
+
+export async function fetchPremiumEmailLogs(params = {}) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') search.append(k, v);
+  });
+  const res = await axios.get(`/backend/admin/premium-jobs/email-logs?${search}`);
+  return res.data;
+}

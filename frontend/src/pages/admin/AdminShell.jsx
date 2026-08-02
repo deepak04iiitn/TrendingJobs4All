@@ -17,12 +17,14 @@ import {
   Home,
   ChevronsLeft,
   ChevronsRight,
+  BellRing,
 } from 'lucide-react';
 import { focusRing } from '../../theme/tokens';
 
 const NAV = [
   { to: '/admin', end: true, label: 'Overview', icon: LayoutDashboard },
   { to: '/admin/users', label: 'Users', icon: Users },
+  { to: '/admin/premium-jobs', label: 'Premium Jobs', icon: BellRing },
   { to: '/admin/comments', label: 'Job comments', icon: MessageSquare },
   { to: '/admin/interviews', label: 'Interview experiences', icon: Briefcase },
   { to: '/admin/salaries', label: 'Salary structures', icon: Wallet },
@@ -36,6 +38,7 @@ const NAV = [
 const TITLES = {
   '/admin': 'Overview',
   '/admin/users': 'Users',
+  '/admin/premium-jobs': 'Premium Jobs subscribers',
   '/admin/comments': 'Job comments',
   '/admin/interviews': 'Interview experiences',
   '/admin/salaries': 'Salary structures',

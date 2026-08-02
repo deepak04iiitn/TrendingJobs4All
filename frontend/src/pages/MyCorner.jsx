@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,9 +12,13 @@ import {
   ChevronLeft,
   PanelLeftClose,
   PanelLeft,
+  Bookmark,
+  BellRing,
 } from 'lucide-react';
 import MyInterviews from '../components/MyInterviews';
 import MySalary from '../components/MySalary';
+import MyJobsPanel from '../components/MyJobsPanel';
+import PremiumJobsPanel from '../components/PremiumJobsPanel';
 import { focusRing } from '../theme/tokens';
 
 const MENU = [
@@ -30,12 +34,35 @@ const MENU = [
     label: 'Salary structures',
     blurb: 'Offers you have posted',
   },
+  {
+    id: 'jobs',
+    icon: Bookmark,
+    label: 'My Jobs',
+    blurb: 'Roles you have saved',
+  },
+  {
+    id: 'premium',
+    icon: BellRing,
+    label: 'Premium Jobs',
+    blurb: 'Subscription & daily matches',
+  },
 ];
+
+const PANELS = {
+  interview: MyInterviews,
+  salary: MySalary,
+  jobs: MyJobsPanel,
+  premium: PremiumJobsPanel,
+};
 
 export default function MyCorner() {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const [activeItem, setActiveItem] = useState('interview');
+  const [searchParams] = useSearchParams();
+  const initialPanel = searchParams.get('panel');
+  const [activeItem, setActiveItem] = useState(
+    PANELS[initialPanel] ? initialPanel : 'interview',
+  );
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -268,7 +295,10 @@ export default function MyCorner() {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.25 }}
                 >
-                  {activeItem === 'interview' ? <MyInterviews /> : <MySalary />}
+                  {(() => {
+                    const ActivePanel = PANELS[activeItem] || MyInterviews;
+                    return <ActivePanel />;
+                  })()}
                 </motion.div>
               </AnimatePresence>
             </div>
