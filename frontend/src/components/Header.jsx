@@ -16,6 +16,7 @@ import {
   MessageCircle,
   Code,
   ArrowUpRight,
+  BellRing,
 } from 'lucide-react';
 import { signoutSuccess } from '../redux/user/userSlice';
 import { focusRing } from '../theme/tokens';
@@ -23,7 +24,7 @@ import { focusRing } from '../theme/tokens';
 const MENU_ITEMS = [
   { path: '/', label: 'Home' },
   { path: '/about', label: 'About' },
-  { path: '/my-jobs', label: 'My Jobs' },
+  // { path: '/premium-jobs', label: 'Premium Jobs', badge: 'New' },
   { path: '/jobs', label: 'Jobs' },
   { path: '/contact-us', label: 'Contact' },
 ];
@@ -188,7 +189,7 @@ export default function Header() {
 
   const NavLinks = ({ isMobile = false }) => (
     <>
-      {MENU_ITEMS.map(({ path, label }) => {
+      {MENU_ITEMS.map(({ path, label, badge }) => {
         const active = isActivePath(path);
         return (
           <Link
@@ -214,6 +215,15 @@ export default function Header() {
               `}
             >
               {label}
+              {badge && (
+                <span
+                  className={`rounded-full bg-[#C4A574] font-semibold uppercase tracking-wide text-[#FFFDF8] ${
+                    isMobile ? 'ml-2 px-1.5 py-0.5 text-[9px]' : 'ml-1.5 px-1.5 py-0.5 text-[9px]'
+                  }`}
+                >
+                  {badge}
+                </span>
+              )}
               {!isMobile && (
                 <motion.span
                   className="absolute -bottom-0.5 left-1/2 h-[2px] w-4 -translate-x-1/2 rounded-full bg-[#C4A574]"
@@ -342,6 +352,7 @@ export default function Header() {
                 ? [{ action: () => handleProfileNavigation('/admin'), icon: LayoutDashboard, label: 'Admin Dashboard', desc: 'System overview' }]
                 : []),
               { action: () => handleProfileNavigation('/myCorner'), icon: BookOpen, label: 'My Corner', desc: 'Personal workspace' },
+              { action: () => handleProfileNavigation('/myCorner?panel=premium'), icon: BellRing, label: 'Premium Jobs', desc: 'Manage subscription' },
             ].map(({ action, icon: Icon, label, desc }) => (
               <button
                 key={label}
@@ -500,6 +511,13 @@ export default function Header() {
                     >
                       <BookOpen size={14} /> Corner
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => handleProfileNavigation('/myCorner?panel=premium')}
+                      className={`col-span-2 flex items-center justify-center gap-2 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] py-2.5 text-sm font-medium text-[#57534E] ${focusRing}`}
+                    >
+                      <BellRing size={14} /> Premium Jobs
+                    </button>
                     {currentUser?.isUserAdmin && (
                       <button
                         type="button"
@@ -529,7 +547,8 @@ export default function Header() {
   return (
     <>
       <motion.header
-        className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-4 lg:px-6"
+        className="fixed left-0 right-0 z-50 px-3 pt-3 transition-[top] duration-300 sm:px-4 lg:px-6"
+        style={{ top: 'var(--r2h-announcement-height, 0px)' }}
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}

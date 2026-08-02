@@ -5,10 +5,11 @@ import About from './pages/About';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Header from './components/Header';
+import AnnouncementStrip from './components/AnnouncementStrip';
 import Footer from './components/Footer';
 import Profile from './pages/Profile';
 import FullJd from './pages/FullJd';
-import MyJobs from './pages/MyJobs';
+import PremiumJobs from './pages/PremiumJobs';
 import InterviewExp from './pages/InterviewExp';
 import SalaryStructures from './pages/SalaryStructures';
 import MyCorner from './pages/MyCorner';
@@ -17,6 +18,7 @@ import AdminRoute from './components/AdminRoute';
 import AdminShell from './pages/admin/AdminShell';
 import AdminOverview from './pages/admin/AdminOverview';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminPremiumJobs from './pages/admin/AdminPremiumJobs';
 import AdminComments from './pages/admin/AdminComments';
 import AdminInterviewExperiences from './pages/admin/AdminInterviewExperiences';
 import AdminSalaryStructures from './pages/admin/AdminSalaryStructures';
@@ -139,6 +141,7 @@ function Layout() {
   return (
     <div className="flex flex-col min-h-screen">
       <SessionManager />
+      {!hidePublicChrome && <AnnouncementStrip />}
       {!hidePublicChrome && <Header />}
       <div className="flex-grow">
         <Routes>
@@ -148,7 +151,8 @@ function Layout() {
                 <Route path='/sign-up' element={<SignUp />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/fulljd/:url/:id' element={<FullJd />} />
-                <Route path="/my-jobs" element={<MyJobs />} />
+                <Route path="/my-jobs" element={<Navigate to="/myCorner?panel=jobs" replace />} />
+                <Route path='/premium-jobs' element={<PremiumJobs />} />
                 <Route path="/interviewExp" element={<InterviewExp />} />
                 <Route path="/interview-experiences" element={<InterviewExp />} />
                 <Route path="/interview-experience/:slug/:experienceId" element={<InterviewExp />} />
@@ -168,6 +172,7 @@ function Layout() {
                   <Route path='/admin' element={<AdminShell />}>
                     <Route index element={<AdminOverview />} />
                     <Route path='users' element={<AdminUsers />} />
+                    <Route path='premium-jobs' element={<AdminPremiumJobs />} />
                     <Route path='comments' element={<AdminComments />} />
                     <Route path='interviews' element={<AdminInterviewExperiences />} />
                     <Route path='salaries' element={<AdminSalaryStructures />} />
@@ -218,7 +223,7 @@ function Layout() {
                 {/* Removed / orphan public URLs → home (preserve crawl equity, avoid 404 soft-404s) */}
                 <Route path="/newsletter" element={<Navigate to="/" replace />} />
                 <Route path="/BuyMeACoffee" element={<Navigate to="/" replace />} />
-                <Route path="/premium-subscription" element={<Navigate to="/" replace />} />
+                <Route path="/premium-subscription" element={<Navigate to="/premium-jobs" replace />} />
                 <Route path="/community" element={<Navigate to="/" replace />} />
                 <Route path="/connect-with-route2hire" element={<Navigate to="/" replace />} />
                 <Route path="/publicpolls" element={<Navigate to="/" replace />} />

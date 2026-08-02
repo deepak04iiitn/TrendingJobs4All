@@ -7,6 +7,7 @@ import InterviewQuestion from '../models/interviewQuestion.model.js';
 import BugReport from '../models/bugReport.model.js';
 import FeatureRequest from '../models/featureRequest.model.js';
 import { Roadmap } from '../models/roadmap.model.js';
+import PremiumSubscription from '../models/premiumSubscription.model.js';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
@@ -104,6 +105,7 @@ export const overview = async (req, res, next) => {
       recentFeatures,
       recentBlogs,
       userGrowthAgg,
+      activePremiumSubscribers,
     ] = await Promise.all([
       User.countDocuments(),
       Comment.countDocuments(),
@@ -150,6 +152,7 @@ export const overview = async (req, res, next) => {
           },
         },
       ]),
+      PremiumSubscription.countDocuments({ status: 'active' }),
     ]);
 
     const growthMap = new Map(
@@ -188,6 +191,8 @@ export const overview = async (req, res, next) => {
         bugsResolved,
         featuresPending,
         featuresImplemented,
+        activePremiumSubscribers,
+        premiumMrr: activePremiumSubscribers * 149,
       },
       charts: {
         userGrowth,

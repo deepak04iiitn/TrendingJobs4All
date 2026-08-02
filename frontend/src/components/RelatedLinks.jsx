@@ -84,6 +84,10 @@ const linkSections = {
     title: 'More resources',
     links: withEscape([HUB.interviews, HUB.salary, HUB.questions, HUB.resume, HUB.dsa, HUB.blogs]),
   },
+  premium: {
+    title: 'Explore more resources',
+    links: withEscape([HUB.jobs, HUB.interviews, HUB.salary, HUB.questions, HUB.resume, HUB.dsa, HUB.blogs]),
+  },
   notFound: {
     title: 'Popular pages',
     links: withEscape([HUB.interviews, HUB.questions, HUB.blogs, HUB.resume]),
