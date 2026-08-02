@@ -40,12 +40,12 @@ const MENU = [
     label: 'My Jobs',
     blurb: 'Roles you have saved',
   },
-  {
-    id: 'premium',
-    icon: BellRing,
-    label: 'Premium Jobs',
-    blurb: 'Subscription & daily matches',
-  },
+  // {
+  //   id: 'premium',
+  //   icon: BellRing,
+  //   label: 'Premium Jobs',
+  //   blurb: 'Subscription & daily matches',
+  // },
 ];
 
 const PANELS = {
