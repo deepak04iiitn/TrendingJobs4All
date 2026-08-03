@@ -9,7 +9,8 @@
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
     "export:naukri:apply-links": "node backend/scripts/export-naukri-apply-links.js",
     "validate:naukri:apply-links": "node backend/scripts/validate-apply-links.js",
-    "migrate:blogs": "node backend/scripts/migrate-blogs-to-blocks.js"
+    "migrate:blogs": "node backend/scripts/migrate-blogs-to-blocks.js",
+    "telegram:jobs": "node backend/scripts/run-telegram-jobs.js"
   },
   "keywords": [],
   "author": "",

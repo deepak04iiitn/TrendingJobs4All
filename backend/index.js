@@ -30,6 +30,7 @@ import roadmapRoutes from './routes/roadmap.route.js';
 import premiumJobsRoutes from './routes/premiumJobs.route.js';
 import webhooksRoutes from './routes/webhooks.route.js';
 import { registerPremiumJobsCron } from './cron/premiumJobsEmail.cron.js';
+import { registerTelegramJobsCron } from './cron/telegramJobsPoster.cron.js';
 import './utils/cloudinary.js';
 
 dotenv.config();
@@ -419,6 +420,7 @@ cron.schedule('0 */6 * * *', async () => {
 });
 
 registerPremiumJobsCron();
+registerTelegramJobsCron();
 
 // Function to delete jobs older than 1 month
 async function deleteOldJobs() {
