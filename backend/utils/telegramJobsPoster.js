@@ -57,10 +57,31 @@ function splitMessage(message, chunkSize = 4000) {
   return chunks;
 }
 
+/**
+ * `naukri.location` is inconsistently stored as:
+ * - a plain string ("Mumbai Metropolitan Region")
+ * - an array of place parts (["Hyderabad", "Telangana"])
+ * - a character array (["M","u","m","b","a","i",...]) when a string was
+ *   written through the Mongoose `[String]` schema (strings are iterable,
+ *   so Mongoose casts "Mumbai" → ["M","u","m","b","a","i"]).
+ *
+ * Joining a char-array with "," produced the Telegram bug:
+ * "M,u,m,b,a,i, ,M,e,t,r,o,..."
+ */
 function formatLocation(location) {
-  if (Array.isArray(location)) return location.filter(Boolean).join(',');
-  if (location == null) return '';
-  return String(location);
+  if (location == null || location === '') return '';
+
+  if (Array.isArray(location)) {
+    const parts = location.filter((part) => part != null && String(part).length > 0);
+    if (parts.length === 0) return '';
+
+    const isCharArray = parts.every((part) => typeof part === 'string' && part.length === 1);
+    if (isCharArray) return parts.join('');
+
+    return parts.map((part) => String(part).trim()).filter(Boolean).join(', ');
+  }
+
+  return String(location).trim();
 }
 
 function isValidApplyLink(applyLink) {
