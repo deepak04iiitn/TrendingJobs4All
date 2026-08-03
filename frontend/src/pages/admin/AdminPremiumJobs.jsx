@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import AdminSectionHeader from '../../components/admin/AdminSectionHeader';
 import AdminDataTable from '../../components/admin/AdminDataTable';
 import AdminPagination from '../../components/admin/AdminPagination';
+import ConfirmModal from '../../components/ConfirmModal';
 import { useAdminPaginatedList } from '../../hooks/useAdminPaginatedList';
 import {
   fetchPremiumOverview,
@@ -23,6 +24,7 @@ export default function AdminPremiumJobs() {
   const [overview, setOverview] = useState(null);
   const [triggering, setTriggering] = useState(false);
   const [rowActionId, setRowActionId] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null); // { type: 'batch' } | { type: 'cancel', id }
 
   const fetcher = useCallback(async ({ page, limit, status: s }) => {
     const data = await fetchPremiumSubscribers({ page, limit, status: s });
@@ -53,7 +55,6 @@ export default function AdminPremiumJobs() {
   }, [loadOverview]);
 
   const handleCancel = async (id) => {
-    if (!window.confirm('Cancel this subscriber\'s subscription?')) return;
     setRowActionId(id);
     try {
       await cancelPremiumSubscriber(id);
@@ -64,6 +65,7 @@ export default function AdminPremiumJobs() {
       toast.error('Failed to cancel subscription');
     } finally {
       setRowActionId(null);
+      setConfirmAction(null);
     }
   };
 
@@ -97,7 +99,6 @@ export default function AdminPremiumJobs() {
   };
 
   const handleTriggerBatch = async () => {
-    if (!window.confirm('Trigger the daily email batch for all active subscribers now?')) return;
     setTriggering(true);
     try {
       const { count } = await triggerPremiumBatch();
@@ -107,6 +108,7 @@ export default function AdminPremiumJobs() {
       toast.error('Failed to trigger batch');
     } finally {
       setTriggering(false);
+      setConfirmAction(null);
     }
   };
 
@@ -118,7 +120,7 @@ export default function AdminPremiumJobs() {
         actions={
           <button
             type="button"
-            onClick={handleTriggerBatch}
+            onClick={() => setConfirmAction({ type: 'batch' })}
             disabled={triggering}
             className={`inline-flex items-center gap-2 rounded-xl bg-[#2C241B] px-4 py-2.5 text-sm font-medium text-[#FFFDF8] disabled:opacity-60 ${focusRing}`}
           >
@@ -248,7 +250,7 @@ export default function AdminPremiumJobs() {
                 <button
                   type="button"
                   disabled={rowActionId === s._id || s.status === 'cancelled'}
-                  onClick={() => handleCancel(s._id)}
+                  onClick={() => setConfirmAction({ type: 'cancel', id: s._id })}
                   className={`rounded-lg p-2 text-rose-600 hover:bg-rose-50 disabled:opacity-30 ${focusRing}`}
                   aria-label="Cancel subscription"
                   title="Cancel subscription"
@@ -262,6 +264,27 @@ export default function AdminPremiumJobs() {
       />
 
       <AdminPagination page={page} totalPages={totalPages} total={total} limit={limit} loading={loading} onPageChange={goToPage} />
+
+      <ConfirmModal
+        open={confirmAction?.type === 'batch'}
+        title="Trigger daily batch now?"
+        description="This immediately sends the daily job-match email to every active subscriber, outside the regular schedule."
+        confirmLabel="Trigger batch"
+        loading={triggering}
+        onConfirm={handleTriggerBatch}
+        onCancel={() => setConfirmAction(null)}
+      />
+
+      <ConfirmModal
+        open={confirmAction?.type === 'cancel'}
+        title="Cancel this subscriber's subscription?"
+        description="This cancels their Razorpay subscription immediately and stops future daily emails."
+        confirmLabel="Cancel subscription"
+        danger
+        loading={rowActionId === confirmAction?.id}
+        onConfirm={() => handleCancel(confirmAction.id)}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }
