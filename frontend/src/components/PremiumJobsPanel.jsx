@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { BellRing, CalendarClock, Mail, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
 import { focusRing } from '../theme/tokens';
 
 const STATUS_LABELS = {
@@ -19,6 +20,8 @@ const STATUS_LABELS = {
 export default function PremiumJobsPanel() {
   const [subscription, setSubscription] = useState(undefined); // undefined = loading, null = none
   const [emailHistory, setEmailHistory] = useState([]);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const fetchSubscription = useCallback(async () => {
     try {
@@ -48,11 +51,7 @@ export default function PremiumJobsPanel() {
   }, [subscription, fetchEmailHistory]);
 
   const handleCancel = async () => {
-    const confirmMessage = subscription?.currentPeriodEnd
-      ? `Cancel your Premium Jobs subscription? You'll keep receiving daily job emails until ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}, then it will end.`
-      : 'Cancel your Premium Jobs subscription?';
-    if (!window.confirm(confirmMessage)) return;
-
+    setCancelling(true);
     try {
       const { data } = await axios.post('/backend/premium-jobs/me/cancel');
       setSubscription(data);
@@ -63,6 +62,9 @@ export default function PremiumJobsPanel() {
       );
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Failed to cancel subscription');
+    } finally {
+      setCancelling(false);
+      setCancelModalOpen(false);
     }
   };
 
@@ -171,7 +173,7 @@ export default function PremiumJobsPanel() {
             {!subscription.cancelAtPeriodEnd && (
               <button
                 type="button"
-                onClick={handleCancel}
+                onClick={() => setCancelModalOpen(true)}
                 className={`mt-6 text-sm font-medium text-[#B4762A] underline decoration-dotted ${focusRing}`}
               >
                 Cancel subscription
@@ -213,6 +215,21 @@ export default function PremiumJobsPanel() {
         </Link>{' '}
         page.
       </p>
+
+      <ConfirmModal
+        open={cancelModalOpen}
+        title="Cancel your Premium Jobs subscription?"
+        description={
+          subscription?.currentPeriodEnd
+            ? `You'll keep receiving daily job emails until ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}, then it will end automatically. No further charges.`
+            : 'This stops your subscription and daily job emails.'
+        }
+        confirmLabel="Cancel subscription"
+        danger
+        loading={cancelling}
+        onConfirm={handleCancel}
+        onCancel={() => setCancelModalOpen(false)}
+      />
     </div>
   );
 }
