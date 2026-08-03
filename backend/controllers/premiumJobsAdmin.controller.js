@@ -90,6 +90,35 @@ export const adminCancelSubscriber = async (req, res) => {
   }
 };
 
+const ACTIVE_STATUSES = new Set(['authenticated', 'active']);
+
+export const syncSubscriberFromRazorpay = async (req, res) => {
+  try {
+    const subscription = await PremiumSubscription.findById(req.params.id);
+    if (!subscription) return res.status(404).json({ message: 'Subscriber not found' });
+    if (!subscription.razorpaySubscriptionId) {
+      return res.status(400).json({ message: 'No Razorpay subscription linked to this subscriber' });
+    }
+
+    // Fetches the subscription's live status directly from Razorpay — a
+    // manual fallback for when a webhook was missed/delayed, so admins
+    // aren't stuck waiting on delivery to reconcile a subscriber.
+    const remote = await razorpay.subscriptions.fetch(subscription.razorpaySubscriptionId);
+
+    subscription.status = remote.status;
+    if (remote.current_end) subscription.currentPeriodEnd = new Date(remote.current_end * 1000);
+    if (remote.status === 'active') subscription.lastChargedAt = new Date();
+    if (remote.status === 'cancelled') subscription.cancelledAt = new Date();
+    await subscription.save();
+
+    await User.findByIdAndUpdate(subscription.userId, { isPremium: ACTIVE_STATUSES.has(remote.status) });
+
+    res.json({ subscription, razorpayStatus: remote.status });
+  } catch (error) {
+    respondWithError(res, error, 'Failed to sync subscription from Razorpay');
+  }
+};
+
 export const adminTriggerEmailForSubscriber = async (req, res) => {
   try {
     const results = await runPremiumJobsBatch({ subscriptionId: req.params.id });
