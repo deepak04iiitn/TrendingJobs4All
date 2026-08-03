@@ -6,6 +6,7 @@ import {
   getSubscriberDetail,
   updateSubscriber,
   adminCancelSubscriber,
+  syncSubscriberFromRazorpay,
   adminTriggerEmailForSubscriber,
   adminTriggerFullBatch,
   listEmailLogs,
@@ -22,6 +23,7 @@ router.get('/premium-jobs/subscribers', verifyToken, verifyAdmin, listSubscriber
 router.get('/premium-jobs/subscribers/:id', verifyToken, verifyAdmin, getSubscriberDetail);
 router.patch('/premium-jobs/subscribers/:id', verifyToken, verifyAdmin, updateSubscriber);
 router.post('/premium-jobs/subscribers/:id/cancel', verifyToken, verifyAdmin, adminCancelSubscriber);
+router.post('/premium-jobs/subscribers/:id/sync', verifyToken, verifyAdmin, syncSubscriberFromRazorpay);
 router.post('/premium-jobs/subscribers/:id/send-now', verifyToken, verifyAdmin, adminTriggerEmailForSubscriber);
 router.post('/premium-jobs/trigger-batch', verifyToken, verifyAdmin, adminTriggerFullBatch);
 router.get('/premium-jobs/email-logs', verifyToken, verifyAdmin, listEmailLogs);

@@ -5,19 +5,40 @@ import User from '../models/user.model.js';
 
 const ACTIVE_STATUSES = new Set(['authenticated', 'active']);
 
-async function syncSubscription(payloadSubscription, status) {
-  const subscription = await PremiumSubscription.findOne({
-    razorpaySubscriptionId: payloadSubscription.id,
-  });
-  if (!subscription) return;
+// Razorpay fires authenticated/activated/charged nearly simultaneously for a
+// brand-new subscription's first payment, with no delivery-order guarantee —
+// confirmed in production, where 'authenticated' finished its write after
+// 'activated'/'charged' and silently regressed status back down. Each
+// incoming status only applies if the subscription's CURRENT stored status
+// is one it's valid to advance from; this is enforced inside the update
+// filter itself so the check-and-write is atomic (no separate read + save
+// race). A stale/out-of-order event simply matches zero documents and no-ops
+// instead of clobbering a more-advanced state. `null` means always apply —
+// terminal/absolute states from Razorpay must win regardless of order.
+const OVERWRITE_ALLOWED_FROM = {
+  authenticated: ['created', 'authenticated'],
+  pending: ['created', 'authenticated', 'active', 'pending'],
+  active: ['created', 'authenticated', 'pending', 'active'],
+  halted: null,
+  cancelled: null,
+  completed: null,
+  expired: null,
+};
 
-  subscription.status = status;
+async function syncSubscription(payloadSubscription, status) {
+  const filter = { razorpaySubscriptionId: payloadSubscription.id };
+  const allowedFrom = OVERWRITE_ALLOWED_FROM[status];
+  if (allowedFrom) filter.status = { $in: allowedFrom };
+
+  const update = { status };
   if (payloadSubscription.current_end) {
-    subscription.currentPeriodEnd = new Date(payloadSubscription.current_end * 1000);
+    update.currentPeriodEnd = new Date(payloadSubscription.current_end * 1000);
   }
-  if (status === 'active') subscription.lastChargedAt = new Date();
-  if (status === 'cancelled') subscription.cancelledAt = new Date();
-  await subscription.save();
+  if (status === 'active') update.lastChargedAt = new Date();
+  if (status === 'cancelled') update.cancelledAt = new Date();
+
+  const subscription = await PremiumSubscription.findOneAndUpdate(filter, update, { new: true });
+  if (!subscription) return; // not found, or guard blocked a stale/out-of-order event — both fine to no-op
 
   await User.findByIdAndUpdate(subscription.userId, {
     isPremium: ACTIVE_STATUSES.has(status),

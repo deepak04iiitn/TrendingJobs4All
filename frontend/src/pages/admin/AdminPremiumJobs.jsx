@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Send, Ban, Loader2, Zap } from 'lucide-react';
+import { Send, Ban, Loader2, Zap, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
 import AdminSectionHeader from '../../components/admin/AdminSectionHeader';
 import AdminDataTable from '../../components/admin/AdminDataTable';
@@ -9,6 +9,7 @@ import {
   fetchPremiumOverview,
   fetchPremiumSubscribers,
   cancelPremiumSubscriber,
+  syncPremiumSubscriber,
   sendPremiumEmailNow,
   triggerPremiumBatch,
 } from '../../lib/admin-api';
@@ -61,6 +62,20 @@ export default function AdminPremiumJobs() {
       loadOverview();
     } catch {
       toast.error('Failed to cancel subscription');
+    } finally {
+      setRowActionId(null);
+    }
+  };
+
+  const handleSync = async (id) => {
+    setRowActionId(id);
+    try {
+      const { razorpayStatus } = await syncPremiumSubscriber(id);
+      toast.success(`Synced — Razorpay status: ${razorpayStatus}`);
+      goToPage(page);
+      loadOverview();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to sync from Razorpay');
     } finally {
       setRowActionId(null);
     }
@@ -210,6 +225,16 @@ export default function AdminPremiumJobs() {
             label: '',
             render: (s) => (
               <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={rowActionId === s._id}
+                  onClick={() => handleSync(s._id)}
+                  className={`rounded-lg p-2 text-[#6B5A48] hover:bg-[#F7F3EC] disabled:opacity-30 ${focusRing}`}
+                  aria-label="Sync status from Razorpay"
+                  title="Sync status from Razorpay"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </button>
                 <button
                   type="button"
                   disabled={rowActionId === s._id || s.status !== 'active'}

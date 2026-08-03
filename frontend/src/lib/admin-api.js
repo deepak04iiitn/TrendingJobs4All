@@ -137,6 +137,11 @@ export async function cancelPremiumSubscriber(id) {
   return res.data;
 }
 
+export async function syncPremiumSubscriber(id) {
+  const res = await axios.post(`/backend/admin/premium-jobs/subscribers/${id}/sync`);
+  return res.data;
+}
+
 export async function sendPremiumEmailNow(id) {
   const res = await axios.post(`/backend/admin/premium-jobs/subscribers/${id}/send-now`);
   return res.data;
