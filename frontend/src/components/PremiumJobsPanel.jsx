@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { BellRing, CalendarClock, Mail, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { BellRing, CalendarClock, Mail, AlertTriangle, CheckCircle2, Pencil, Check, X } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import { focusRing } from '../theme/tokens';
 
@@ -22,6 +22,9 @@ export default function PremiumJobsPanel() {
   const [emailHistory, setEmailHistory] = useState([]);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [editingYoe, setEditingYoe] = useState(false);
+  const [yoeInput, setYoeInput] = useState('');
+  const [savingYoe, setSavingYoe] = useState(false);
 
   const fetchSubscription = useCallback(async () => {
     try {
@@ -49,6 +52,30 @@ export default function PremiumJobsPanel() {
   useEffect(() => {
     if (subscription && subscription.status === 'active') fetchEmailHistory();
   }, [subscription, fetchEmailHistory]);
+
+  const startEditingYoe = () => {
+    setYoeInput(String(subscription.yoe));
+    setEditingYoe(true);
+  };
+
+  const handleSaveYoe = async () => {
+    const yoeNum = Number(yoeInput);
+    if (yoeInput === '' || Number.isNaN(yoeNum) || yoeNum < 0) {
+      toast.error('Please enter a valid Years of Experience');
+      return;
+    }
+    setSavingYoe(true);
+    try {
+      const { data } = await axios.patch('/backend/premium-jobs/me/yoe', { yoe: yoeNum });
+      setSubscription(data);
+      toast.success('Years of Experience updated');
+      setEditingYoe(false);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Failed to update Years of Experience');
+    } finally {
+      setSavingYoe(false);
+    }
+  };
 
   const handleCancel = async () => {
     setCancelling(true);
@@ -154,7 +181,50 @@ export default function PremiumJobsPanel() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#6B5A48]">
                   Years of Experience
                 </p>
-                <p className="mt-1 text-sm font-medium text-[#1C1917]">{subscription.yoe} years</p>
+                {editingYoe ? (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      min="0"
+                      autoFocus
+                      value={yoeInput}
+                      onChange={(e) => setYoeInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveYoe();
+                        if (e.key === 'Escape') setEditingYoe(false);
+                      }}
+                      disabled={savingYoe}
+                      className={`w-20 rounded-lg border border-[#E5DCCE] bg-white px-2.5 py-1.5 text-sm text-[#1C1917] outline-none focus:border-[#C4A574] ${focusRing}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSaveYoe}
+                      disabled={savingYoe}
+                      aria-label="Save"
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg bg-[#2C241B] text-[#FFFDF8] transition hover:bg-[#1C1711] disabled:opacity-60 ${focusRing}`}
+                    >
+                      <Check size={15} aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingYoe(false)}
+                      disabled={savingYoe}
+                      aria-label="Cancel"
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5DCCE] text-[#6B5A48] transition hover:bg-[#F7F3EC] disabled:opacity-60 ${focusRing}`}
+                    >
+                      <X size={15} aria-hidden />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={startEditingYoe}
+                    className={`mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-[#1C1917] underline decoration-dotted decoration-[#C4A574] underline-offset-2 hover:text-[#6B5A48] ${focusRing}`}
+                  >
+                    {subscription.yoe} years
+                    <Pencil size={12} className="text-[#C4A574]" aria-hidden />
+                  </button>
+                )}
               </div>
 
               {subscription.currentPeriodEnd && (

@@ -33,9 +33,17 @@ export const createSubscription = async (req, res) => {
         });
         razorpayCustomerId = customer.id;
       } catch (err) {
-        // Razorpay returns a 400 with an existing customer id if one already exists for this email
+        // fail_existing:0 is meant to return the existing customer instead of
+        // erroring, but this is unreliable in practice (a known, unresolved
+        // issue in Razorpay's Node SDK — fail_existing:0 still throws
+        // "Customer already exists for the merchant" without the expected
+        // metadata.customer_id fallback). Customer creation is purely for our
+        // own reference (Razorpay's subscriptions.create doesn't require a
+        // customer_id — that gets linked during checkout), so never let this
+        // block subscribing: fall back to the metadata id if present, else
+        // just proceed without one.
+        console.error('Razorpay customer create failed (continuing without customerId):', err?.error?.description || err.message);
         razorpayCustomerId = err?.error?.metadata?.customer_id || null;
-        if (!razorpayCustomerId) throw err;
       }
     }
 
