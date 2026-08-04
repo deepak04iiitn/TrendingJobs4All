@@ -5,7 +5,7 @@ import About from './pages/About';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Header from './components/Header';
-import AnnouncementStrip from './components/AnnouncementStrip';
+// import AnnouncementStrip from './components/AnnouncementStrip';
 import Footer from './components/Footer';
 import Profile from './pages/Profile';
 import FullJd from './pages/FullJd';
@@ -141,7 +141,7 @@ function Layout() {
   return (
     <div className="flex flex-col min-h-screen">
       <SessionManager />
-      {!hidePublicChrome && <AnnouncementStrip />}
+      {/* {!hidePublicChrome && <AnnouncementStrip />} */}
       {!hidePublicChrome && <Header />}
       <div className="flex-grow">
         <Routes>
