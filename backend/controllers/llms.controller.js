@@ -148,9 +148,11 @@ const generateLLMSText = (dynamicContent) => {
   if (dynamicContent.jobs.length > 0) {
     content += `\n## Current Job Opportunities\n\n`;
     dynamicContent.jobs.slice(0, 30).forEach(job => {
-      const title = job.job_title || 'Job Opportunity';
+      const title = job.title || 'Job Opportunity';
       const company = job.company || 'Company';
-      const location = job.location && job.location.length > 0 ? job.location.join(', ') : 'Location not specified';
+      const location = Array.isArray(job.location)
+        ? (job.location.length > 0 ? job.location.join(', ') : 'Location not specified')
+        : (job.location || 'Location not specified');
       const jobSlug = createSlug(`${job._id}`);
       content += `- [${title} at ${company}](${baseUrl}/fulljd/${jobSlug}/${job._id}): ${title} position at ${company} in ${location}.\n`;
     });
@@ -209,7 +211,7 @@ export const generateLLMS = async (req, res) => {
           apply_link: { $not: { $regex: /invalid-url|\/404\/|\/404$|not.found|not.available/i } },
           apply_link: { $regex: /^https?:\/\/.+\..+/i }
         },
-        { projection: { _id: 1, job_title: 1, company: 1, location: 1 } }
+        { projection: { _id: 1, title: 1, company: 1, location: 1 } }
       ).limit(30).toArray(),
       Blog.find({ status: 'published' }, 'title slug excerpt category').lean().limit(20)
     ]);
