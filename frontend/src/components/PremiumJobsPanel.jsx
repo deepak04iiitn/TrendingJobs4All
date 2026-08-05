@@ -53,6 +53,33 @@ export default function PremiumJobsPanel() {
     if (subscription && subscription.status === 'active') fetchEmailHistory();
   }, [subscription, fetchEmailHistory]);
 
+  // While a subscription is still waiting on the webhook to confirm payment,
+  // poll for the real status instead of making the user manually refresh —
+  // stops as soon as it reaches 'active' or any terminal state, capped at
+  // ~2 minutes so it doesn't poll forever if something never resolves.
+  useEffect(() => {
+    if (!subscription || !['created', 'authenticated', 'pending'].includes(subscription.status)) {
+      return undefined;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 40;
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        return;
+      }
+      fetchSubscription();
+    }, 3000);
+
+    return () => clearInterval(interval);
+    // Depend on the status string, not the whole subscription object — that
+    // object gets a new reference on every poll, which would otherwise
+    // restart this effect (and reset the attempts counter) on every tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subscription?.status, fetchSubscription]);
+
   const startEditingYoe = () => {
     setYoeInput(String(subscription.yoe));
     setEditingYoe(true);

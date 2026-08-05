@@ -14,7 +14,11 @@ export default function AnnouncementStrip() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setDismissed(localStorage.getItem(DISMISS_KEY) === '1');
+    // sessionStorage (not localStorage) — dismissing should hold for the rest
+    // of this browsing session (across page navigations), but reappear the
+    // next time the user opens the site after closing the tab/browser,
+    // rather than being gone forever after a single dismiss.
+    setDismissed(sessionStorage.getItem(DISMISS_KEY) === '1');
   }, []);
 
   useEffect(() => {
@@ -26,7 +30,7 @@ export default function AnnouncementStrip() {
 
   const handleDismiss = (e) => {
     e.stopPropagation();
-    localStorage.setItem(DISMISS_KEY, '1');
+    sessionStorage.setItem(DISMISS_KEY, '1');
     setDismissed(true);
   };
 
