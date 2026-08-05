@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {
   Bookmark,
@@ -9,7 +9,6 @@ import {
   Clock,
   ExternalLink,
   X,
-  ArrowLeft,
   Building2,
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -306,14 +305,6 @@ export default function FullJd() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, ease: easeOut }}
               >
-                <Link
-                  to="/jobs"
-                  className={`mb-8 inline-flex items-center gap-2 text-sm font-medium text-[#6B5A48] hover:text-[#2C241B] ${focusRing}`}
-                >
-                  <ArrowLeft size={16} aria-hidden />
-                  Back to jobs
-                </Link>
-
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B5A48]">
                   Role details
                 </p>

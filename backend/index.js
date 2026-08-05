@@ -201,9 +201,10 @@ app.get('/backend/naukri', cacheMiddleware, async (req, res) => {
     const filter = { ...baseFilter };
 
     if (search) {
-      const regex = new RegExp(search, 'i');
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escapedSearch, 'i');
       filter.$or = [
-        { job_title: regex },
+        { title: regex },
         { company: regex },
         { jd: regex },
         { full_jd: regex },
