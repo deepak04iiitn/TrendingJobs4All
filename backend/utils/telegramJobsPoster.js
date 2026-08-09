@@ -120,6 +120,13 @@ function resolveInstagramUrl() {
   return process.env.TELEGRAM_INSTAGRAM_URL || 'https://instagram.com/route2hire/';
 }
 
+function resolvePremiumJobsUrl() {
+  return (
+    process.env.TELEGRAM_PREMIUM_JOBS_URL ||
+    `${resolveSiteBaseUrl()}/premium-jobs`
+  );
+}
+
 /**
  * Port of legacy db_ops.new_jobs(..., 'telegram', role):
  * category + min_exp + missing telegram_status, ignorelist + company_details filter.
@@ -193,6 +200,7 @@ export function buildTelegramMessage(jobOpenings, { isoDate } = {}) {
   }
 
   combined += '\n ❗Note: If Apply link is not working request to search it on the career page of that company \n';
+  combined += `\n ⭐ Get curated jobs in your inbox daily: [Premium Jobs](${resolvePremiumJobsUrl()})`;
   combined += `\n Follow for QA content: [Instagram](${resolveInstagramUrl()})`;
   return combined;
 }
