@@ -179,51 +179,6 @@ html:has(.jd-page) {
   font-weight: 600;
 }
 
-/* Related links (shared component) */
-.jobs-explore {
-  border-top: 1px solid #e5dcce;
-  padding-top: 1.75rem;
-}
-
-.jobs-explore__title {
-  margin-bottom: 0.85rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #6b5a48;
-}
-
-.jobs-explore__links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0;
-}
-
-.jobs-explore__item {
-  display: inline-flex;
-  align-items: center;
-}
-
-.jobs-explore__sep {
-  display: inline-block;
-  width: 1px;
-  height: 0.85rem;
-  margin: 0 0.75rem;
-  background: #e5dcce;
-}
-
-.jobs-explore__link {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #57534e;
-}
-
-.jobs-explore__link:hover {
-  color: #2c241b;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html:has(.jd-page) {
     scroll-behavior: auto;

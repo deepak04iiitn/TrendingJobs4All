@@ -8,6 +8,7 @@ import BugReport from '../models/bugReport.model.js';
 import FeatureRequest from '../models/featureRequest.model.js';
 import { Roadmap } from '../models/roadmap.model.js';
 import PremiumSubscription from '../models/premiumSubscription.model.js';
+import DsaCatalogProblem from '../models/dsaCatalogProblem.model.js';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
@@ -16,14 +17,21 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-let dsaProblemCount = 0;
-try {
-  const dsaData = JSON.parse(
-    fs.readFileSync(path.join(__dirname, '../../frontend/src/data/dsa.json'), 'utf8'),
-  );
-  dsaProblemCount = Array.isArray(dsaData) ? dsaData.length : 0;
-} catch {
-  dsaProblemCount = 0;
+async function resolveDsaProblemCount() {
+  try {
+    const count = await DsaCatalogProblem.countDocuments({ status: 'published' });
+    if (count > 0) return count;
+  } catch {
+    // fall through to JSON
+  }
+  try {
+    const dsaData = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../frontend/src/data/dsa.json'), 'utf8'),
+    );
+    return Array.isArray(dsaData) ? new Set(dsaData.map((r) => r['Problem Name'])).size : 0;
+  } catch {
+    return 0;
+  }
 }
 
 export const statistics = async (req, res) => {
@@ -186,7 +194,7 @@ export const overview = async (req, res, next) => {
         blogLikes: totalLikes,
         questionSets,
         roadmaps: roadmapsCount,
-        dsaProblems: dsaProblemCount,
+        dsaProblems: await resolveDsaProblemCount(),
         bugsPending,
         bugsResolved,
         featuresPending,

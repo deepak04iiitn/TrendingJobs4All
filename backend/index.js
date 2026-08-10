@@ -20,6 +20,7 @@ import blogRoutes from './routes/blog.route.js';
 import bugReportRoutes from './routes/bugReport.route.js';
 import featureRequestRoutes from './routes/featureRequest.route.js';
 import dsaProblemRoutes from './routes/dsaProblem.route.js';
+import dsaPlatformRoutes from './routes/dsaPlatform.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
@@ -50,7 +51,20 @@ const app = express();
 // Configure CORS with specific options
 app.use(cors());
 
-app.use(compression());
+app.use(
+  compression({
+    filter: (req, res) => {
+      // Don't gzip SSE — it buffers and kills live judge progress
+      if (
+        req.query.stream === '1' ||
+        String(req.headers.accept || '').includes('text/event-stream')
+      ) {
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+  })
+);
 
 // Razorpay webhook signature verification needs the raw request body, so this
 // route must be mounted with express.raw() BEFORE the global JSON parser below.
@@ -145,6 +159,7 @@ app.use('/backend/interview-questions', interviewQuestionRoutes);
 app.use('/backend/interview-question-comments', interviewQuestionCommentRoutes);
 app.use('/backend/blogs', blogRoutes);
 app.use('/backend/dsa-problems', dsaProblemRoutes);
+app.use('/backend/dsa', dsaPlatformRoutes);
 app.use('/backend/bugs', bugReportRoutes);
 app.use('/backend/feature-requests', featureRequestRoutes);
 app.use('/backend/roadmaps', roadmapRoutes);

@@ -14,11 +14,13 @@ import {
   PanelLeft,
   Bookmark,
   BellRing,
+  Code2,
 } from 'lucide-react';
 import MyInterviews from '../components/MyInterviews';
 import MySalary from '../components/MySalary';
 import MyJobsPanel from '../components/MyJobsPanel';
 import PremiumJobsPanel from '../components/PremiumJobsPanel';
+import MyDsaProgressPanel from '../components/MyDsaProgressPanel';
 import { focusRing } from '../theme/tokens';
 
 const MENU = [
@@ -46,6 +48,12 @@ const MENU = [
     label: 'Premium Jobs',
     blurb: 'Subscription & daily matches',
   },
+  {
+    id: 'dsa',
+    icon: Code2,
+    label: 'DSA progress',
+    blurb: 'Streaks, XP & heatmap',
+  },
 ];
 
 const PANELS = {
@@ -53,15 +61,16 @@ const PANELS = {
   salary: MySalary,
   jobs: MyJobsPanel,
   premium: PremiumJobsPanel,
+  dsa: MyDsaProgressPanel,
 };
 
 export default function MyCorner() {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const initialPanel = searchParams.get('panel');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const panelFromUrl = searchParams.get('panel');
   const [activeItem, setActiveItem] = useState(
-    PANELS[initialPanel] ? initialPanel : 'interview',
+    PANELS[panelFromUrl] ? panelFromUrl : 'interview',
   );
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -74,8 +83,18 @@ export default function MyCorner() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  useEffect(() => {
+    if (panelFromUrl && PANELS[panelFromUrl] && panelFromUrl !== activeItem) {
+      setActiveItem(panelFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panelFromUrl]);
+
   if (!currentUser) {
-    return <Navigate to="/sign-in?redirect=/myCorner" replace />;
+    const redirect = panelFromUrl
+      ? `/sign-in?redirect=${encodeURIComponent(`/myCorner?panel=${panelFromUrl}`)}`
+      : '/sign-in?redirect=/myCorner';
+    return <Navigate to={redirect} replace />;
   }
 
   const active = MENU.find((m) => m.id === activeItem) || MENU[0];
@@ -83,11 +102,12 @@ export default function MyCorner() {
   const selectItem = (id) => {
     setActiveItem(id);
     setMobileOpen(false);
+    setSearchParams(id === 'interview' ? {} : { panel: id }, { replace: true });
   };
 
   const sidebarInner = (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="shrink-0 border-b border-[#E5DCCE] px-4 py-5">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-[#E5DCCE] px-4 py-4">
         {(!collapsed || mobileOpen) ? (
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6B5A48]">
@@ -102,7 +122,10 @@ export default function MyCorner() {
         )}
       </div>
 
-      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-3" aria-label="My Corner sections">
+      <nav
+        className="r2h-scroll-hidden min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain p-2.5"
+        aria-label="My Corner sections"
+      >
         {MENU.map(({ id, icon: Icon, label, blurb }) => {
           const isActive = activeItem === id;
           return (
@@ -111,7 +134,7 @@ export default function MyCorner() {
               type="button"
               onClick={() => selectItem(id)}
               title={label}
-              className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition ${focusRing} ${
+              className={`group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition ${focusRing} ${
                 isActive
                   ? 'bg-[#2C241B] text-[#FFFDF8]'
                   : 'text-[#6B5A48] hover:bg-[#F7F3EC] hover:text-[#2C241B]'
@@ -122,10 +145,10 @@ export default function MyCorner() {
                 aria-hidden
               />
               {(!collapsed || mobileOpen) && (
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-medium">{label}</span>
+                <span className="min-w-0 leading-tight">
+                  <span className="block truncate text-[13px] font-medium">{label}</span>
                   <span
-                    className={`mt-0.5 block truncate text-[11px] ${
+                    className={`mt-0.5 block truncate text-[10px] leading-snug ${
                       isActive ? 'text-[#E5DCCE]' : 'text-[#78716C]'
                     }`}
                   >
@@ -186,10 +209,11 @@ export default function MyCorner() {
         <link rel="canonical" href="https://route2hire.com/myCorner" />
       </Helmet>
 
-      <div className="flex min-h-screen bg-[#F7F3EC]">
-        {/* Desktop sidebar */}
+      {/* Do not put w-full on the main column — beside a fixed-width sidebar it becomes 100%+280px and clips. */}
+      <div className="flex min-h-screen w-full min-w-0 overflow-x-clip bg-[#F7F3EC]">
+        {/* Desktop sidebar — fixed to viewport height; nav scrolls inside */}
         <aside
-          className={`sticky top-0 hidden h-screen shrink-0 border-r border-[#E5DCCE] bg-[#FFFDF8] transition-[width] duration-300 lg:block ${
+          className={`sticky top-0 hidden h-svh max-h-svh shrink-0 overflow-hidden border-r border-[#E5DCCE] bg-[#FFFDF8] transition-[width] duration-300 lg:flex lg:flex-col ${
             collapsed ? 'w-[88px]' : 'w-[280px]'
           }`}
         >
@@ -213,7 +237,7 @@ export default function MyCorner() {
                 animate={{ x: 0 }}
                 exit={{ x: -280 }}
                 transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-                className="fixed inset-y-0 left-0 z-[2147483647] flex w-[min(100%,280px)] flex-col border-r border-[#E5DCCE] bg-[#FFFDF8] lg:hidden"
+                className="fixed inset-y-0 left-0 z-[2147483647] flex h-svh max-h-svh w-[min(100%,280px)] flex-col overflow-hidden border-r border-[#E5DCCE] bg-[#FFFDF8] lg:hidden"
               >
                 <div className="absolute right-3 top-3 z-10">
                   <button
@@ -231,8 +255,8 @@ export default function MyCorner() {
           )}
         </AnimatePresence>
 
-        {/* Main */}
-        <div className="flex min-w-0 flex-1 flex-col">
+        {/* Main — flex-1 + min-w-0 only (no w-full) so width = remaining space after sidebar */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-x-clip">
           <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[#E5DCCE] bg-[#F7F3EC]/90 px-4 py-3 backdrop-blur-md sm:px-6 lg:hidden">
             <button
               type="button"
@@ -257,7 +281,7 @@ export default function MyCorner() {
             </Link>
           </header>
 
-          <main className="relative min-h-0 flex-1 overflow-y-auto">
+          <main className="relative min-w-0 flex-1 overflow-x-clip">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-x-0 top-0 h-48"
@@ -267,9 +291,9 @@ export default function MyCorner() {
               }}
             />
 
-            <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+            <div className="relative mx-auto box-border w-full min-w-0 max-w-5xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
               <div className="mb-8 hidden items-end justify-between gap-4 border-b border-[#E5DCCE] pb-6 lg:flex">
-                <div>
+                <div className="min-w-0">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6B5A48]">
                     Workspace
                   </p>
@@ -280,7 +304,7 @@ export default function MyCorner() {
                 </div>
                 <Link
                   to="/"
-                  className={`inline-flex items-center gap-1.5 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-xs font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[#E5DCCE] bg-[#FFFDF8] px-3 py-2 text-xs font-medium text-[#6B5A48] transition hover:bg-[#EFE8DC] ${focusRing}`}
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                   Back to site
@@ -294,6 +318,7 @@ export default function MyCorner() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.25 }}
+                  className="min-w-0"
                 >
                   {(() => {
                     const ActivePanel = PANELS[activeItem] || MyInterviews;

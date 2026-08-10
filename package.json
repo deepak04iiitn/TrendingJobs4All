@@ -10,7 +10,12 @@
     "export:naukri:apply-links": "node backend/scripts/export-naukri-apply-links.js",
     "validate:naukri:apply-links": "node backend/scripts/validate-apply-links.js",
     "migrate:blogs": "node backend/scripts/migrate-blogs-to-blocks.js",
-    "telegram:jobs": "node backend/scripts/run-telegram-jobs.js"
+    "telegram:jobs": "node backend/scripts/run-telegram-jobs.js",
+    "dsa:seed": "node backend/scripts/seed-dsa-catalog.js",
+    "dsa:seed:fresh": "node backend/scripts/seed-dsa-catalog.js --fresh",
+    "dsa:migrate-progress": "node backend/scripts/migrate-dsa-progress.js",
+    "dsa:migrate-progress:dry": "node backend/scripts/migrate-dsa-progress.js --dry-run",
+    "dsa:validate": "node backend/scripts/validate-dsa-content.js"
   },
   "keywords": [],
   "author": "",

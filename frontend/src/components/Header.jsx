@@ -23,7 +23,7 @@ import { focusRing } from '../theme/tokens';
 
 const MENU_ITEMS = [
   { path: '/', label: 'Home' },
-  { path: '/about', label: 'About' },
+  { path: '/qa-sdet-dsa-sheet', label: 'DSA Sheet' },
   { path: '/premium-jobs', label: 'Premium Jobs', badge: 'New' },
   { path: '/jobs', label: 'Jobs' },
   { path: '/contact-us', label: 'Contact' },
@@ -160,10 +160,14 @@ export default function Header() {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
+  // Paths already in the primary nav should not also light up Features
+  const primaryNavPaths = new Set(MENU_ITEMS.map((item) => item.path));
+
   const isFeaturesActive = FEATURE_GROUPS.some((group) =>
     group.items.some(
       (item) =>
         !item.comingSoon &&
+        !primaryNavPaths.has(item.path) &&
         (location.pathname === item.path || location.pathname.startsWith(`${item.path}/`))
     )
   );
