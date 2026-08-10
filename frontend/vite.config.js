@@ -9,7 +9,16 @@ export default defineConfig({
       '/backend': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        // Keep SSE judge progress streaming
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            if (String(proxyRes.headers['content-type'] || '').includes('text/event-stream')) {
+              proxyRes.headers['cache-control'] = 'no-cache, no-transform';
+              proxyRes.headers['x-accel-buffering'] = 'no';
+            }
+          });
+        },
       },
       '/sitemap.xml': {
         target: 'http://localhost:3000',

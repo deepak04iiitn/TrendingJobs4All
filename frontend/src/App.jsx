@@ -45,6 +45,9 @@ import BlogListingPage from './pages/BlogListingPage';
 import BlogDetailPage from './pages/BlogDetailPage';
 import BlogLegacyRedirect from './pages/BlogLegacyRedirect';
 import DSAProblemTracker from './pages/DSAProblemTracker';
+import DsaDashboardPage from './pages/dsa/DsaDashboardPage';
+import DsaProblemSolverPage from './pages/dsa/DsaProblemSolverPage';
+import DsaLeaderboardPage from './pages/dsa/DsaLeaderboardPage';
 import NotFound from './pages/NotFound';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -136,14 +139,20 @@ function Layout() {
   // public site chrome (floating nav) eating into its vertical space.
   const isAdminArea = location.pathname.startsWith('/admin');
   const isMyCorner = location.pathname.toLowerCase().startsWith('/mycorner');
-  const hidePublicChrome = isAdminArea || isMyCorner;
+  const isDsaProblem =
+    location.pathname.startsWith('/qa-sdet-dsa-sheet/problems/');
+  const isDsaLeaderboard = location.pathname.startsWith('/qa-sdet-dsa-sheet/leaderboard');
+  // My Corner keeps its own sidebar shell (no public header / social FAB), but still shows the site footer.
+  const hideHeaderChrome = isAdminArea || isMyCorner || isDsaProblem;
+  const hideFooterChrome = isAdminArea || isDsaProblem;
+  const hideSocialFab = hideHeaderChrome || isDsaLeaderboard;
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
       <SessionManager />
-      {!hidePublicChrome && <AnnouncementStrip />}
-      {!hidePublicChrome && <Header />}
-      <div className="flex-grow">
+      {!hideHeaderChrome && <AnnouncementStrip />}
+      {!hideHeaderChrome && <Header />}
+      <div className="min-w-0 flex-grow overflow-x-clip">
         <Routes>
                 <Route path='/' element={<Home />} />
                 <Route path='/about' element={<About />} />
@@ -211,8 +220,13 @@ function Layout() {
                 <Route path='/blogs/:slug/:id' element={<BlogLegacyRedirect />} />
                 <Route path='/blogs/:slug' element={<BlogDetailPage />} />
                 
-                {/* DSA Problem Tracker Route */}
-                <Route path='/qa-sdet-dsa-sheet' element={<DSAProblemTracker />} />
+                {/* DSA Platform */}
+                <Route path='/qa-sdet-dsa-sheet' element={<DsaDashboardPage />} />
+                <Route element={<PrivateRoute />}>
+                  <Route path='/qa-sdet-dsa-sheet/problems/:slug' element={<DsaProblemSolverPage />} />
+                </Route>
+                <Route path='/qa-sdet-dsa-sheet/leaderboard' element={<DsaLeaderboardPage />} />
+                <Route path='/qa-sdet-dsa-sheet/legacy' element={<DSAProblemTracker />} />
 
                 {/* Roadmaps blocked — redirect public URLs to home */}
                 <Route path="/roadmap" element={<Navigate to="/" replace />} />
@@ -234,8 +248,8 @@ function Layout() {
 
         </Routes>
       </div>
-      {!hidePublicChrome && <Footer />}
-      {!hidePublicChrome && <SocialIconFab />}
+      {!hideFooterChrome && <Footer />}
+      {!hideSocialFab && <SocialIconFab />}
       <ToastContainer position="bottom-right" autoClose={2500} hideProgressBar={false} newestOnTop theme="colored" closeOnClick pauseOnFocusLoss={false} draggable pauseOnHover />
     </div>
   );

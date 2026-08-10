@@ -84,6 +84,21 @@ export async function fetchDsaLeaderboard(limit = 20) {
   return res.data;
 }
 
+export async function fetchDsaCatalogAdmin() {
+  const res = await axios.get('/backend/dsa/admin/problems');
+  return res.data;
+}
+
+export async function fetchDsaCatalogProblemAdmin(id) {
+  const res = await axios.get(`/backend/dsa/admin/problems/${id}`);
+  return res.data;
+}
+
+export async function publishDsaProblemAdmin(id) {
+  const res = await axios.post(`/backend/dsa/admin/problems/${id}/publish`);
+  return res.data;
+}
+
 export async function fetchInterviewQuestions(params = {}) {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {

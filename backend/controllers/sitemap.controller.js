@@ -42,6 +42,7 @@ const generateSitemapXML = (urls) => {
     { url: '/salary-structures', priority: '0.80' },
     { url: '/interview-questions', priority: '0.80' },
     { url: '/qa-sdet-dsa-sheet', priority: '0.80' },
+    { url: '/qa-sdet-dsa-sheet/leaderboard', priority: '0.70' },
     { url: '/resume-builder', priority: '0.70' },
     { url: '/blogs', priority: '0.80' },
     { url: '/contact-us', priority: '0.60' },

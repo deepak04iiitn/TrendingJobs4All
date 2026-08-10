@@ -6,16 +6,23 @@ import AdminDataTable from '../../components/admin/AdminDataTable';
 import AdminKpiCard from '../../components/admin/AdminKpiCard';
 import AdminPagination from '../../components/admin/AdminPagination';
 import { useAdminPaginatedList } from '../../hooks/useAdminPaginatedList';
-import { fetchDsaUsersStats, fetchDsaLeaderboard } from '../../lib/admin-api';
+import {
+  fetchDsaUsersStats,
+  fetchDsaLeaderboard,
+  fetchDsaCatalogAdmin,
+  publishDsaProblemAdmin,
+} from '../../lib/admin-api';
 import { focusRing } from '../../theme/tokens';
 
 const PAGE_SIZE = 12;
 
 export default function AdminDsa() {
-  const [tab, setTab] = useState('progress');
+  const [tab, setTab] = useState('catalog');
   const [search, setSearch] = useState('');
   const [leaderboard, setLeaderboard] = useState([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  const [catalog, setCatalog] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
 
   const fetcher = useCallback(async ({ page, limit, search: q }) => {
     const data = await fetchDsaUsersStats({ page, limit, search: q });
@@ -41,21 +48,35 @@ export default function AdminDsa() {
       .finally(() => setLeaderboardLoading(false));
   }, [tab]);
 
+  useEffect(() => {
+    if (tab !== 'catalog') return;
+    setCatalogLoading(true);
+    fetchDsaCatalogAdmin()
+      .then((data) => setCatalog(data.problems || []))
+      .catch(() => toast.error('Failed to load catalog'))
+      .finally(() => setCatalogLoading(false));
+  }, [tab]);
+
   return (
     <div>
       <AdminSectionHeader
         title="DSA sheet"
-        description="Track solver progress and leaderboard rankings across the QA/SDET problem set."
+        description="Manage the in-app problem catalog, solver progress, and leaderboard rankings."
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <AdminKpiCard label="Problems in sheet" value={extra.totalProblems ?? 0} />
+        <AdminKpiCard label="Catalog problems" value={catalog.length || extra.totalProblems || 0} />
         <AdminKpiCard label="Active solvers" value={total} />
-        <AdminKpiCard label="Top score" value={leaderboard[0]?.completedCount ?? 0} hint={leaderboard[0]?.username} tone="bronze" />
+        <AdminKpiCard
+          label="Published"
+          value={catalog.filter((p) => p.status === 'published').length}
+          tone="bronze"
+        />
       </div>
 
       <div className="mb-5 flex flex-wrap items-center gap-2">
         {[
+          { id: 'catalog', label: 'Problem catalog' },
           { id: 'progress', label: 'User progress' },
           { id: 'leaderboard', label: 'Leaderboard' },
         ].map((t) => (
@@ -84,7 +105,60 @@ export default function AdminDsa() {
         )}
       </div>
 
-      {tab === 'progress' ? (
+      {tab === 'catalog' && (
+        <AdminDataTable
+          rows={catalog}
+          loading={catalogLoading}
+          keyField="_id"
+          empty="No catalog problems. Run npm run dsa:seed."
+          columns={[
+            { key: 'title', label: 'Title', render: (p) => p.title },
+            { key: 'category', label: 'Topic' },
+            { key: 'difficulty', label: 'Difficulty' },
+            {
+              key: 'status',
+              label: 'Status',
+              render: (p) => (
+                <span className={p.status === 'published' ? 'text-emerald-700' : 'text-amber-700'}>
+                  {p.status}
+                </span>
+              ),
+            },
+            {
+              key: 'companies',
+              label: 'Companies',
+              render: (p) => (p.companyTags || []).slice(0, 3).join(', ') || '—',
+            },
+            {
+              key: 'actions',
+              label: '',
+              render: (p) =>
+                p.status !== 'published' ? (
+                  <button
+                    type="button"
+                    className={`text-xs font-semibold text-[#C4A574] ${focusRing}`}
+                    onClick={async () => {
+                      try {
+                        await publishDsaProblemAdmin(p._id);
+                        toast.success('Published');
+                        const data = await fetchDsaCatalogAdmin();
+                        setCatalog(data.problems || []);
+                      } catch (e) {
+                        toast.error(e?.response?.data?.message || 'Publish failed');
+                      }
+                    }}
+                  >
+                    Publish
+                  </button>
+                ) : (
+                  <span className="text-[11px] text-[#78716C]">Live</span>
+                ),
+            },
+          ]}
+        />
+      )}
+
+      {tab === 'progress' && (
         <>
           <AdminDataTable
             rows={users}
@@ -118,7 +192,9 @@ export default function AdminDsa() {
           />
           <AdminPagination page={page} totalPages={totalPages} total={total} limit={limit} loading={loading} onPageChange={goToPage} />
         </>
-      ) : (
+      )}
+
+      {tab === 'leaderboard' && (
         <AdminDataTable
           rows={leaderboard}
           loading={leaderboardLoading}
