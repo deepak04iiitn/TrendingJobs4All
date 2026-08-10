@@ -28,6 +28,9 @@ import useDsaTimer, { formatElapsed } from '../../hooks/useDsaTimer';
 import DsaMarkdown from '../../components/dsa/DsaMarkdown';
 import DsaJudgeResults from '../../components/dsa/DsaJudgeResults';
 import DsaDiscussionPanel from '../../components/dsa/DsaDiscussionPanel';
+import DsaJudgeQuotaModal, {
+  isJudgeQuotaFailure,
+} from '../../components/dsa/DsaJudgeQuotaModal';
 import {
   fetchDsaProblem,
   updateDsaProgress,
@@ -189,6 +192,7 @@ export default function DsaProblemSolverPage() {
   const [notesDraft, setNotesDraft] = useState('');
   const [notesBusy, setNotesBusy] = useState(false);
   const [ioHintVisible, setIoHintVisible] = useState(true);
+  const [quotaModalOpen, setQuotaModalOpen] = useState(false);
   const [editorNonce, setEditorNonce] = useState(0);
   const [editorOverride, setEditorOverride] = useState(null);
   const [leftWidth, setLeftWidth] = useState(() => {
@@ -386,7 +390,8 @@ export default function DsaProblemSolverPage() {
       else toast.error(`${res.passedCount}/${res.totalCount} samples passed`);
     } catch (e) {
       setJudge((j) => ({ ...j, running: false }));
-      toast.error(e?.message || 'Run failed');
+      if (isJudgeQuotaFailure(e)) setQuotaModalOpen(true);
+      else toast.error(e?.message || 'Run failed');
     } finally {
       setRunBusy(false);
     }
@@ -428,7 +433,8 @@ export default function DsaProblemSolverPage() {
       setSubmissions(subs.submissions || []);
     } catch (e) {
       setJudge((j) => ({ ...j, running: false }));
-      toast.error(e?.message || 'Submit failed');
+      if (isJudgeQuotaFailure(e)) setQuotaModalOpen(true);
+      else toast.error(e?.message || 'Submit failed');
     } finally {
       setSubmitBusy(false);
     }
@@ -1018,6 +1024,8 @@ export default function DsaProblemSolverPage() {
           </div>,
           document.body,
         )}
+
+      <DsaJudgeQuotaModal open={quotaModalOpen} onClose={() => setQuotaModalOpen(false)} />
     </>
   );
 }

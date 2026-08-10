@@ -9,6 +9,20 @@
 const DEFAULT_BASE = 'https://api.onlinecompiler.io';
 const DEFAULT_TIMEOUT_MS = 35000; // sync endpoint blocks up to ~30s
 
+/** Provider quota / billing / rate-limit — not a user code failure. */
+export function isJudgeQuotaError(error) {
+  if (!error) return false;
+  if (error.code === 'JUDGE_QUOTA') return true;
+  const status = Number(error.status || error.statusCode || 0);
+  if ([402, 429, 503].includes(status)) return true;
+  const msg = String(error.message || '').toLowerCase();
+  return (
+    /quota|rate\s*limit|too many|credit|billing|payment|exceeded|limit reached|over.?limit|insufficient/.test(
+      msg
+    )
+  );
+}
+
 export async function runOnlineCompiler({
   compiler,
   code,
@@ -42,9 +56,12 @@ export async function runOnlineCompiler({
 
     const data = await response.json().catch(() => null);
 
-    if (response.status === 429) {
-      const err = new Error(data?.message || 'OnlineCompiler rate limit (too many concurrent requests)');
-      err.status = 429;
+    if (response.status === 429 || response.status === 402 || response.status === 403) {
+      const detail =
+        data?.message || data?.error || data?.detail || `OnlineCompiler HTTP ${response.status}`;
+      const err = new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+      err.status = response.status;
+      err.code = 'JUDGE_QUOTA';
       err.payload = data;
       throw err;
     }
@@ -55,6 +72,7 @@ export async function runOnlineCompiler({
       const err = new Error(typeof message === 'string' ? message : JSON.stringify(message));
       err.status = response.status;
       err.payload = data;
+      if (isJudgeQuotaError(err)) err.code = 'JUDGE_QUOTA';
       throw err;
     }
 
@@ -64,6 +82,9 @@ export async function runOnlineCompiler({
       const err = new Error('OnlineCompiler request timed out');
       err.code = 'TIMEOUT';
       throw err;
+    }
+    if (isJudgeQuotaError(error)) {
+      error.code = 'JUDGE_QUOTA';
     }
     throw error;
   } finally {
@@ -189,6 +210,10 @@ export async function runCasesWithPool(
           timeoutMs,
         });
       } catch (error) {
+        if (isJudgeQuotaError(error)) {
+          error.code = 'JUDGE_QUOTA';
+          throw error;
+        }
         raw = {
           output: '',
           error: error.message || 'Execution failed',

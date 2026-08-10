@@ -47,9 +47,11 @@ async function streamJudge(path, body, { onStart, onCase, onDone, onError } = {}
 
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
+    let code;
     try {
       const data = await res.json();
       message = data.message || message;
+      code = data.code;
     } catch {
       /* ignore */
     }
@@ -57,7 +59,10 @@ async function streamJudge(path, body, { onStart, onCase, onDone, onError } = {}
       const current = window.location.pathname + window.location.search + window.location.hash;
       window.location.href = `/sign-in?redirect=${encodeURIComponent(current)}`;
     }
-    throw new Error(message);
+    const err = new Error(message);
+    err.status = res.status;
+    err.code = code || (res.status === 503 ? 'JUDGE_QUOTA' : undefined);
+    throw err;
   }
 
   const reader = res.body?.getReader();
@@ -91,8 +96,10 @@ async function streamJudge(path, body, { onStart, onCase, onDone, onError } = {}
         finalResult = evt.result;
         onDone?.(evt.result);
       } else if (evt.type === 'error') {
-        onError?.(evt.message || 'Judge error');
-        throw new Error(evt.message || 'Judge error');
+        const err = new Error(evt.message || 'Judge error');
+        err.code = evt.code;
+        onError?.(evt.message || 'Judge error', evt);
+        throw err;
       }
     }
   }

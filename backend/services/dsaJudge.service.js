@@ -25,6 +25,7 @@ function sanitizeElapsedMs(elapsedMs) {
 import {
   runCasesWithPool,
   classifyOnlineCompilerCase,
+  isJudgeQuotaError,
 } from '../utils/onlineCompilerClient.js';
 
 const recentCache = new Map(); // key -> { at, result }
@@ -268,6 +269,7 @@ export async function judgeSubmission({
   if (!allowRate(userId, 'run', mode === 'run' ? 6 : 4, 60_000)) {
     const err = new Error('Rate limit exceeded. Please wait before trying again.');
     err.statusCode = 429;
+    err.code = 'USER_RATE_LIMIT';
     throw err;
   }
 
@@ -424,6 +426,14 @@ export async function judgeSubmission({
         totalCount: cases.length,
         judgeMessage: error.message || 'Judge unavailable',
       });
+    }
+    if (isJudgeQuotaError(error)) {
+      const err = new Error(
+        error.message || 'Code runner is temporarily unavailable due to high demand.'
+      );
+      err.statusCode = 503;
+      err.code = 'JUDGE_QUOTA';
+      throw err;
     }
     const err = new Error(error.message || 'Code execution failed');
     err.statusCode = 502;

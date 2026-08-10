@@ -8,6 +8,7 @@ import DsaActivityDay from '../models/dsaActivityDay.model.js';
 import DsaUserStats from '../models/dsaUserStats.model.js';
 import User from '../models/user.model.js';
 import { judgeSubmission } from '../services/dsaJudge.service.js';
+import { notifyFoundersDsaJudgeQuota } from '../utils/dsaJudgeQuotaAlert.js';
 import {
   DSA_LANGUAGES,
   DIFFICULTY_POINTS,
@@ -34,6 +35,36 @@ function publicProblem(doc, progress) {
     attemptCount: progress?.attemptCount || 0,
     acceptedCount: progress?.acceptedCount || 0,
   };
+}
+
+/** Non-blocking founder email when the code runner quota modal would appear. */
+function alertFoundersOnJudgeQuota(error, { req, problem, mode }) {
+  if (error?.code !== 'JUDGE_QUOTA') return;
+  Promise.resolve()
+    .then(async () => {
+      let userLabel = String(req.user?.id || 'unknown');
+      let userEmail = '';
+      try {
+        const user = await User.findById(req.user.id).select('username email').lean();
+        if (user) {
+          userLabel = user.username || userLabel;
+          userEmail = user.email || '';
+        }
+      } catch {
+        /* ignore lookup failures */
+      }
+      await notifyFoundersDsaJudgeQuota({
+        mode,
+        slug: problem?.slug || req.params?.slug || '',
+        message: error.message || '',
+        userId: req.user?.id,
+        userLabel,
+        userEmail,
+      });
+    })
+    .catch((err) => {
+      console.error('[dsa-quota-alert] unexpected:', err?.message || err);
+    });
 }
 
 export const listProblems = async (req, res, next) => {
@@ -198,12 +229,13 @@ export const updateProgress = async (req, res, next) => {
 };
 
 export const runCode = async (req, res, next) => {
+  let problem = null;
   try {
     const { language, code, elapsedMs } = req.body;
     if (!language || typeof code !== 'string') {
       return res.status(400).json({ message: 'language and code are required' });
     }
-    const problem = await DsaCatalogProblem.findOne({ slug: req.params.slug, status: 'published' });
+    problem = await DsaCatalogProblem.findOne({ slug: req.params.slug, status: 'published' });
     if (!problem) return res.status(404).json({ message: 'Problem not found' });
 
     const wantsStream =
@@ -231,7 +263,12 @@ export const runCode = async (req, res, next) => {
           onProgress: send,
         });
       } catch (error) {
-        send({ type: 'error', message: error.message || 'Run failed' });
+        alertFoundersOnJudgeQuota(error, { req, problem, mode: 'run' });
+        send({
+          type: 'error',
+          code: error.code || undefined,
+          message: error.message || 'Run failed',
+        });
       }
       return res.end();
     }
@@ -246,18 +283,25 @@ export const runCode = async (req, res, next) => {
     });
     res.json(result);
   } catch (error) {
-    if (error.statusCode) return res.status(error.statusCode).json({ message: error.message });
+    alertFoundersOnJudgeQuota(error, { req, problem, mode: 'run' });
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({
+        message: error.message,
+        code: error.code || undefined,
+      });
+    }
     next(error);
   }
 };
 
 export const submitCode = async (req, res, next) => {
+  let problem = null;
   try {
     const { language, code, elapsedMs } = req.body;
     if (!language || typeof code !== 'string') {
       return res.status(400).json({ message: 'language and code are required' });
     }
-    const problem = await DsaCatalogProblem.findOne({ slug: req.params.slug, status: 'published' });
+    problem = await DsaCatalogProblem.findOne({ slug: req.params.slug, status: 'published' });
     if (!problem) return res.status(404).json({ message: 'Problem not found' });
 
     const wantsStream =
@@ -286,7 +330,12 @@ export const submitCode = async (req, res, next) => {
           onProgress: send,
         });
       } catch (error) {
-        send({ type: 'error', message: error.message || 'Submit failed' });
+        alertFoundersOnJudgeQuota(error, { req, problem, mode: 'submit' });
+        send({
+          type: 'error',
+          code: error.code || undefined,
+          message: error.message || 'Submit failed',
+        });
       }
       return res.end();
     }
@@ -302,7 +351,13 @@ export const submitCode = async (req, res, next) => {
     });
     res.json(result);
   } catch (error) {
-    if (error.statusCode) return res.status(error.statusCode).json({ message: error.message });
+    alertFoundersOnJudgeQuota(error, { req, problem, mode: 'submit' });
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({
+        message: error.message,
+        code: error.code || undefined,
+      });
+    }
     next(error);
   }
 };
