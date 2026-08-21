@@ -87,8 +87,8 @@ export default function PremiumJobsPanel() {
 
   const handleSaveYoe = async () => {
     const yoeNum = Number(yoeInput);
-    if (yoeInput === '' || Number.isNaN(yoeNum) || yoeNum < 0) {
-      toast.error('Please enter a valid Years of Experience');
+    if (yoeInput === '' || Number.isNaN(yoeNum) || yoeNum < 0 || !Number.isInteger(yoeNum)) {
+      toast.error('Please enter whole years only (e.g. 0, 1, 2 — no decimals)');
       return;
     }
     setSavingYoe(true);
@@ -213,9 +213,14 @@ export default function PremiumJobsPanel() {
                     <input
                       type="number"
                       min="0"
+                      step="1"
+                      inputMode="numeric"
                       autoFocus
                       value={yoeInput}
-                      onChange={(e) => setYoeInput(e.target.value)}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        if (next === '' || /^\d+$/.test(next)) setYoeInput(next);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleSaveYoe();
                         if (e.key === 'Escape') setEditingYoe(false);

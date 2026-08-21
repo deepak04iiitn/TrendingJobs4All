@@ -58,8 +58,8 @@ export default function PremiumSubscribeDrawer({ open, onClose }) {
 
   const handleSubscribe = async () => {
     const yoeNum = Number(yoeInput);
-    if (yoeInput === '' || Number.isNaN(yoeNum) || yoeNum < 0) {
-      toast.error('Please enter a valid Years of Experience');
+    if (yoeInput === '' || Number.isNaN(yoeNum) || yoeNum < 0 || !Number.isInteger(yoeNum)) {
+      toast.error('Please enter whole years only (e.g. 0, 1, 2 — no decimals)');
       return;
     }
 
@@ -218,11 +218,17 @@ export default function PremiumSubscribeDrawer({ open, onClose }) {
                     id="drawer-yoe-input"
                     type="number"
                     min="0"
+                    step="1"
+                    inputMode="numeric"
                     value={yoeInput}
-                    onChange={(e) => setYoeInput(e.target.value)}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      if (next === '' || /^\d+$/.test(next)) setYoeInput(next);
+                    }}
                     placeholder="e.g. 3"
                     className={`mt-2 w-full rounded-xl border border-[#E5DCCE] bg-white px-4 py-2.5 text-sm text-[#1C1917] outline-none ${focusRing}`}
                   />
+                  <p className="mt-1.5 text-xs text-[#78716C]">Whole years only — decimals like 2.5 aren&apos;t allowed.</p>
 
                   <button
                     type="button"

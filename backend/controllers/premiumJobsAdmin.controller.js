@@ -52,7 +52,9 @@ export const updateSubscriber = async (req, res) => {
     const update = {};
     if (yoe !== undefined) {
       const yoeNum = Number(yoe);
-      if (Number.isNaN(yoeNum) || yoeNum < 0) return res.status(400).json({ message: 'Invalid YOE' });
+      if (Number.isNaN(yoeNum) || yoeNum < 0 || !Number.isInteger(yoeNum)) {
+        return res.status(400).json({ message: 'YOE must be a whole number (no decimals)' });
+      }
       update.yoe = yoeNum;
     }
     if (status !== undefined) update.status = status;
