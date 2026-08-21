@@ -2,7 +2,15 @@ import mongoose from 'mongoose';
 
 const PremiumSubscriptionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
-  yoe: { type: Number, required: true, min: 0 },
+  yoe: {
+    type: Number,
+    required: true,
+    min: 0,
+    validate: {
+      validator: Number.isInteger,
+      message: 'Years of Experience must be a whole number',
+    },
+  },
   category: { type: String, default: 'qa' },
 
   razorpayCustomerId: { type: String, default: null },

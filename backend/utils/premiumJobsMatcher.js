@@ -93,7 +93,10 @@ async function findFreshJobsForYoe({ yoe, category, excludeJobIds }) {
 export async function matchTop10JobsForSubscriber(subscription) {
   const seen = new Set();
   const matches = [];
-  let currentYoe = subscription.yoe;
+  // naukri.min_exp is an integer. Subscribers may enter floats (e.g. 2.5),
+  // which never exact-match — floor so 2.5 → 2, then walk down 1, 0, …
+  let currentYoe = Math.floor(Number(subscription.yoe));
+  if (!Number.isFinite(currentYoe) || currentYoe < 0) currentYoe = 0;
 
   while (matches.length < 10 && currentYoe >= 0) {
     const fresh = await findFreshJobsForYoe({

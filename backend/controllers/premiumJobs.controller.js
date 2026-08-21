@@ -11,8 +11,10 @@ export const createSubscription = async (req, res) => {
     const { yoe } = req.body;
     const yoeNum = Number(yoe);
 
-    if (yoe === undefined || yoe === null || Number.isNaN(yoeNum) || yoeNum < 0) {
-      return res.status(400).json({ message: 'A valid Years of Experience value is required' });
+    if (yoe === undefined || yoe === null || Number.isNaN(yoeNum) || yoeNum < 0 || !Number.isInteger(yoeNum)) {
+      return res.status(400).json({
+        message: 'Years of Experience must be a whole number (0, 1, 2, … — no decimals)',
+      });
     }
 
     const existing = await PremiumSubscription.findOne({ userId: req.user.id });
@@ -91,8 +93,10 @@ export const updateYoe = async (req, res) => {
   try {
     const { yoe } = req.body;
     const yoeNum = Number(yoe);
-    if (yoe === undefined || yoe === null || Number.isNaN(yoeNum) || yoeNum < 0) {
-      return res.status(400).json({ message: 'A valid Years of Experience value is required' });
+    if (yoe === undefined || yoe === null || Number.isNaN(yoeNum) || yoeNum < 0 || !Number.isInteger(yoeNum)) {
+      return res.status(400).json({
+        message: 'Years of Experience must be a whole number (0, 1, 2, … — no decimals)',
+      });
     }
 
     const subscription = await PremiumSubscription.findOneAndUpdate(
