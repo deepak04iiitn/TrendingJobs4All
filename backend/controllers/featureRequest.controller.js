@@ -1,13 +1,25 @@
 import FeatureRequest from '../models/featureRequest.model.js';
 import { errorHandler } from '../utils/error.js';
+import { notifyFoundersFeedbackReceived } from '../utils/feedbackAlert.js';
 
 export const createFeatureRequest = async (req, res, next) => {
   try {
-    const { email, description } = req.body;
+    const { email, description, pageUrl, userAgent } = req.body;
     if (!email || !description) {
       return next(errorHandler(400, 'Email and description are required'));
     }
-    const request = await FeatureRequest.create({ email, description });
+    const request = await FeatureRequest.create({ email, description, pageUrl, userAgent });
+    notifyFoundersFeedbackReceived({
+      type: 'feature',
+      email: request.email,
+      description: request.description,
+      pageUrl: request.pageUrl,
+      userAgent: request.userAgent,
+      reportId: String(request._id),
+      submittedAt: request.createdAt,
+    }).catch((err) => {
+      console.error('[feedback-alert] feature request notify failed:', err?.message || err);
+    });
     res.status(201).json(request);
   } catch (error) {
     next(error);

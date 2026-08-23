@@ -37,6 +37,10 @@ const PremiumSubscriptionSchema = new mongoose.Schema({
 
   lastEmailSentAt: { type: Date, default: null },
   lastEmailJobCount: { type: Number, default: 0 },
+
+  // Set once after the welcome/confirmation email is sent — prevents
+  // duplicate sends when Razorpay fires activated + charged together.
+  welcomeEmailSentAt: { type: Date, default: null },
 }, { timestamps: true });
 
 const PremiumSubscription = mongoose.model('PremiumSubscription', PremiumSubscriptionSchema);

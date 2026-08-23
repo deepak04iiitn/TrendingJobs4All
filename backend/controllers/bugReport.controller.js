@@ -1,13 +1,25 @@
 import BugReport from '../models/bugReport.model.js';
 import { errorHandler } from '../utils/error.js';
+import { notifyFoundersFeedbackReceived } from '../utils/feedbackAlert.js';
 
 export const createBugReport = async (req, res, next) => {
   try {
-    const { email, description } = req.body;
+    const { email, description, pageUrl, userAgent } = req.body;
     if (!email || !description) {
       return next(errorHandler(400, 'Email and description are required'));
     }
-    const report = await BugReport.create({ email, description });
+    const report = await BugReport.create({ email, description, pageUrl, userAgent });
+    notifyFoundersFeedbackReceived({
+      type: 'bug',
+      email: report.email,
+      description: report.description,
+      pageUrl: report.pageUrl,
+      userAgent: report.userAgent,
+      reportId: String(report._id),
+      submittedAt: report.createdAt,
+    }).catch((err) => {
+      console.error('[feedback-alert] bug report notify failed:', err?.message || err);
+    });
     res.status(201).json(report);
   } catch (error) {
     next(error);

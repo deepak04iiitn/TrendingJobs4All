@@ -2,6 +2,7 @@ import Razorpay from 'razorpay';
 import PremiumSubscription from '../models/premiumSubscription.model.js';
 import WebhookEvent from '../models/webhookEvent.model.js';
 import User from '../models/user.model.js';
+import { claimAndSendPremiumWelcome } from '../utils/premiumJobsEmail.js';
 
 const ACTIVE_STATUSES = new Set(['authenticated', 'active']);
 
@@ -43,6 +44,12 @@ async function syncSubscription(payloadSubscription, status) {
   await User.findByIdAndUpdate(subscription.userId, {
     isPremium: ACTIVE_STATUSES.has(status),
   });
+
+  if (status === 'active') {
+    claimAndSendPremiumWelcome(subscription).catch((err) => {
+      console.error('[premium-welcome] unexpected:', err?.message || err);
+    });
+  }
 }
 
 export const handleRazorpayWebhook = async (req, res) => {
