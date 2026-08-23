@@ -3,6 +3,7 @@ import PremiumSubscription from '../models/premiumSubscription.model.js';
 import PremiumEmailLog from '../models/premiumEmailLog.model.js';
 import User from '../models/user.model.js';
 import { runPremiumJobsBatch } from '../cron/premiumJobsEmail.cron.js';
+import { claimAndSendPremiumWelcome } from '../utils/premiumJobsEmail.js';
 import { respondWithError } from '../utils/razorpayError.js';
 
 export const listSubscribers = async (req, res) => {
@@ -114,6 +115,12 @@ export const syncSubscriberFromRazorpay = async (req, res) => {
     await subscription.save();
 
     await User.findByIdAndUpdate(subscription.userId, { isPremium: ACTIVE_STATUSES.has(remote.status) });
+
+    if (remote.status === 'active') {
+      claimAndSendPremiumWelcome(subscription).catch((err) => {
+        console.error('[premium-welcome] admin sync unexpected:', err?.message || err);
+      });
+    }
 
     res.json({ subscription, razorpayStatus: remote.status });
   } catch (error) {
